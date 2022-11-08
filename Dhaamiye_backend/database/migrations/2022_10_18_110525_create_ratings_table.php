@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('ratings', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('role_id')->references('id')->on('roles');
+            $table->foreignId('user_id')->references('user_id')->on('users');
+            $table->foreignId('order_id')->references('id')->on('customer_orders');
+            $table->longText('review')->nullable();
+            $table->integer('star_rating');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('ratings');
+    }
+};
