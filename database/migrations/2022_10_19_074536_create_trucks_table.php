@@ -34,7 +34,7 @@ return new class extends Migration
             $table->integer('updated_by')->nullable()->comment('1:Admin,2:Sub admin,4:Self');
             $table->foreignId('updated_user')->references('user_id')->on('users')->nullable();
             $table->integer('approval_by')->nullable()->comment('1:Admin,2:Sub admin,5:Fuel station');
-            $table->foreignId('approval_user')->references('user_id')->on('users')->nullable();            $table->integer('reg_status')->comment('0:Pending ,1:Accepted, 2:Rejected');
+            $table->foreignId('approval_user')->references('user_id')->on('users')->nullable();            
             $table->integer('status')->default(1)->comment('1:Active, 2:Blocked');
             $table->integer('reg_status')->default(0)->comment('0:Pending,1:Accepted,2:Rejected');
             $table->timestamps();
