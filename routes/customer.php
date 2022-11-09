@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\android\customer\ProfileController;
+
 
 
 
@@ -20,3 +22,7 @@ use App\Http\Controllers\LoginController;
 
 Route::post('login', [LoginController::class, 'customeLogin']);
 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('profile', [ProfileController::class, 'index']);
+    Route::post('change-password', [ProfileController::class, 'changePassword']);
+});
