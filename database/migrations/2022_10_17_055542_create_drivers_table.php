@@ -19,11 +19,11 @@ return new class extends Migration
             $table->string('license_url')->nullable();
             $table->date('license_expiry')->nullable();
             $table->integer('added_by')->nullable()->comment('1:Admin,2:Sub admin,4:Self');
-            $table->integer('added_user')->references('user_id')->on('users')->nullable();
+            $table->integer('added_user')->references('id')->on('users')->nullable();
             $table->integer('updated_by')->nullable()->comment('1:Admin,2:Sub admin,4:Self');
-            $table->integer('updated_user')->references('user_id')->on('users')->nullable();
+            $table->integer('updated_user')->references('id')->on('users')->nullable();
             $table->integer('approval_by')->nullable()->comment('1:Admin,2:Sub admin,5:Fuel station');
-            $table->integer('approval_user')->references('user_id')->on('users')->nullable();
+            $table->integer('approval_user')->references('id')->on('users')->nullable();
             $table->foreignId('fuel_station_id')->nullable()->references('id')->on('fuel_stations');
             $table->foreignId('truck_id')->nullable()->references('id')->on('trucks');
             $table->integer('status')->default(1)->comment('1:Active, 2:Blocked');

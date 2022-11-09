@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('issue_type_id')->references('id')->on('issue_types');
             $table->mediumText('comment')->nullable();
             $table->foreignId('role_id')->references('id')->on('roles');
-            $table->foreignId('user_id')->references('user_id')->on('users');
+            $table->foreignId('user_id')->references('id')->on('users');
             $table->timestamps();
         });
     }
