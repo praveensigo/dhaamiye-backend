@@ -34,8 +34,12 @@ return new class extends Migration
             $table->integer('updated_by')->nullable()->comment('1:Admin,2:Sub admin,4:Self');
             $table->foreignId('updated_user')->references('id')->on('users')->nullable();
             $table->integer('approval_by')->nullable()->comment('1:Admin,2:Sub admin,5:Fuel station');
+<<<<<<< HEAD:database/migrations/2022_10_17_054536_create_trucks_table.php
             $table->foreignId('approval_user')->references('id')->on('users')->nullable();            
             $table->integer('reg_status')->comment('0:Pending ,1:Accepted, 2:Rejected');
+=======
+            $table->foreignId('approval_user')->references('user_id')->on('users')->nullable();            
+>>>>>>> main:database/migrations/2022_10_19_074536_create_trucks_table.php
             $table->integer('status')->default(1)->comment('1:Active, 2:Blocked');
             $table->timestamps();
         });
