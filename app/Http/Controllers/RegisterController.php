@@ -165,7 +165,9 @@ class RegisterController extends Controller
             $driver->fuel_station_id = $fields['fuel_station'];
             $driver->added_by  = '4';
             $driver->created_at  = date('Y-m-d H:i:s');
+
             $driver->reg_status  = '0';
+
 
             $passport_uploaded_path = '';
             if ($request->file('passport')!=null) {
@@ -210,7 +212,9 @@ class RegisterController extends Controller
                 $result1 = $user->save();
                
                 $user_details = DB::table('users')
-                                    ->select('drivers.id','users.name_en','users.image','users.country_code_id','country_codes.country_code','users.mobile','users.email')
+
+                                    ->select('drivers.id','users.name_en','users.name_so','users.image','users.country_code_id','country_codes.country_code','users.mobile','users.email')
+
                                     ->join('drivers','drivers.id','=','users.user_id')
                                     ->join('country_codes','country_codes.id','=','users.country_code_id')
                                     ->where('users.role_id','4')

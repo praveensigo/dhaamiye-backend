@@ -1,9 +1,12 @@
 <?php
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\admin\CustomerController;
 use App\Http\Controllers\admin\FuelStationController;
 use App\Http\Controllers\admin\FuelTypeController;
 use App\Http\Controllers\admin\CustomerOrderController;
+use App\Http\Controllers\admin\DriverController;
+use App\Http\Controllers\admin\TruckController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +24,11 @@ use Illuminate\Support\Facades\Route;
 Route::post('login/custome', [LoginController::class, 'customeLogin']);
 Route::post('login/admin', [LoginController::class, 'adminLogin']);
 
+/*REGISTER API*/
+Route::post('register/customer', [RegisterController::class, 'customer']);
+Route::post('register/fuel_station', [RegisterController::class, 'fuelStation']);
+Route::post('register/driver', [RegisterController::class, 'driver']);
+Route::post('register/sub_admin', [RegisterController::class, 'subAdmin']);
 
 //MIDDLEWARE
 
@@ -53,6 +61,21 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('admin/order/add',[CustomerOrderController::class,'add']);
 
+    Route::post('admin/driver/add', [DriverController::class, 'add']);
+    Route::post('admin/driver/update', [DriverController::class, 'update']);
+    Route::get('admin/drivers', [DriverController::class, 'index']);
+    Route::get('admin/driver/details', [DriverController::class, 'details']);
+    Route::post('admin/driver/approve', [DriverController::class, 'approve']);
+    Route::get('admin/driver/status', [DriverController::class, 'status']);
+    Route::get('admin/driver/pending_drivers', [DriverController::class, 'pendingIndex']);
+    Route::get('admin/driver/pending_drivers/details', [DriverController::class, 'pendingDetails']);
+    Route::post('admin/driver/change_password', [DriverController::class, 'changePassword']);
 
+    Route::post('admin/truck/add', [TruckController::class, 'add']);
+    Route::post('admin/truck/update', [TruckController::class, 'update']);
+    Route::get('admin/trucks', [TruckController::class, 'index']);
+    Route::get('admin/truck/details', [TruckController::class, 'details']);
+    Route::get('admin/truck/status', [TruckController::class, 'status']);
+    Route::post('admin/truck/approve', [TruckController::class, 'approve']);
     // return $request->user();
 });
