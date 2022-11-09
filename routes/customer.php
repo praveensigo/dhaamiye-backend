@@ -8,6 +8,7 @@ use App\Http\Controllers\android\customer\ProfileController;
 
 
 
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -25,4 +26,3 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('profile', [ProfileController::class, 'index']);
     Route::post('change-password', [ProfileController::class, 'changePassword']);
 });
-
