@@ -15,10 +15,10 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->integer('added_by')->nullable()->comment('1:Admin, 2:Sub admin ,3:Self');
-            $table->integer('added_user')->references('user_id')->on('users')->nullable();
+            $table->integer('added_by')->default(1)->nullable()->comment('1:Admin, 2:Sub admin ,3:Self');
+            $table->foreignId('added_user')->nullable()->references('id')->on('users');
             $table->integer('updated_by')->nullable()->comment('1:Admin, 2:Sub admin ,3:Self');
-            $table->integer('updated_user')->references('user_id')->on('users')->nullable();
+            $table->foreignId('updated_user')->nullable()->references('id')->on('users');
             $table->integer('status')->default(1)->comment('1:Active, 2:Blocked');
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
