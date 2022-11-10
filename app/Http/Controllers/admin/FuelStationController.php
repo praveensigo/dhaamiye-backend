@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\admin\FuelStation;
+use App\Models\admin\FuelStationStock;
 use App\Models\Service\ResponseSender as Response;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -418,4 +419,58 @@ public function changePassword(Request $request)
      }
      return $res;
  }
+ public function FuelStationFuels(Request $request)
+ {
+        $validator = Validator::make($request->all(),
+             [
+                'limit' => 'required|numeric',
+                'keyword' => 'nullable',
+
+              ]);
+        if ($validator->fails()) 
+            {
+                $errors = collect($validator->errors());
+                $res = Response::send(false, [], $message = $errors, 422);
+
+            } else
+                {
+                 $fuels = FuelStationStock::select('fuel_station_stocks.*','users.name_en as fuel_station_name_en','users.name_so as fuel_station_name_so') 
+                            ->leftjoin('users', 'users.user_id', '=', 'fuel_station_stocks.fuel_station_id')
+                                ->with([
+                                   'fuel' 
+                                        ])
+                                ->where('users.role_id', '5')
+                                ->where('fuel_station_stocks.status','1')
+                                ->orderBy('fuel_station_stocks.id', 'desc');
+                
+
+                 if ($request->keyword) 
+                    {   $search_text=$request->keyword;
+                         $fuels->where(function ($query) use ($search_text) 
+                            {
+                                $query->where('users.name_en', 'LIKE', $search_text . '%')
+                                      ->orWhere('users.name_so', 'LIKE', $search_text . '%')
+                                      ->orWhereHas('fuel', function ($query)use($search_text) 
+                                            {
+                                                $query->where('fuel_types.fuel_en', 'Like', '%' . $search_text . '%')
+                                                    ->orWhere('fuel_types.fuel_so', 'Like', '%' . $search_text . '%');
+                                                return $query;       
+                                            },);
+                                     
+
+                            });
+                     }
+                   
+
+            $fuels = $fuels->paginate($request->limit);
+       
+            $data = array(
+                  'fuels' => $fuels,
+                         );
+
+            $res = Response::send(true, $data, '', 200);
+      }
+
+       return $res;
+}
 }
