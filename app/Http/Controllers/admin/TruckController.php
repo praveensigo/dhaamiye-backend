@@ -179,8 +179,7 @@ class TruckController extends Controller
                 $truck->updated_user  = $user_id;
                 $truck->updated_at  = date('Y-m-d H:i:s');
                 $truck->reg_status           = '1';
-                $truck->updated_at  = date('Y-m-d H:i:s');
-    
+
                 $mot_uploaded_path = '';
                 if ($request->file('mot_certificate')!=null) {
                     $uploadFolder = 'Trucks/mot_certificates';
@@ -236,22 +235,33 @@ class TruckController extends Controller
 
                 } else
                     {
-                     $trucks = Truck::select('trucks.*') 
-                                    ->with([
-                                       'fuel_station' 
-                                            ])
-                                    ->orderBy('trucks.id', 'desc');
+
+                  
+                $trucks = Truck::select('trucks.*','users.name_en as fuel_station_name_en','users.name_so as fuel_station_name_so','users.email as fuel_station_email','users.image as fuel_station_image','users.country_code_id as fuel_station_country_code_id ','users.mobile  as fuel_station_mobile','users.role_id   as fuel_station_role_id ','users.user_id  as fuel_station_user_id','users.status  as fuel_station_status','users.reg_status  as fuel_station_reg_status') 
+                                ->leftjoin('users', 'users.user_id', '=', 'trucks.fuel_station_id')
+                                ->leftjoin('country_codes', 'country_codes.id', '=', 'users.country_code_id')
+                                ->with([
+                                        'fuel_station' 
+                                        ])
+                                ->where('users.role_id', '5')
+                                ->where('trucks.reg_status','1')
+                                ->orderBy('trucks.id', 'desc');
+
 
                      if ($request->keyword) 
                         {
                              $trucks->where(function ($query) use ($request) 
                                 {
-                                    $query->where('truck_no', 'LIKE', $request->keyword . '%')
-                                          ->orWhere('manufacturer', 'LIKE', $request->keyword . '%')
-                                          ->orWhere('chassis_no', 'LIKE', $request->keyword . '%')
-                                          ->orWhere('engine_no', 'LIKE', $request->keyword . '%')
-                                          ->orWhere('color', 'LIKE', $request->keyword . '%')
-                                          ->orWhere('model', 'LIKE', $request->keyword . '%');
+
+                                    $query->where('trucks.truck_no', 'LIKE', $request->keyword . '%')
+                                            ->orWhere('trucks.manufacturer', 'LIKE', $request->keyword . '%')
+                                            ->orWhere('trucks.chassis_no', 'LIKE', $request->keyword . '%')
+                                            ->orWhere('trucks.engine_no', 'LIKE', $request->keyword . '%')
+                                            ->orWhere('trucks.color', 'LIKE', $request->keyword . '%')
+                                            ->orWhere('trucks.model', 'LIKE', $request->keyword . '%')
+                                            ->orWhere('users.name_en', 'LIKE', $request->keyword . '%')
+                                            ->orWhere('users.name_so', 'LIKE', $request->keyword . '%');
+
 
                                 });
                          }
@@ -296,12 +306,19 @@ class TruckController extends Controller
             $errors = collect($validator->errors());
             $res = Response::send(false, [], $message = $errors, 422);
         } else {
-                 $trucks = Truck::select('trucks.*')               
-                                ->where('trucks.id', $request->id)
-                                ->with([
+
+            $trucks = Truck::select('trucks.*','users.name_en as fuel_station_name_en','users.name_so as fuel_station_name_so','users.email as fuel_station_email','users.image as fuel_station_image','users.country_code_id as fuel_station_country_code_id ','users.mobile  as fuel_station_mobile','users.role_id   as fuel_station_role_id ','users.user_id  as fuel_station_user_id','users.status  as fuel_station_status','users.reg_status  as fuel_station_reg_status') 
+                            ->leftjoin('users', 'users.user_id', '=', 'trucks.fuel_station_id')
+                            ->leftjoin('country_codes', 'country_codes.id', '=', 'users.country_code_id')
+                            ->with([
                                     'fuel_station' 
-                                         ])
-                                ->first();
+                                    ])
+                            ->where('users.role_id', '5')
+                            ->where('trucks.id', $request->id)
+                            ->where('trucks.reg_status','1')
+                            ->first();
+
+
                         $data = array(
                             'trucks' => $trucks,
                                 );
@@ -347,7 +364,12 @@ public function status(Request $request)
 }  
 
 public function approve(Request $request)
-{ 
+
+{   
+    $auth_user            = Auth::user();
+    $role_id = $auth_user->role_id;
+    $user_id = $auth_user->user_id;
+
     $fields    = $request->input();
     $validator = Validator::make($request->all(),
         [
@@ -369,7 +391,10 @@ public function approve(Request $request)
         if ($truck->reg_status == 0) 
         {
         $truck->reg_status = 1;
-        $truck->added_by = 'admin';
+
+        $truck->approval_by        = $role_id;
+        $truck->approval_user        = $user_id;
+
         $result = $truck->save();
         $dmessage = 'Approved';
                 
@@ -384,6 +409,96 @@ public function approve(Request $request)
 }
 return $res;
 } 
+
+
+public function PendingIndex(Request $request)
+     {
+            $validator = Validator::make($request->all(),
+                 [
+                    'limit' => 'required|numeric',
+                    'keyword' => 'nullable',
+
+                  ]);
+            if ($validator->fails()) 
+                {
+                    $errors = collect($validator->errors());
+                    $res = Response::send(false, [], $message = $errors, 422);
+
+                } else
+                    {
+                       
+         $trucks = Truck::select('trucks.*','users.name_en as fuel_station_name_en','users.name_so as fuel_station_name_so','users.email as fuel_station_email','users.image as fuel_station_image','users.country_code_id as fuel_station_country_code_id ','users.mobile  as fuel_station_mobile','users.role_id   as fuel_station_role_id ','users.user_id  as fuel_station_user_id','users.status  as fuel_station_status','users.reg_status  as fuel_station_reg_status') 
+                        ->leftjoin('users', 'users.user_id', '=', 'trucks.fuel_station_id')
+                        ->leftjoin('country_codes', 'country_codes.id', '=', 'users.country_code_id')
+                        ->with([
+                                'fuel_station' 
+                                ])
+                        ->where('users.role_id', '5')
+                        ->where('trucks.reg_status','0')
+                        ->orderBy('trucks.id', 'desc');
+
+                     if ($request->keyword) 
+                        {
+                             $trucks->where(function ($query) use ($request) 
+                                {
+                                    $query->where('trucks.truck_no', 'LIKE', $request->keyword . '%')
+                                          ->orWhere('trucks.manufacturer', 'LIKE', $request->keyword . '%')
+                                          ->orWhere('trucks.chassis_no', 'LIKE', $request->keyword . '%')
+                                          ->orWhere('trucks.engine_no', 'LIKE', $request->keyword . '%')
+                                          ->orWhere('trucks.color', 'LIKE', $request->keyword . '%')
+                                          ->orWhere('trucks.model', 'LIKE', $request->keyword . '%')
+                                          ->orWhere('users.name_en', 'LIKE', $request->keyword . '%')
+                                          ->orWhere('users.name_so', 'LIKE', $request->keyword . '%');
+
+                                });
+                         }
+                       
+ 
+                $trucks = $trucks->paginate($request->limit);
+           
+                $data = array(
+                      'trucks' => $trucks,
+                             );
+
+                $res = Response::send(true, $data, '', 200);
+          }
+           return $res;
+    }
+
+    public function pendingDetails(Request $request)
+    {
+        $validator = Validator::make($request->all(),
+            [
+                'id' => 'required|exists:trucks,id',
+            ],
+        );
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+            $res = Response::send(false, [], $message = $errors, 422);
+        } else {    
+            $trucks = Truck::select('trucks.*','users.name_en as fuel_station_name_en','users.name_so as fuel_station_name_so','users.email as fuel_station_email','users.image as fuel_station_image','users.country_code_id as fuel_station_country_code_id ','users.mobile  as fuel_station_mobile','users.role_id   as fuel_station_role_id ','users.user_id  as fuel_station_user_id','users.status  as fuel_station_status','users.reg_status  as fuel_station_reg_status') 
+                            ->leftjoin('users', 'users.user_id', '=', 'trucks.fuel_station_id')
+                            ->leftjoin('country_codes', 'country_codes.id', '=', 'users.country_code_id')
+                            ->with([
+                                    'fuel_station' 
+                                    ])
+                            ->where('users.role_id', '5')
+                            ->where('trucks.id', $request->id)
+                            ->where('trucks.reg_status','0')
+                            ->first();
+                        $data = array(
+                            'trucks' => $trucks,
+                                );
+                        $res = Response::send(true, $data, 'Truck found', 200);
+                    }
+
+        return $res;
+    }
+
+
+   
+
+
         }
        
    
