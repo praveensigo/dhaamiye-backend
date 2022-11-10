@@ -7,6 +7,7 @@ use App\Models\admin\Customer;
 use App\Models\Service\ResponseSender as Response;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Validator;
 
@@ -28,7 +29,7 @@ class CustomerController extends Controller
             $errors = collect($validator->errors());
             $res = Response::send('false', $data = [], $message = $errors, $code = 422);
         } else {
-            $customers = Customer::select('customers.id as customer_id', 'users.name', 'country_codes.country_code', 'users.country_code_id', 'users.email', 'users.mobile', 'customers.added_by', 'customers.created_at', 'customers.status')
+            $customers = Customer::select('customers.id as customer_id', 'users.name_en', 'users.name_so', 'country_codes.country_code', 'users.country_code_id', 'users.email', 'users.mobile', 'customers.added_by', 'customers.added_user', 'customers.updated_by', 'customers.updated_user', 'customers.created_at', 'customers.status')
                 ->join('users', 'users.user_id', '=', 'customers.id')
                 ->join('country_codes', 'country_codes.id', '=', 'users.country_code_id')
                 ->where('users.role_id', 3)
@@ -69,43 +70,48 @@ class CustomerController extends Controller
     public function add(Request $request)
     {$fields = $request->input();
         $validator = Validator::make($request->all(), [
-            'name' => 'required|min:3|max:100',
+            'name_en' => 'nullable|required_without:name_so|min:3|max:100',
+            'name_so' => 'nullable|required_without:name_en|min:3|max:100',
             'email' => 'nullable|email|unique:users',
             'country_code' => 'required|numeric|exists:country_codes,id',
             'mobile' => 'required|integer|digits_between:6,14|unique:users',
             'password' => 'required|min:6|max:16',
             // 'password' => 'required|min:6|max:16|not_contains_space',
             'password_confirmation' => 'required|same:password|min:6|max:16',
-        ], ['name.required' => __('error.name_required'),
-            'name.min' => __('error.name_min'),
-            'name.max' => __('error.name_max'),
-            'country_code.required' => __('error.country_code_required'),
-            'country_code.exists' => __('error.country_code_exists'),
-            'mobile.required' => __('error.mobile_required'),
-            'mobile.unique' => __('error.mobile_unique'),
-            'email.unique' => __('error.email_unique'),
-            // 'password.not_contains_space' => __('error.password_no_space'),
-            'password.required' => __('error.password_required'),
-            'password.min' => __('error.password_min'),
-            'password.max' => __('error.password_max'),
-            'password_confirmation.required' => 'Please enter the confirmation password.',
-            'password_confirmation.same' => 'Entered password and confirmation password should be same.',
 
-        ]);
+        ],
+            ['name_en.min' => __('error.name_min'),
+                'name_en.max' => __('error.name_max'),
+                'name_so.min' => __('error.name_min'),
+                'name_so.max' => __('error.name_max'),
+                'country_code.required' => __('error.country_code_required'),
+                'country_code.exists' => __('error.country_code_exists'),
+                'mobile.required' => __('error.mobile_required'),
+                'mobile.unique' => __('error.mobile_unique'),
+                'email.unique' => __('error.email_unique'),
+                // 'password.not_contains_space' => __('error.password_no_space'),
+                'password.required' => __('error.password_required'),
+                'password.min' => __('error.password_min'),
+                'password.max' => __('error.password_max'),
+                'password_confirmation.required' => 'Please enter the confirmation password.',
+                'password_confirmation.same' => 'Entered password and confirmation password should be same.',
+
+            ]);
         if ($validator->fails()) {
             $errors = collect($validator->errors());
             $res = Response::send('false', $data = [], $message = $errors, $code = 422);
         } else {
             $customer = new Customer;
-            $customer->added_by = $fields['added_by'];
-            $customer->added_user = $fields['added_user'];
-            $customer->updated_by = $fields['updated_by'];
-            $customer->updated_user = $fields['updated_user'];
+            $role_id = auth('sanctum')->user()->role_id;
+            $user_id = auth('sanctum')->user()->user_id;
+            $customer->added_by = $role_id;
+            $customer->added_user = $user_id;
             $result = $customer->save();
 
             if ($result) {
                 $user = new User;
-                $user->name = $fields['name'];
+                $user->name_en = $fields['name_en'];
+                $user->name_so = $fields['name_so'];
                 $user->country_code_id = $fields['country_code'];
                 $user->mobile = $fields['mobile'];
                 $user->email = $fields['email'];
@@ -135,16 +141,19 @@ class CustomerController extends Controller
         $fields = $request->input();
         $validator = Validator::make($request->all(),
             ['id' => 'required|numeric|exists:customers,id',
-                'name' => 'required|min:3|max:100',
+                'name_en' => 'nullable|required_without:name_so|min:3|max:100',
+                'name_so' => 'nullable|required_without:name_en|min:3|max:100',
                 'country_code' => 'required|numeric|exists:country_codes,id',
                 'mobile' => ['required', 'numeric',
                     Rule::unique('users', 'mobile')->ignore($request->id, 'user_id')],
                 'email' => ['nullable', 'email',
                     Rule::unique('users', 'email')->ignore($request->id, 'user_id')],
+
             ],
-            ['name.required' => __('error.name_required'),
-                'name.min' => __('error.name_min'),
-                'name.max' => __('error.name_max'),
+            ['name_en.min' => __('error.name_min'),
+                'name_en.max' => __('error.name_max'),
+                'name_so.min' => __('error.name_min'),
+                'name_so.max' => __('error.name_max'),
                 'country_code.required' => __('error.country_code_required'),
                 'country_code.exists' => __('error.country_code_exists'),
                 'mobile.required' => __('error.mobile_required'),
@@ -157,12 +166,15 @@ class CustomerController extends Controller
             $res = Response::send('false', $data = [], $message = $errors, $code = 422);
         } else {
             $customer = Customer::find($fields['id']);
-            $customer->added_by = 'Admin';
-
+            $role_id = auth('sanctum')->user()->role_id;
+            $user_id = auth('sanctum')->user()->user_id;
+            $customer->updated_by = $role_id;
+            $customer->updated_user = $user_id;
             $result = $customer->save();
             if ($result) {
                 $user = User::where('user_id', $fields['id'])->where('role_id', '3')->first();
-                $user->name = $fields['name'];
+                $user->name_en = $fields['name_en'];
+                $user->name_so = $fields['name_so'];
                 $user->country_code_id = $fields['country_code'];
                 $user->mobile = $fields['mobile'];
                 $user->email = $fields['email'];
@@ -275,8 +287,15 @@ class CustomerController extends Controller
             $errors = collect($validator->errors());
             $res = Response::send(false, [], $message = $errors, 422);
         } else {
-            $customer = Customer::select('customers.id as customer_id', 'customers.name', 'country_codes.country_code', 'users.country_code_id', 'users.email', 'users.mobile', 'customers.added_by', 'customers.created_at', 'customers.status')
 
+            $customer = Customer::select('customers.id as customer_id', 'users.name_en', 'users.name_so', 'users.image', 'country_codes.country_code', 'users.country_code_id', 'users.email', 'users.mobile')
+                ->join('users', 'users.user_id', '=', 'customers.id')
+                ->leftjoin('country_codes', 'country_codes.id', '=', 'users.country_code_id')
+                ->where('users.role_id', 3)
+                ->where('customers.id', $request->id)
+                ->first();
+
+            $details = Customer::select('customers.id as customer_id', 'users.name_en', 'users.name_so', 'users.image', 'country_codes.country_code', 'users.country_code_id', 'users.email', 'users.mobile', 'customers.added_by', 'customers.added_user', 'customers.updated_by', 'customers.updated_user', 'customers.created_at', 'customers.status')
                 ->join('users', 'users.user_id', '=', 'customers.id')
                 ->leftjoin('country_codes', 'country_codes.id', '=', 'users.country_code_id')
                 ->where('users.role_id', 3)
@@ -284,6 +303,8 @@ class CustomerController extends Controller
                 ->first();
             $data = array(
                 'customer' => $customer,
+                'details' => $details,
+
             );
             $res = Response::send(true, $data, 'Customer found', 200);
         }
@@ -295,17 +316,23 @@ class CustomerController extends Controller
         $fields = $request->input();
         $validator = Validator::make($request->all(),
             ['id' => 'required|numeric|exists:customers,id',
-                'name' => 'required|min:3|max:100',
-                'image' => 'nullable|mimes:png,jpg,jpeg|max:1024|dimensions:max_width=600,max_height=600',
+                'name_en' => 'nullable|required_without:name_so|min:3|max:100',
+                'name_so' => 'nullable|required_without:name_en|min:3|max:100',
+
                 'country_code' => 'required|numeric|exists:country_codes,id',
-                'mobile' => ['required', 'numeric', 'digits:10',
+                'mobile' => ['nullable', 'numeric',
                     Rule::unique('users', 'mobile')->ignore($request->id, 'user_id')],
                 'email' => ['nullable', 'email',
                     Rule::unique('users', 'email')->ignore($request->id, 'user_id')],
+
+                'image' => 'nullable|mimes:png,jpg,jpeg|max:1024|dimensions:max_width=600,max_height=600',
+
             ],
-            ['name.required' => __('error.name_required'),
-                'name.min' => __('error.name_min'),
-                'name.max' => __('error.name_max'),
+            [
+                'name_en.min' => __('error.name_min'),
+                'name_en.max' => __('error.name_max'),
+                'name_so.min' => __('error.name_min'),
+                'name_so.max' => __('error.name_max'),
                 'image.mimes' => __('error.image_mimes'),
                 'country_code.required' => __('error.country_code_required'),
                 'country_code.exists' => __('error.country_code_exists'),
@@ -319,22 +346,28 @@ class CustomerController extends Controller
             $res = Response::send('false', $data = [], $message = $errors, $code = 422);
         } else {
             $customer = Customer::find($fields['id']);
-            $customer->added_by = 'Admin';
-
+            $role_id = auth('sanctum')->user()->role_id;
+            $user_id = auth('sanctum')->user()->user_id;
+            $customer->updated_by = $role_id;
+            $customer->updated_user = $user_id;
             $result = $customer->save();
-            $path = null;
-            if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $path = $image->store('patients', 'public');
-            }
-            $patient->image = $path;
-            $result = $patient->save();
 
             if ($result) {
                 $user = User::where('user_id', $fields['id'])->where('role_id', '3')->first();
+                $user->name_en = $fields['name_en'];
+                $user->name_so = $fields['name_so'];
                 $user->country_code_id = $fields['country_code'];
                 $user->mobile = $fields['mobile'];
                 $user->email = $fields['email'];
+                $image_uploaded_path = '';
+                if ($request->file('image') != null) {
+                    $uploadFolder = 'customers/images';
+                    $image = $request->file('image');
+                    $image_uploaded_path = $image->store($uploadFolder, 'public');
+                    $user->image = $image_uploaded_path;} else {
+                    $user->image = '';
+                }
+
                 $user->save();
                 $res = Response::send('true',
                     [],
@@ -350,17 +383,16 @@ class CustomerController extends Controller
 
         return $res;
     }
-     public function sendPlaceSMS(Request $request) {
-       // $fields = $request->input();
 
-      //  $mobile=$fields['mobile'];
-                        
-    $res = file_get_contents("http://sms.moplet.com/api/sendhttp.php?authkey=2773AVudLLXJ62ea1040P43&mobiles=9400171938&message=
+    public function sendPlaceSMS(Request $request)
+    {
+        // $fields = $request->input();
+
+        //  $mobile=$fields['mobile'];
+
+        $res = file_get_contents("http://sms.moplet.com/api/sendhttp.php?authkey=2773AVudLLXJ62ea1040P43&mobiles=9400171938&message=
         Your%20order%20placed%20successfully.%20Thank%20You%20for%20choosing%20Medicino!&sender=MEDCIO&route=4&country=91&DLT_TE_ID=1407165945239381201");
-         return $res;
-     }
-        
-        
-
+        return $res;
+    }
 
 }
