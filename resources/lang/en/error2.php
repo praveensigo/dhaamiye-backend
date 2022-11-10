@@ -3,8 +3,12 @@
 return [
 
     //'name_required' => 'Please enter name',
+
+    'name_en_required_without' => 'Please enter the Name in English or Somali',
     'name_en_min' => 'Name should contain a minimum of 3 characters',
     'name_en_max' => 'Name should contain a maximum of 100 characters',
+    'name_so_required_without' => 'Please  enter the Name in English or Somali',
+
     'name_so_min' => 'Name should contain a minimum of 3 characters',
     'name_so_max' => 'Name should contain a maximum of 100 characters',
     'country_code_required' => 'Please select country code',
