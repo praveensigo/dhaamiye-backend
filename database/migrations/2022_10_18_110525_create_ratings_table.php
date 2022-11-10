@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('ratings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('role_id')->references('id')->on('roles');
-            $table->foreignId('user_id')->references('user_id')->on('users');
+            $table->foreignId('user_id')->references('id')->on('users');
             $table->foreignId('order_id')->references('id')->on('customer_orders');
             $table->longText('review')->nullable();
             $table->integer('star_rating');

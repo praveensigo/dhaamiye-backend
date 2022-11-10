@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('subadmin_modules', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('subadmin_id')->references('id')->on('subadmins');
+            $table->foreignId('subadmin_id')->references('id')->on('sub_admins');
             $table->foreignId('module_id')->references('id')->on('modules');
             $table->integer('status')->default(2)->comment('1:Active, 2:Blocked');
             $table->timestamps();

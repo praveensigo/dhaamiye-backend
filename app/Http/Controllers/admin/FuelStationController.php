@@ -8,6 +8,7 @@ use App\Models\Service\ResponseSender as Response;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Validator;
 
@@ -64,12 +65,13 @@ class FuelStationController extends Controller
     {$fields = $request->input();
         $validator = Validator::make($request->all(),
             [
-                'name' => 'required|min:3|max:100',
+                'name_en' => 'nullable|required_without:name_so|min:3|max:100',
+                'name_so' => 'nullable|required_without:name_en|min:3|max:100',
                 'image' => 'nullable|mimes:png,jpg,jpeg|max:1024|dimensions:max_width=600,max_height=600',
                 'email' => 'required|email|unique:users',
                 'country_code' => 'required|numeric|exists:country_codes,id',
                 'mobile' => 'required|integer|digits_between:6,14|unique:users',
-                'location' => 'required|min:3|max:100',
+                'place' => 'required|min:3|max:100',
                 'latitude' => 'required|min:3|max:100',
                 'longitude' => 'required|min:3|max:100',
                 'address' => 'required|min:3|max:100',
@@ -85,7 +87,11 @@ class FuelStationController extends Controller
                 'upi_id' => 'required|min:6|max:16',
 
             ],
-            [
+            ['name_en.min' => __('error.name_min'),
+            'name_en.max' => __('error.name_max'),
+            'name_so.min' => __('error.name_min'),
+            'name_so.max' => __('error.name_max'),
+         
                 'name.required' => __('error.name_required'),
                 'name.min' => __('error.name_min'),
                 'name.max' => __('error.name_max'),
@@ -105,6 +111,9 @@ class FuelStationController extends Controller
                 'password.max' => __('error.password_max'),
                 'password_confirmation.required' => 'Please enter the confirmation password.',
                 'password_confirmation.same' => 'Entered password and confirmation password should be same.',
+                'place.required' => __('error.place_required'),
+                'place.min' => __('error.place_min'),
+                'place.max' => __('error.place_max'),
                 'latitude.required' => __('error.latitude_required'),
                 'latitude.min' => __('error.latitude_min'),
                 'latitude.max' => __('error.latitude_max'),
@@ -130,17 +139,18 @@ class FuelStationController extends Controller
         } else {
             $fuel_station = new fuelStation;
             $fuel_station->place = $fields['place'];
-            $fuel_station->added_by = $fields['added_by'];
-            $fuel_station->added_user = $fields['added_user'];
-            $fuel_station->updated_by = $fields['updated_by'];
-            $fuel_station->updated_user = $fields['updated_user'];
+            $role_id = auth('sanctum')->user()->role_id;
+            $user_id = auth('sanctum')->user()->user_id;
+            $fuel_station->added_by = $role_id;
+            $fuel_station->added_user = $user_id;
             $fuel_station->address = $fields['address'];
             $fuel_station->latitude = $fields['latitude'];
             $fuel_station->longitude = $fields['longitude'];
            $result = $fuel_station->save();
             if ($result) {
                 $user = new User;
-                $user->name = $fields['name'];
+                $user->name_en = $fields['name_en'];
+                $user->name_so = $fields['name_so'];
                 $user->country_code_id = $fields['country_code'];
                 $user->mobile = $fields['mobile'];
                 $user->email = $fields['email'];
@@ -197,15 +207,16 @@ class FuelStationController extends Controller
     {
         $fields = $request->input();
         $validator = Validator::make($request->all(),
-            ['id' => 'required|numeric|exists:fuel_stations,id',
-                'name' => 'required|min:3|max:100',
-                'image' => 'nullable|mimes:png,jpg,jpeg|max:1024|dimensions:max_width=600,max_height=600',
+            [   'id' => 'required|numeric|exists:fuel_stations,id',
+                 'name_en' => 'nullable|required_without:name_so|min:3|max:100',
+                 'name_so' => 'nullable|required_without:name_en|min:3|max:100',
+                 'image' => 'nullable|mimes:png,jpg,jpeg|max:1024|dimensions:max_width=600,max_height=600',
                 'country_code' => 'required|numeric|exists:country_codes,id',
                 'mobile' => ['required', 'numeric', 'digits:10',
                     Rule::unique('users', 'mobile')->ignore($request->id, 'user_id')],
                 'email' => ['required', 'email',
                     Rule::unique('users', 'email')->ignore($request->id, 'user_id')],
-                'location' => 'required|min:3|max:100',
+                'place' => 'required|min:3|max:100',
                 'latitude' => 'required|min:3|max:100',
                 'longitude' => 'required|min:3|max:100',
                 'address' => 'required|min:3|max:100',
@@ -232,9 +243,9 @@ class FuelStationController extends Controller
                 'mobile.unique' => __('error.mobile_unique'),
                 'email.required' => __('error.email_required'),
                 'email.unique' => __('error.email_unique'),
-                'location.required' => __('error.location_required'),
-                'location.min' => __('error.location_min'),
-                'location.max' => __('error.location_max'),
+                'place.required' => __('error.place_required'),
+                'place.min' => __('error.place_min'),
+                'place.max' => __('error.place_max'),
                 'latitude.required' => __('error.latitude_required'),
                 'latitude.min' => __('error.latitude_min'),
                 'latitude.max' => __('error.latitude_max'),
@@ -256,27 +267,34 @@ class FuelStationController extends Controller
             $res = Response::send('false', $data = [], $message = $errors, $code = 422);
         } else {
             $fuel_station = fuelStation::find($fields['id']);
-            $fuel_station->name = $fields['name'];
-            $fuel_station->location = $fields['location'];
+            $role_id = auth('sanctum')->user()->role_id;
+            $user_id = auth('sanctum')->user()->user_id;
+            $fuel_station->updated_by = $role_id;
+            $fuel_station->updated_user = $user_id;
+            $fuel_station->place = $fields['place'];
             $fuel_station->address = $fields['address'];
-            $fuel_station->location = $fields['location'];
             $fuel_station->latitude = $fields['latitude'];
             $fuel_station->longitude = $fields['longitude'];
-
-            if ($request->file('image') != null) {
-                $uploadFolder = 'fuel_station/images';
-                $image = $request->file('image');
-                $image_uploaded_path = $image->store($uploadFolder, 'public');
-                $fuel_station->image = $image_uploaded_path;
-            }
-
             $result = $fuel_station->save();
 
             if ($result) {
                 $user = User::where('user_id', $fields['id'])->where('role_id', '5')->first();
+                $user->name_en = $fields['name_en'];
+                $user->name_so = $fields['name_so'];
                 $user->country_code_id = $fields['country_code'];
                 $user->mobile = $fields['mobile'];
                 $user->email = $fields['email'];
+                $image_uploaded_path = '';
+                if ($request->file('image') != null) {
+                    $uploadFolder = 'fuel_station/images';
+                    $image = $request->file('image');
+                    $image_uploaded_path = $image->store($uploadFolder, 'public');
+                    $user->image = $image_uploaded_path;
+    
+                } else {
+                    $user->image = '';
+                }
+                
                 $user->save();
                 DB::table('fuel_station_bank_details')->where('fuel_station_id', $fields['id'])->update(
                     array('bank_name' => $fields['bank_name'],
@@ -317,7 +335,15 @@ class FuelStationController extends Controller
             $errors = collect($validator->errors());
             $res = Response::send('false', $data = [], $message = $errors, $code = 422);
         } else {
-            $fuel_station = fuelStation::select('fuel_stations.id', 'fuel_stations.name', 'image', 'added_by', 'location', 'latitude', 'longitude', 'address', 'image', 'fuel_stations.status', 'country_code_id', 'country_code', 'mobile', 'email', 'role_id', 'fuel_stations.created_at')
+
+            $fuel_station = fuelStation::select('fuel_stations.id', 'users.name_en','users.name_so', 'users.image' ,'address', 'country_code_id', 'country_code', 'mobile', 'email',)
+            ->join('users', 'users.user_id', '=', 'fuel_stations.id')
+            ->join('country_codes', 'country_codes.id', '=', 'users.country_code_id')
+            ->where('fuel_stations.id', $fields['id'])
+            ->where('users.role_id', '5')
+            ->first();
+       
+            $fuel_station_detail = fuelStation::select('fuel_stations.id', 'users.name_en','users.name_so', 'users.image', 'added_by','added_user','updated_by','updated_user' ,'place', 'latitude', 'longitude', 'address', 'fuel_stations.status', 'country_code_id', 'country_code', 'mobile', 'email', 'role_id', 'fuel_stations.created_at')
                 ->join('users', 'users.user_id', '=', 'fuel_stations.id')
                 ->join('country_codes', 'country_codes.id', '=', 'users.country_code_id')
                 ->where('fuel_stations.id', $fields['id'])
@@ -329,6 +355,7 @@ class FuelStationController extends Controller
 
             $res = Response::send('true',
                 $data = ['fuel_station' => $fuel_station,
+                'details' => $fuel_station_detail,
                     'bank_details' => $bank_details,
                 ],
                 $message = 'Success',
