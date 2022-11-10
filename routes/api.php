@@ -42,8 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/customer/status', [CustomerController::class, 'status']);
     Route::get('admin/customer/profile', [CustomerController::class, 'profile']);
     Route::post('admin/customer/password', [CustomerController::class, 'changePassword']);
-    Route::post('admin/customer/updateProfile', [CustomerController::class, 'update']);
-
+    Route::post('admin/customer/updateProfile', [CustomerController::class, 'updateProfile']);
     Route::post('admin/fuelStation/add', [FuelStationController::class, 'add']);
     Route::post('admin/fuelStation/update', [FuelStationController::class, 'update']);
     Route::get('admin/fuelStation/index', [FuelStationController::class, 'index']);
@@ -71,6 +70,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/driver/pending_drivers', [DriverController::class, 'pendingIndex']);
     Route::get('admin/driver/pending_drivers/details', [DriverController::class, 'pendingDetails']);
     Route::post('admin/driver/change_password', [DriverController::class, 'changePassword']);
+
 
     Route::post('admin/truck/add', [TruckController::class, 'add']);
     Route::post('admin/truck/update', [TruckController::class, 'update']);

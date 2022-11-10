@@ -96,6 +96,7 @@ class TruckController extends Controller
             }
             $truck->insurance_certificate_url= $insurance_uploaded_path;
 
+
            
             $certificate_uploaded_path = '';
             if ($request->file('truck_certificate')!=null) {
@@ -178,7 +179,7 @@ class TruckController extends Controller
                 $truck->updated_user  = $user_id;
                 $truck->updated_at  = date('Y-m-d H:i:s');
                 $truck->reg_status           = '1';
-    
+
                 $mot_uploaded_path = '';
                 if ($request->file('mot_certificate')!=null) {
                     $uploadFolder = 'Trucks/mot_certificates';
@@ -234,6 +235,7 @@ class TruckController extends Controller
 
                 } else
                     {
+
                   
                 $trucks = Truck::select('trucks.*','users.name_en as fuel_station_name_en','users.name_so as fuel_station_name_so','users.email as fuel_station_email','users.image as fuel_station_image','users.country_code_id as fuel_station_country_code_id ','users.mobile  as fuel_station_mobile','users.role_id   as fuel_station_role_id ','users.user_id  as fuel_station_user_id','users.status  as fuel_station_status','users.reg_status  as fuel_station_reg_status') 
                                 ->leftjoin('users', 'users.user_id', '=', 'trucks.fuel_station_id')
@@ -245,10 +247,12 @@ class TruckController extends Controller
                                 ->where('trucks.reg_status','1')
                                 ->orderBy('trucks.id', 'desc');
 
+
                      if ($request->keyword) 
                         {
                              $trucks->where(function ($query) use ($request) 
                                 {
+
                                     $query->where('trucks.truck_no', 'LIKE', $request->keyword . '%')
                                             ->orWhere('trucks.manufacturer', 'LIKE', $request->keyword . '%')
                                             ->orWhere('trucks.chassis_no', 'LIKE', $request->keyword . '%')
@@ -257,6 +261,7 @@ class TruckController extends Controller
                                             ->orWhere('trucks.model', 'LIKE', $request->keyword . '%')
                                             ->orWhere('users.name_en', 'LIKE', $request->keyword . '%')
                                             ->orWhere('users.name_so', 'LIKE', $request->keyword . '%');
+
 
                                 });
                          }
@@ -301,6 +306,7 @@ class TruckController extends Controller
             $errors = collect($validator->errors());
             $res = Response::send(false, [], $message = $errors, 422);
         } else {
+
             $trucks = Truck::select('trucks.*','users.name_en as fuel_station_name_en','users.name_so as fuel_station_name_so','users.email as fuel_station_email','users.image as fuel_station_image','users.country_code_id as fuel_station_country_code_id ','users.mobile  as fuel_station_mobile','users.role_id   as fuel_station_role_id ','users.user_id  as fuel_station_user_id','users.status  as fuel_station_status','users.reg_status  as fuel_station_reg_status') 
                             ->leftjoin('users', 'users.user_id', '=', 'trucks.fuel_station_id')
                             ->leftjoin('country_codes', 'country_codes.id', '=', 'users.country_code_id')
@@ -311,6 +317,7 @@ class TruckController extends Controller
                             ->where('trucks.id', $request->id)
                             ->where('trucks.reg_status','1')
                             ->first();
+
 
                         $data = array(
                             'trucks' => $trucks,
@@ -357,10 +364,12 @@ public function status(Request $request)
 }  
 
 public function approve(Request $request)
+
 {   
     $auth_user            = Auth::user();
     $role_id = $auth_user->role_id;
     $user_id = $auth_user->user_id;
+
     $fields    = $request->input();
     $validator = Validator::make($request->all(),
         [
@@ -382,8 +391,10 @@ public function approve(Request $request)
         if ($truck->reg_status == 0) 
         {
         $truck->reg_status = 1;
+
         $truck->approval_by        = $role_id;
         $truck->approval_user        = $user_id;
+
         $result = $truck->save();
         $dmessage = 'Approved';
                 
@@ -398,6 +409,7 @@ public function approve(Request $request)
 }
 return $res;
 } 
+
 
 public function PendingIndex(Request $request)
      {
@@ -485,6 +497,7 @@ public function PendingIndex(Request $request)
 
 
    
+
 
         }
        
