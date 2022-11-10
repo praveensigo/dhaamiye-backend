@@ -38,4 +38,9 @@ class Truck extends Model
     {
         return $this->belongsTo(FuelStation::class, 'fuel_station_id', 'id');
     }
+    public function fuels()
+     {
+         return $this->belongsToMany(FuelType::class, 'truck_fuels', 'truck_id','fuel_type_id');
+    
+     }
 }

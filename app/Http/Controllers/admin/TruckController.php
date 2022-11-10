@@ -311,7 +311,9 @@ class TruckController extends Controller
                             ->leftjoin('users', 'users.user_id', '=', 'trucks.fuel_station_id')
                             ->leftjoin('country_codes', 'country_codes.id', '=', 'users.country_code_id')
                             ->with([
-                                    'fuel_station' 
+                                    'fuel_station','fuels'  => function ($query) {
+                                        return $query->select('truck_id','fuel_types.fuel_en','capacity', 'stock', );
+                                    },
                                     ])
                             ->where('users.role_id', '5')
                             ->where('trucks.id', $request->id)
