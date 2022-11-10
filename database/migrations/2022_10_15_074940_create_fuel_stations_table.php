@@ -18,11 +18,7 @@ return new class extends Migration
             $table->string('place')->nullable();
             $table->string('latitude');
             $table->string('longitude');
-<<<<<<< HEAD
-            $table->string('address')->nullable();;
-=======
             $table->string('address')->nullable();
->>>>>>> main
             $table->foreignId('added_by')->default(1)->nullable()->comment('1:Admin, 2:Sub admin ,5:Self');
             $table->foreignId('added_user')->nullable()->references('id')->on('users');
             $table->integer('updated_by')->nullable()->comment('1:Admin, 2:Sub admin ,5:Self');
