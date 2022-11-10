@@ -50,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('admin/fuelStation/password', [FuelStationController::class, 'changePassword']);
     Route::post('admin/fuelStation/updateDetails', [FuelStationController::class, 'updateDetails']);
     Route::get('admin/fuelStation/details', [FuelStationController::class, 'details']);
+    Route::get('admin/fuel_station_fuels', [FuelStationController::class, 'FuelStationFuels']);
 
     Route::post('admin/fuel/add', [FuelTypeController::class, 'add']);
     Route::post('admin/fuel/update', [FuelTypeController::class, 'update']);
@@ -70,11 +71,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/driver/pending_drivers/details', [DriverController::class, 'pendingDetails']);
     Route::post('admin/driver/change_password', [DriverController::class, 'changePassword']);
 
+
     Route::post('admin/truck/add', [TruckController::class, 'add']);
     Route::post('admin/truck/update', [TruckController::class, 'update']);
     Route::get('admin/trucks', [TruckController::class, 'index']);
     Route::get('admin/truck/details', [TruckController::class, 'details']);
     Route::get('admin/truck/status', [TruckController::class, 'status']);
     Route::post('admin/truck/approve', [TruckController::class, 'approve']);
+    Route::get('admin/truck/pending_trucks', [TruckController::class, 'pendingIndex']);
+    Route::get('admin/driver/pending_trucks/details', [TruckController::class, 'pendingDetails']);
+
     // return $request->user();
 });
