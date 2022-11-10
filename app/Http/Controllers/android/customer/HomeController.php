@@ -15,19 +15,80 @@ class HomeController extends Controller
 {
     /*
      * Home Screen
-     * @params: 
+     * @params: latitude, longitude
      */
     public function index(Request $request)
     {
         $auth_user = auth('sanctum')->user();
-
+        $auth_user_id = $auth_user->user_id;
         $fuel_stations = [];
         $validator = Validator::make($request->all(),
             [
-                'latitude' => 'required',
+                'latitude' => 'required|numeric',
                 'longitude' => 'required',
+                'limit' => 'required',
             ]
         );
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+            $res = Response::send(false, [], $message = $errors, 422);
+
+        } else {
+            $fuel_stations = FuelStation::select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at', DB::raw("ROUND(6371 * acos(cos(radians(" . floatval($request->latitude) . ")) 
+                * cos(radians(fuel_stations.latitude)) 
+                * cos(radians(fuel_stations.longitude) - radians(" . floatval($request->longitude) . ")) 
+                + sin(radians(" .$request->latitude. ")) 
+                * sin(radians(fuel_stations.latitude))), 2) AS distance"))
+                ->join('users', 'users.user_id', '=', 'fuel_stations.id')
+                ->active()
+                ->where('role_id', 5)
+                ->whereIn('fuel_stations.id', function($query){
+                    $query->select('fuel_station_id')
+                    ->from(with(new FuelStationStock)->getTable())
+                    ->where('status', 1);
+                })
+                ->orderBy('distance', 'asc')
+                ->with([
+                    'fuels' => function ($query) {
+                        $query->where('fuel_station_stocks.status', '=', 1);
+                    },
+
+                    'favourites' => function ($query) use($auth_user_id) {
+                        $query->select('customers.id', 'name_en', 'name_so')
+                        ->where('customer_favorite_stations.customer_id', '=', $auth_user_id);
+                    },
+                ])
+                ->paginate($request->limit);
+        
+
+            $sliders = DB::table('sliders')
+                        ->select('image')
+                        ->where('status', 1)
+                        ->get();       
+            
+            $data = array(
+                'fuel_stations' => $fuel_stations,
+                'sliders' => $sliders,
+            );
+
+            $res = Response::send(true, $data, 'Data found', 200);
+        }
+
+        return $res;
+    }
+
+    /*
+     * Home Search
+     * @params: keyword, lang
+     */
+    public function search(Request $request) {
+        $validator = Validator::make($request->all(),
+            [
+                'lang' => 'required',
+            ]
+        );
+
+        $fuel_stations = [];
         if ($validator->fails()) {
             $errors = collect($validator->errors());
             $res = Response::send(false, [], $message = $errors, 422);
@@ -37,37 +98,31 @@ class HomeController extends Controller
                 ->join('users', 'users.user_id', '=', 'fuel_stations.id')
                 ->active()
                 ->where('role_id', 5)
-                // ->whereIn('fuel_stations.id', function($query){
-                //     $query->select('fuel_station_id')
-                //     ->from(with(new FuelStationStock)->getTable())
-                //     ->where('status', 1);
-                // })
-                //->orderBy('distance', 'asc')
-                ->with([
-                    'fuels' => function ($query) {
-                        $query->where('fuel_station_stocks.status', '=', 1);
-                    },
-                ])
-                ->get();
-        }
+                ->whereIn('fuel_stations.id', function($query){
+                    $query->select('fuel_station_id')
+                    ->from(with(new FuelStationStock)->getTable())
+                    ->where('status', 1);
+                });
 
-        $sliders = DB::table('sliders')
-                    ->select('image')
-                    ->where('status', 1)
-                    ->get();
+            if ($request->lang == 1) {
+                $fuel_stations->where('name_en', 'LIKE', $request->keyword . '%');
+            }
 
-        // DB::raw("6371 * acos(cos(radians(" . floatval($lat) . ")) 
-        //         * cos(radians(users.lat)) 
-        //         * cos(radians(users.lon) - radians(" . floatval($lon) . ")) 
-        //         + sin(radians(" .$lat. ")) 
-        //         * sin(radians(users.lat))) AS distance")
-        
-       
-        $data = array(
-            'fuel_stations' => $fuel_stations,
-            'sliders' => $sliders,
-        );
+            if ($request->lang == 2) {
+                $fuel_stations->where('name_so', 'LIKE', $request->keyword . '%');
+            }
 
-        return Response::send(true, $data, 'Data found', 200);
+            $fuel_stations = $fuel_stations->get();
+
+            $data = array(
+                'fuel_stations' => $fuel_stations,
+            );  
+            $res = Response::send(true, $data, '', 200); 
+                
+        }           
+
+        return $res;
+
+
     }
 }
