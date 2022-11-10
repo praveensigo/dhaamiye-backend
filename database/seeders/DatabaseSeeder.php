@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             DriverSeeder::class,
             UserSeeder::class,
             SettingSeeder::class,
+            FuelTypeSeeder::class,
         ]);
     }
 }

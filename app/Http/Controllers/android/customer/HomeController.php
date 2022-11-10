@@ -17,38 +17,37 @@ class HomeController extends Controller
      * Home Screen
      * @params: 
      */
-    public function index()
+    public function index(Request $request)
     {
         $auth_user = auth('sanctum')->user();
 
-        
+        $fuel_stations = [];
         $validator = Validator::make($request->all(),
             [
-                'latitude' => 'required|numeric',
-                'longitude' => 'required|numeric',
-            ],[]
-            
+                'latitude' => 'required',
+                'longitude' => 'required',
+            ]
         );
         if ($validator->fails()) {
             $errors = collect($validator->errors());
             $res = Response::send(false, [], $message = $errors, 422);
 
         } else {
-            $fuel_stations = FuelStation::select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address' 'status', 'created_at')
+            $fuel_stations = FuelStation::select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at')
                 ->join('users', 'users.user_id', '=', 'fuel_stations.id')
                 ->active()
                 ->where('role_id', 5)
-                ->whereIn('id', function($query){
-                    $query->select('fuel_station_id')
-                    ->from(with(new FuelStationStock)->getTable())
-                    ->where('status', 1);
-                })
-                ->orderBy('distance', 'asc')
+                // ->whereIn('fuel_stations.id', function($query){
+                //     $query->select('fuel_station_id')
+                //     ->from(with(new FuelStationStock)->getTable())
+                //     ->where('status', 1);
+                // })
+                //->orderBy('distance', 'asc')
                 ->with([
                     'fuels' => function ($query) {
-                        $query->where('fuel_station_stocks.status', '=', 1)
+                        $query->where('fuel_station_stocks.status', '=', 1);
                     },
-                ]);
+                ])
                 ->get();
         }
 
@@ -62,8 +61,6 @@ class HomeController extends Controller
         //         * cos(radians(users.lon) - radians(" . floatval($lon) . ")) 
         //         + sin(radians(" .$lat. ")) 
         //         * sin(radians(users.lat))) AS distance")
-
-
         
        
         $data = array(
