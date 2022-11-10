@@ -34,8 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/customer/status', [CustomerController::class, 'status']);
     Route::get('admin/customer/profile', [CustomerController::class, 'profile']);
     Route::post('admin/customer/password', [CustomerController::class, 'changePassword']);
-    Route::post('admin/customer/updateProfile', [CustomerController::class, 'update']);
-
+    Route::post('admin/customer/updateProfile', [CustomerController::class, 'updateProfile']);
     Route::post('admin/fuelStation/add', [FuelStationController::class, 'add']);
     Route::post('admin/fuelStation/update', [FuelStationController::class, 'update']);
     Route::get('admin/fuelStation/index', [FuelStationController::class, 'index']);
