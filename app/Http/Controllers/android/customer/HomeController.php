@@ -50,11 +50,12 @@ class HomeController extends Controller
                 ->orderBy('distance', 'asc')
                 ->with([
                     'fuels' => function ($query) {
-                        $query->where('fuel_station_stocks.status', '=', 1);
+                        $query->select('fuel_type_id', 'fuel_en', 'fuel_so', 'price', 'stock')
+                        ->where('fuel_station_stocks.status', '=', 1);
                     },
 
                     'favourites' => function ($query) use($auth_user_id) {
-                        $query->select('customers.id', 'name_en', 'name_so')
+                        $query->select('customers.id', 'name_en', 'name_so', 'customers.created_at', 'customers.status')
                         ->where('customer_favorite_stations.customer_id', '=', $auth_user_id);
                     },
                 ])
@@ -124,5 +125,55 @@ class HomeController extends Controller
         return $res;
 
 
+    }
+
+    /*************
+     * Fuel Station Fuels
+     * @params: id
+    **************/
+    public function getFuelStationFuels(Request $request)
+    {
+        $auth_user = auth('sanctum')->user();
+        $auth_user_id = $auth_user->user_id;
+        $fuel_stations = [];
+        $validator = Validator::make($request->all(),
+            [
+                'id' => 'required|exists:fuel_stations,id',
+                'latitude' => 'required',
+                'longitude' => 'required',
+            ],
+        );
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+            $res = Response::send(false, [], $message = $errors, 422);
+
+        } else {
+            $fuel_station = FuelStation::select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at', DB::raw("ROUND(6371 * acos(cos(radians(" . floatval($request->latitude) . ")) 
+                * cos(radians(fuel_stations.latitude)) 
+                * cos(radians(fuel_stations.longitude) - radians(" . floatval($request->longitude) . ")) 
+                + sin(radians(" .$request->latitude. ")) 
+                * sin(radians(fuel_stations.latitude))), 2) AS distance"))
+                ->join('users', 'users.user_id', '=', 'fuel_stations.id')
+                ->active()
+                ->where('role_id', 5)                
+                ->with([
+                    'fuels' => function ($query) {
+                        $query->select('fuel_type_id', 'fuel_en', 'fuel_so', 'price', 'stock')
+                       ->where('fuel_station_stocks.status', '=', 1);
+                    },
+
+                    'favourites' => function ($query) use($auth_user_id) {
+                        $query->select('customers.id', 'name_en', 'name_so', 'customers.created_at', 'customers.status')
+                        ->where('customer_favorite_stations.customer_id', '=', $auth_user_id);
+                    },
+                ])
+                ->first();
+            $data = array(
+                'fuel_station' => $fuel_station,
+            );
+            $res = Response::send(true, $data, 'Fuel Station found', 200);
+        }
+
+        return $res;
     }
 }

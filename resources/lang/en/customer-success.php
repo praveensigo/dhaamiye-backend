@@ -10,6 +10,9 @@ return [
 
     'mobile_registered_en' => 'The given mobile number is registered',
     'mobile_registered_so' => 'The given mobile number is registered',
+
+    'in_stock_en' => 'In stock',
+    'in_stock_so' => 'In stock',
     
 
 ];

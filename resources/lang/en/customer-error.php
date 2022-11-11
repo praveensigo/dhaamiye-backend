@@ -65,5 +65,17 @@ return [
     'email_exists_en' => 'The given email is already registered',
     'email_exists_so' => 'The given email is already registered',
 
+    'out_of_stock_en' => 'Out of stock',
+    'out_of_stock_so' => 'Out of stock',
+
+    'coupon_exists_en' => 'Invalid coupon code',
+    'coupon_exists_so' => 'Invalid coupon code',
+
+    'coupon_expired_en' => 'Coupon expired',
+    'coupon_expired_so' => 'Coupon expired',
+
+    'coupon_used_en' => 'Already used',
+    'coupon_used_so' => 'Already used',
+
 
 ];
