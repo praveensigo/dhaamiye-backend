@@ -7,6 +7,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\android\customer\ProfileController;
 use App\Http\Controllers\android\customer\CheckController;
 use App\Http\Controllers\android\customer\HomeController;
+use App\Http\Controllers\android\customer\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,4 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('profile/update', [ProfileController::class, 'update']);
     Route::get('home', [HomeController::class, 'index']);
     Route::get('search', [HomeController::class, 'search']);
+    Route::get('fuel-types', [HomeController::class, 'getFuelStationFuels']);
+    Route::post('check-stock', [OrderController::class, 'isQuantityInStock']);
+    Route::post('apply-coupon', [OrderController::class, 'applyCoupon']);
 });
