@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Service\ResponseSender as Response;
 use App\Models\admin\Driver;
+use App\Models\admin\CustomerOrderFuel;
+use App\Models\admin\DriverPayments;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
+use App\Models\admin\User;
 
 
 use Validator;
@@ -662,5 +664,99 @@ public function pendingIndex(Request $request)
     }
      return $res;
 }
+public function orders(Request $request)
+{
+    $fields    = $request->input();
+    $validator = Validator::make($request->all(), [
+        'id' => 'required|numeric|exists:drivers,id',
+        'limit' => 'required|numeric',
+        'keyword' => 'nullable',
+        'status' => 'nullable|numeric',
+
+    ]);
+    if ($validator->fails()) {
+        $errors = collect($validator->errors());
+        $res = Response::send(false, [], $message = $errors, 422);
+
+    } else {
+        
+        $orders = CustomerOrderFuel::select('customer_order_fuels.id as customer_order_fuels_id','customer_order_fuels.customer_id','customer_order_fuels.order_id','customer_order_fuels.fuel_type_id','customer_order_fuels.quantity','customer_order_fuels.price','customer_order_fuels.amount','customer_orders.*')
+                                    ->join('customer_orders', 'customer_orders.id', '=', 'customer_order_fuels.order_id')
+                                    ->with([
+                                        'customer' ,'fuel','driver'
+                                        ])
+                                    ->where('customer_orders.driver_id',$fields['id'])
+                                    ->orderBy('customer_order_fuels.id');
+                   
+                                    
+            if($fields['keyword'])
+               {    
+                $search_text=$fields['keyword'];
+                    $orders->where('customer_order_fuels.amount', 'Like', '%' . $search_text . '%')
+                            ->orWhere('customer_order_fuels.order_id', 'Like', '%' . $search_text . '%')
+                            ->orWhereHas('customer', function ($query)use($search_text) 
+                                                {
+                                                    $query->where('users.email', 'Like', '%' . $search_text . '%')
+                                                        ->orWhere('users.mobile', 'Like', '%' . $search_text . '%')
+                                                        ->orWhere('users.name_en', 'Like', '%' . $search_text . '%')
+                                                        ->orWhere('users.name_so', 'Like', '%' . $search_text . '%');
+                                                        
+                                                    return $query;       
+                                                },)
+                             ->orWhereHas('fuel', function ($query)use($search_text) 
+                                                {
+                                                    $query->where('fuel_types.fuel_en', 'Like', '%' . $search_text . '%')
+                                                        ->orWhere('fuel_types.fuel_so', 'Like', '%' . $search_text . '%');
+                                                    return $query;       
+                                                },);
+
+                }
+                   
+                if ($fields['status'] != '' && $fields['status'] != null) 
+                {
+                   if($fields['status'] == 0)
+                     {
+                      $orders->where('customer_orders.status', $fields['status']);
+                     
+                     }
+                     if($fields['status'] == 1)
+                     {
+                      $orders->where('customer_orders.status', $fields['status']);
+                     
+                     }
+                     if($fields['status'] == 2)
+                     {
+                      $orders->where('customer_orders.status', $fields['status']);
+                     
+                     } if($fields['status'] == 3)
+                     {
+                      $orders->where('customer_orders.status', $fields['status']);
+                     
+                     } if($fields['status'] == 4)
+                     {
+                      $orders->where('customer_orders.status', $fields['status']);
+                     
+                     } if($fields['status'] == 5)
+                     {
+                      $orders->where('customer_orders.status', $fields['status']);
+                     }
+                     if($fields['status'] == 6)
+                     {
+                      $orders->where('customer_orders.status', $fields['status']);
+                     }
+                    }
+    
+             $orders = $orders->paginate($fields['limit']);
+       
+            $data = array(
+                  'orders' => $orders,
+                         );
+
+            $res = Response::send(true, $data, '', 200);
+      }
+       return $res;
+}
+
+
 }
 

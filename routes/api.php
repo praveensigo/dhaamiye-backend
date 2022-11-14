@@ -70,6 +70,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/driver/pending_drivers', [DriverController::class, 'pendingIndex']);
     Route::get('admin/driver/pending_drivers/details', [DriverController::class, 'pendingDetails']);
     Route::post('admin/driver/change_password', [DriverController::class, 'changePassword']);
+    Route::get('admin/driver/orders', [DriverController::class, 'orders']);
+    Route::get('admin/driver/earnings', [DriverController::class, 'earnings']);
 
 
     Route::post('admin/truck/add', [TruckController::class, 'add']);
