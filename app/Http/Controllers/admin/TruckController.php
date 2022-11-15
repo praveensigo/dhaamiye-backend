@@ -504,5 +504,3 @@ public function PendingIndex(Request $request)
 
 
         }
-       
-   
