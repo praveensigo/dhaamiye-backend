@@ -77,5 +77,8 @@ return [
     'coupon_used_en' => 'Already used',
     'coupon_used_so' => 'Already used',
 
+    'quantity_required_en' => 'Please enter qunatity',
+    'quantity_required_so' => 'Please enter qunatity',
+
 
 ];
