@@ -35,4 +35,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('fuel-types', [HomeController::class, 'getFuelStationFuels']);
     Route::post('check-stock', [OrderController::class, 'isQuantityInStock']);
     Route::post('apply-coupon', [OrderController::class, 'applyCoupon']);
+    Route::post('request-fuel', [OrderController::class, 'requestFuel']);
 });
