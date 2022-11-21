@@ -24,8 +24,8 @@
                 $table->decimal('tax',12,2)->nullable();
                 $table->decimal('delivery_charge', 12, 2);
                 $table->string('coupon_code')->nullable();
-                $table->decimal('promotion_discount',12,2)->nullable();
-                $table->decimal('other_charges',12,2)->nullable();
+                $table->decimal('promotion_discount',12,2)->default(0);
+                $table->decimal('other_charges',12,2)->default(0);
                 $table->decimal('total',12,2);
                 $table->decimal('amount_commission',12,2)->nullable();
                 $table->decimal('delivery_charge_commission',12,2)->nullable();
@@ -33,12 +33,14 @@
                 $table->date('delivery_date')->nullable();
                 $table->time('delivery_time')->nullable();
                 $table->integer('pin')->nullable();
-                $table->integer('status')->default(0)->comment('0:Pending, 1:Accepted, 2:Ongoing, 3:Scheduled, 4:Delivered, 5:Cancelled, 6:Missed');
+                $table->integer('status')->default(0)->comment('0:Requested 1:Pending, 2:Accepted, 3:Ongoing, 4:Scheduled, 5:Delivered, 6:Cancelled, 7:Missed');
                 $table->timestamp('accepted_at')->nullable();
                 $table->timestamp('started_at')->nullable();
                 $table->timestamp('delivered_at')->nullable();
                 $table->timestamp('cancelled_at')->nullable();
                 $table->text('cancel_reason')->nullable();
+                $table->integer('added_by')->nullable()->comment('1:Admin, 2:Sub admin 3:Customer 5:fuel station');
+                $table->foreignId('added_user')->nullable()->references('id')->on('users');
                 $table->timestamps();
             });
         }
