@@ -27,11 +27,20 @@ class ProfileController extends Controller
                     ->where('users.role_id','3')
                     ->first();
 
+        // $doctorname = "Dr. Riya" ;
+        // $patientname = "Lisa Mathew";
+        // $mobile = '9999999999';
+        // $message='Hello ' . $patientname . ' ! Your registration has been done successfully. Start Feeling Better Today! Thank You for choosing Medicino. Kindly choose the specialized Doctor for you.';
+        // $msg = rawurlencode($message);
+
         if($customer) {
             $res = Response::send(
                 'true', 
                 $data = [
                     'customer' => $customer,
+                    //'auth_user' => $auth_user,
+                    //'msg' => $msg
+
                 ], 
                 $message = '', 
                 $code    = 200
