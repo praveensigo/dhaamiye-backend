@@ -80,5 +80,27 @@ return [
     'quantity_required_en' => 'Please enter qunatity',
     'quantity_required_so' => 'Please enter qunatity',
 
+    'confirm_order_en' => 'This order is already confirmed',
+    'confirm_order_so' => 'This order is already confirmed',
+
+    'reason_required_en' => 'Please enter a reason',
+    'reason_required_so' => 'Please enter a reason',
+
+    'cancel_order_en' => 'Failed to cancel the order',
+    'cancel_order_so' => 'Failed to cancel the order',
+
+    'rating_required_en' => 'Please pick your rating',
+    'rating_required_so' => 'Please pick your rating',
+
+    'review_required_en' => 'Please enter your review',
+    'review_required_so' => 'Please enter your review',
+
+    'add_review_status_en' => 'You cannot add review as your order is not completed',
+    'add_review_status_so' => 'You cannot add review as your order is not completed',
+
+    'add_review_en' => 'Failed to add review',
+    'add_review_so' => 'Failed to add review',
+
+
 
 ];
