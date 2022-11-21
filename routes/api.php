@@ -7,6 +7,12 @@ use App\Http\Controllers\admin\FuelTypeController;
 use App\Http\Controllers\admin\CustomerOrderController;
 use App\Http\Controllers\admin\DriverController;
 use App\Http\Controllers\admin\TruckController;
+use App\Http\Controllers\admin\CouponController;
+use App\Http\Controllers\admin\SettingsController;
+use App\Http\Controllers\admin\CmsController;
+use App\Http\Controllers\admin\EnquiriesController;
+use App\Http\Controllers\admin\SubAdminController;
+use App\Http\Controllers\admin\ReportsController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -82,6 +88,35 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('admin/truck/approve', [TruckController::class, 'approve']);
     Route::get('admin/truck/pending_trucks', [TruckController::class, 'pendingIndex']);
     Route::get('admin/driver/pending_trucks/details', [TruckController::class, 'pendingDetails']);
+
+
+    Route::post('admin/coupon/add', [CouponController::class, 'add']);
+    Route::post('admin/coupon/edit', [CouponController::class, 'update']);
+    Route::get('admin/coupons', [CouponController::class, 'index']);
+    Route::get('admin/coupon/status', [CouponController::class, 'status']);
+
+    Route::get('admin/settings/index',[SettingsController::class,'index']);
+    Route::post('admin/edit',[SettingsController::class,'updateAdmin']);
+    Route::post('admin/change_password',[SettingsController::class,'changePassword']);
+    Route::post('admin/settings/charge_update',[SettingsController::class,'updateCharges']);
+    Route::post('admin/settings/maintenance_update',[SettingsController::class,'updateMaintenance']);
+    Route::post('admin/settings/version_control_update',[SettingsController::class,'updateVersionControl']);
+
+    Route::post('admin/about/edit',[CmsController::class,'updateAbout']);
+    Route::post('admin/policy/edit',[CmsController::class,'updatePolicy']);
+    Route::post('admin/term/edit',[CmsController::class,'updateTerm']);
+    Route::get('admin/about',[CmsController::class,'indexAbout']);
+    Route::get('admin/terms',[CmsController::class,'indexTerms']);
+    Route::get('admin/policy',[CmsController::class,'indexPolicy']);
+    Route::get('admin/enquiries',[EnquiriesController::class,'index']);
+
+    Route::post('admin/sub_admin/add',[SubAdminController::class,'add']);
+    Route::post('admin/sub_admin/edit',[SubAdminController::class,'update']);
+    Route::get('admin/sub_admin/status',[SubAdminController::class,'status']);
+    Route::get('admin/sub_admins',[SubAdminController::class,'index']);
+    Route::post('admin/sub_admin/add_module',[SubAdminController::class,'addModules']);
+
+    Route::get('admin/sales_reports',[ReportsController::class,'salesReport']);
 
     // return $request->user();
 });

@@ -15,6 +15,8 @@ return new class extends Migration
     {
         Schema::create('privacy_policy', function (Blueprint $table) {
             $table->id();
+            $table->string('title_en')->nullable();
+            $table->string('title_so')->nullable();
             $table->longText('policy_en')->nullable();
             $table->longText('policy_so')->nullable();
             $table->timestamps();

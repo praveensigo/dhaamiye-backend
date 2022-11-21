@@ -2,8 +2,9 @@
 
 return [
 
-    //'name_required' => 'Please enter name',
-
+    'name_required' => 'Please enter name',
+    'status_in' => 'Status accepts only 1 or 2',
+    'id_exists' => 'Record not found',
     'name_en_required_without' => 'Please enter the Name in English or Somali',
     'name_en_min' => 'Name should contain a minimum of 3 characters',
     'name_en_max' => 'Name should contain a maximum of 100 characters',
@@ -48,7 +49,6 @@ return [
     'license_expiry_required'=>'Please enter License expiry date',
     'block_driver'=>'Driver unpublished successfully',
 
-    'id_exists' => 'Driver not found',
 
     //TRUCK
     'truck_no_required'=>'Please enter the truck no',
@@ -87,4 +87,36 @@ return [
     'amount_required' => 'Please enter amount',
     'percentage_required' => 'Please enter percentage',
     'create_coupons' =>  'Failed to create Coupon, please try again',
+    'update_coupons' =>  'Failed to update coupon',
+    'publish_coupon' => 'Failed to publish Coupon, please try again',
+    'unpublish_coupon' => 'Failed to unpublish Coupon, please try again',
+
+    //SETTINGS
+    'update_admin' =>  'Failed to update Admin',
+    'change_password' => 'Failed to change Password',
+    'fuel_delivery_range_required' => 'Please enter Fuel delivery range',
+    'commision_required' => 'Please enter Commision',
+    'min_fuel_level_required' => 'Please enter Minimum fuel level',
+    'update_charges' => 'Failed to update charges',
+    'maintenance_required' => 'Please enter the maintenance 0:yes/1:no',
+    'maintenance_reason_en_required_if' =>  'Please enter the maintenace reason in English language',
+    'maintenance_reason_so_required_if' =>  'Please enter the maintenace reason in Somali language',
+    'update_maintenance' => 'Failed to update maintenance mode',
+    'update_version_control' => 'Failed to update version control',
+
+    //CMS
+    'title_required_without' => 'Please enter the title in English or Somali',
+    'content_required_without' => 'Please enter the content in English or Somali',
+    'update_about' =>  'Failed to update about',
+    'policy_required_without' => 'Please enter the Privacy policy in English or Somali',
+    'update_policy' =>  'Failed to update Privacy policy',
+    'term_required_without' => 'Please enter the Terms & Conditions in English or Somali',
+    'update_term' =>  'Failed to update Terms & Conditions',
+   
+    //SUBADMIN
+    'create_sub_admin' =>  'Failed to create Sub Admin',
+    'update_sub_admin' =>  'Failed to update Sub Admin',
+    'block_sub_admin'=>'Sub Admin unpublished successfully',
+    'add_sub_admin_modules' =>  'Failed to add modules',
+
 ];
