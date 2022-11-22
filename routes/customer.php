@@ -8,6 +8,7 @@ use App\Http\Controllers\android\customer\ProfileController;
 use App\Http\Controllers\android\customer\CheckController;
 use App\Http\Controllers\android\customer\HomeController;
 use App\Http\Controllers\android\customer\OrderController;
+use App\Http\Controllers\android\customer\ReviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,7 +29,7 @@ Route::post('reset-password', [CheckController::class, 'resetPassword']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('profile', [ProfileController::class, 'index']);
-    Route::post('change-password', [ProfileController::class, 'changePassword']);
+    Route::post('profile/change-password', [ProfileController::class, 'changePassword']);
     Route::post('profile/update', [ProfileController::class, 'update']);
     Route::get('home', [HomeController::class, 'index']);
     Route::get('search', [HomeController::class, 'search']);
@@ -36,4 +37,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('check-stock', [OrderController::class, 'isQuantityInStock']);
     Route::post('apply-coupon', [OrderController::class, 'applyCoupon']);
     Route::post('request-fuel', [OrderController::class, 'requestFuel']);
+    Route::post('book-now', [OrderController::class, 'bookNowSchedule']);
+    Route::post('order/confirm', [OrderController::class, 'confirmOrder']);
+    Route::get('my-orders', [OrderController::class, 'index']);
+    Route::get('order/details', [OrderController::class, 'details']);
+    Route::post('order/cancel', [OrderController::class, 'cancel']);
+    Route::post('order/add-review', [ReviewController::class, 'add']);
+
 });

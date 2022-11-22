@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\android\customer\FuelStation;
 use App\Models\android\customer\FuelStationStock;
 use App\Models\android\customer\FuelType;
+use App\Models\android\customer\CustomerOrder;
 use Illuminate\Support\Facades\DB;
 use App\Models\Service\ResponseSender as Response;
 use Illuminate\Validation\Rule;
@@ -195,13 +196,15 @@ class OrderController extends Controller
 
             $fuels = [];
             $i = 0;
-            $total = 0;
+            $fuel_quantity_price = 0;
             $quantities = $request->quantities;
             foreach($request->fuel_type_ids as $fuel_type) {
+
                 $type = DB::table('fuel_station_stocks')
                         ->select('fuel_station_stocks.fuel_type_id', 'fuel_en', 'fuel_so', 'price', 'stock')
                         ->join('fuel_types', 'fuel_station_stocks.fuel_type_id', '=', 'fuel_types.id')
                         ->first();
+
                 if($type) {
                     if($quantities[$i] <= $type->stock) {
 
@@ -212,11 +215,26 @@ class OrderController extends Controller
                             'quantity' => $quantities[$i],
                             'price' => $type->price,
                             'total' => $type->price * $quantities[$i],
+                            'stock_status' => 1,
+                            'converted_stock_status' => 'In Stock',
                         ];
                         
-                        $total = $total + ($type->price * $quantities[$i]);
-                        $i++;
+                        $fuel_quantity_price = $fuel_quantity_price + ($type->price * $quantities[$i]);
+                        
+                    } else {
+                        
+                        $fuels[] = [
+                            'id' => $fuel_type,
+                            'fuel_en' => $type->fuel_en,
+                            'fuel_so' => $type->fuel_so,
+                            'quantity' => $quantities[$i],
+                            'price' => $type->price,
+                            'total' => $type->price * $quantities[$i],
+                            'stock_status' => 1,
+                            'converted_stock_status' => 'Out of Stock',
+                        ];
                     }
+                    $i++;
                 }               
             }
 
@@ -244,7 +262,7 @@ class OrderController extends Controller
 
             $delivery_charge = $fuel_station->distance * $settings->fuel_delivery_range;
 
-            $tax = $total * $settings->tax / 100;
+            $tax = $fuel_quantity_price * $settings->tax / 100;
 
             /************* coupon starts ***************/
             $promotion_discount = 0;
@@ -263,14 +281,14 @@ class OrderController extends Controller
                 if($coupon) {
 
                     if($coupon->type == 1) {
-                        if($coupon->amount > $total) {
-                            $promotion_discount = $total;
+                        if($coupon->amount > $fuel_quantity_price) {
+                            $promotion_discount = $fuel_quantity_price;
                         } else {
                             $promotion_discount = $coupon->amount;
                         }
 
                     } else if($coupon->type == 2) {
-                        $promotion_discount = $total * $coupon->amount/100;
+                        $promotion_discount = $fuel_quantity_price * $coupon->amount/100;
                     }
                 }
             }
@@ -278,12 +296,12 @@ class OrderController extends Controller
 
             $other_charges = 0;
 
-            $grand_total = $total - $promotion_discount + $delivery_charge + $tax + $other_charges;
+            $grand_total = $fuel_quantity_price - $promotion_discount + $delivery_charge + $tax + $other_charges;
 
             $data = [
                 'fuel_station' => $fuel_station,
                 'fuels' => $fuels,
-                'total_price' => $total,
+                'total_price' => $fuel_quantity_price,
                 'coupon_code' => $request->coupon_code,
                 'promotion_discount' => $promotion_discount,
                 'delivery_charge' => $delivery_charge,
@@ -296,5 +314,405 @@ class OrderController extends Controller
         }
 
         return $res;
+    }
+
+    /*************
+    Book Now & Schedule
+    @params: fuel_station_id, fuel_type_ids[], quantities[], latitude, longitude, lang
+    **************/
+    public function bookNowSchedule(Request $request)
+    {        
+        $auth_user = auth('sanctum')->user();
+        $auth_user_id = $auth_user->user_id;
+        $lang = [
+            'fuel_station_id.exists' => __('customer-error.exists_en'),
+            'quantities.required' => __('customer-error.quantity_required_en'),
+        ];
+        if($request->lang == 2) {
+            $lang = [
+                'fuel_station_id.exists' => __('customer-error.exists_so'),
+                'quantities.required' => __('customer-error.quantity_required_so'),
+            ];
+        }
+        $validator = Validator::make($request->all(),
+            [
+                'fuel_station_id' => 'required|exists:fuel_stations,id',
+                'fuel_type_ids' => 'required|array',
+                'fuel_type_ids.*' => 'distinct|exists:fuel_types,id|numeric',
+                'quantities' => 'required|array',
+                'coupon_code' => 'nullable|exists:coupons,coupon_code',
+                'latitude' => 'required',
+                'longitude' => 'required',
+                'order_type' => 'required|in:1,2',
+            ]
+        );
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+            $res = Response::send(false, [], $message = $errors, 422);
+
+        } else {
+
+            $fuels = [];
+            $order_fuels = [];
+            $i = 0;
+            $fuel_quantity_price = 0;
+            $quantities = $request->quantities;
+            foreach($request->fuel_type_ids as $fuel_type) {
+
+                $type = DB::table('fuel_station_stocks')
+                        ->select('fuel_station_stocks.fuel_type_id', 'fuel_en', 'fuel_so', 'price', 'stock')
+                        ->join('fuel_types', 'fuel_station_stocks.fuel_type_id', '=', 'fuel_types.id')
+                        ->first();
+
+                if($type) {                   
+
+                    $order_fuels[] = (object)array(
+                        'customer_id' => $auth_user_id,
+                        'order_id' => 0,
+                        'fuel_type_id' => $type->fuel_type_id,
+                        'quantity' => $quantities[$i],
+                        'price' => $type->price,
+                        'amount' => $type->price * $quantities[$i],
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    );
+                        
+                    $fuel_quantity_price = $fuel_quantity_price + ($type->price * $quantities[$i]);                       
+
+                    $i++;
+                }               
+            }
+
+            $fuel_station = FuelStation::select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at', DB::raw("ROUND(6371 * acos(cos(radians(" . floatval($request->latitude) . ")) 
+                * cos(radians(fuel_stations.latitude)) 
+                * cos(radians(fuel_stations.longitude) - radians(" . floatval($request->longitude) . ")) 
+                + sin(radians(" .$request->latitude. ")) 
+                * sin(radians(fuel_stations.latitude))), 2) AS distance"))
+                ->join('users', 'users.user_id', '=', 'fuel_stations.id')
+                ->active()
+                ->where('role_id', 5)                
+                ->with([                    
+
+                    'favourites' => function ($query) use($auth_user_id) {
+                        $query->select('customers.id', 'name_en', 'name_so', 'customers.created_at', 'customers.status')
+                        ->where('customer_favorite_stations.customer_id', '=', $auth_user_id);
+                    },
+                ])
+                ->first();
+
+            $settings = DB::table('settings')
+                        ->select('fuel_delivery_range', 'tax')
+                        ->where('id', 1)
+                        ->first();
+
+            $delivery_charge = $fuel_station->distance * $settings->fuel_delivery_range;
+
+            $tax = $fuel_quantity_price * $settings->tax / 100;
+
+            /************* coupon starts ***************/
+            $promotion_discount = 0;
+            if($request->coupon_code) {
+                $coupon = DB::table('coupons')->select('id', 'coupon_code', 'amount', 'type', 'expiry_date', 'count', 'used_count', 'status')
+                        ->where('status', 1)
+                        ->where('coupon_code', $request->coupon_code)
+                        ->whereRaw('used_count < count')
+                        ->where('expiry_date', '>=', date('Y-m-d'))
+                        ->whereNotIn('coupon_code', function ($query) use($auth_user_id) {
+                                $query->select('coupon_code')
+                                ->from('customer_orders')
+                                ->where('customer_id', $auth_user_id);
+                            })
+                        ->first();
+                if($coupon) {
+
+                    if($coupon->type == 1) {
+                        if($coupon->amount > $fuel_quantity_price) {
+                            $promotion_discount = $fuel_quantity_price;
+                        } else {
+                            $promotion_discount = $coupon->amount;
+                        }
+
+                    } else if($coupon->type == 2) {
+                        $promotion_discount = $fuel_quantity_price * $coupon->amount/100;
+                    }
+                }
+            }
+            /************* coupon ends ***************/
+
+            $other_charges = 0;
+
+            $grand_total = $fuel_quantity_price - $promotion_discount + $delivery_charge + $tax + $other_charges;
+
+            $order = new CustomerOrder;
+            $order->customer_id = $auth_user_id;
+            $order->fuel_station_id = $request->fuel_station_id;
+            $order->order_type = $request->order_type;
+            $order->fuel_quantity_price = $fuel_quantity_price;
+            $order->tax = $tax;
+            $order->delivery_charge = $delivery_charge;
+            $order->promotion_discount = $promotion_discount;
+            $order->other_charges = $other_charges;
+            $order->total = $grand_total;
+            $order->created_at = date('Y-m-d H:i:s');
+            $order->updated_at = date('Y-m-d H:i:s');
+
+
+            if($order->save()) {
+
+                foreach($order_fuels as $order_fuel) {
+                    DB::table('customer_order_fuels')->insert(array(
+                        'customer_id' => $order_fuel->customer_id,
+                        'order_id' => $order->id,
+                        'fuel_type_id' => $order_fuel->fuel_type_id,
+                        'quantity' => $order_fuel->quantity,
+                        'price' => $order_fuel->price,
+                        'amount' => $order_fuel->amount,
+                        'created_at' => $order_fuel->created_at,
+                        'updated_at' => $order_fuel->updated_at,
+                    ));
+                }                
+
+                // $created_order =CustomerOrder::select('id', 'fuel_station_id', 'customer_id', 'order_type', 'fuel_quantity_price', 'tax', 'delivery_charge', 'coupon_code', 'promotion_discount', 'other_charges', 'total', 'status', 'created_at')
+                //                 ->where('id', $order->id)
+                //                 ->with(['fuel_station', 'customer', 'fuels'])
+                //                 ->first();
+                $data = [
+                    'order' => $this->getOrder($order->id)
+                ];
+
+                $res = Response::send(true, $data, '', 200);
+            } else {
+                $res = Response::send(false, [], '', 400);
+            }
+        }
+
+        return $res;
+    }
+
+
+    /*************
+    Confirm Order
+    @params: order_id, latitude, longitude, address, payment_type, lang
+    **************/
+    public function confirmOrder(Request $request)
+    {        
+        $auth_user = auth('sanctum')->user();
+        $auth_user_id = $auth_user->user_id;
+        $lang = [
+            'fuel_station_id.exists' => __('customer-error.exists_en'),
+            'quantities.required' => __('customer-error.quantity_required_en'),
+        ];
+        if($request->lang == 2) {
+            $lang = [
+                'fuel_station_id.exists' => __('customer-error.exists_so'),
+                'quantities.required' => __('customer-error.quantity_required_so'),
+            ];
+        }
+        $validator = Validator::make($request->all(),
+            [
+                'order_id' => 'required|exists:customer_orders,id',
+                'latitude' => 'required',
+                'longitude' => 'required',
+                'address' => 'required',
+                'payment_type' => 'required',
+                'delivery_date' => 'nullable|date',
+                'delivery_time' => 'nullable',
+
+            ]
+        );
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+            $res = Response::send(false, [], $message = $errors, 422);
+
+        } else {
+            $order = CustomerOrder::find($request->order_id);
+
+            if($order->status == 0) {
+                $order->status = 1;
+                $order->save();
+
+                DB::table('customer_order_address')->insert(array(
+                        'customer_id' => $order->customer_id,
+                        'order_id' => $order->id,
+                        'address' => $request->address,
+                        'latitude' => $request->latitude,
+                        'longitude' => $request->longitude,
+                        'special_instructions' => $request->special_instructions,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                ));
+                DB::table('customer_order_payments')->insert(array(
+                        'customer_id' => $order->customer_id,
+                        'order_id' => $order->id,
+                        'payment_type' => $request->payment_type,
+                ));
+
+                $message = __('customer-success.confirm_order_en');
+                if($request->lang == 2) {
+                    $message = __('customer-success.confirm_order_so');
+                }    
+
+                $res = Response::send(true, [], $message, 200);
+
+            } else {                
+
+                $message = __('customer-error.confirm_order_en');
+                if($request->lang == 2) {
+                    $message = __('customer-error.confirm_order_so');
+                }                 
+                $res = Response::send(false, [], $message, 400);
+            }
+
+            return $res;
+        }
+    }
+
+    /*************
+    Orders listing
+    @params: limit, status
+    **************/
+    public function index(Request $request)
+    {
+        $auth_user = auth('sanctum')->user();
+        $validator = Validator::make($request->all(), [
+            'limit' => 'required|numeric',
+            'status' => 'nullable|numeric|in:1,2,3,4,5,6,7'
+        ]);
+
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+            $res = Response::send(false, [], $message = $errors, 422);
+
+        } else {
+
+            $orders = CustomerOrder::select('customer_orders.id', 'customer_id', 'fuel_station_id', 'created_at')
+                ->descending()
+                ->where('customer_orders.customer_id', $auth_user->user_id)
+                ->status($request->status)
+                ->with([
+                    'fuel_station', 'fuels', 
+                ]);
+           
+
+            $orders = $orders->paginate($request->limit);
+
+            $data = array(
+                'orders' => $orders,
+            );
+
+
+            $res = Response::send(true, $data, '', 200);
+        }
+        return $res;
+    }
+
+    /*************
+    Orders Details
+    @params: id
+    **************/
+    public function details(Request $request)
+    {
+        $auth_user = auth('sanctum')->user();
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:customer_orders,id',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+            $res = Response::send(false, [], $message = $errors, 422);
+
+        } else {            
+
+            $data = array(
+                'order'=> $this->getOrder($request->id)
+            );
+
+            $res = Response::send(true, $data, '', 200);
+        }
+        return $res;
+    }
+
+    public function getOrder($order_id) {
+        $order = CustomerOrder::select('customer_orders.*')
+                ->descending()
+                ->where('customer_orders.id', $order_id)
+                ->with([
+                    'fuel_station', 'fuels', 
+                    'customer' => function($query) {
+                        $query->join('users', 'customers.id', '=', 'users.user_id')
+                        ->select('customers.id', 'name_en', 'name_so', 'email', 'mobile', 'country_code_id', 'country_code', 'customers.created_at', 'customers.status')
+                        ->join('country_codes', 'users.country_code_id', '=', 'country_codes.id')
+                        ->where('role_id', 3);
+                    },
+                ])
+                ->first();         
+
+        
+        return $order;
+    }
+
+    /*************
+    Cancel order
+    @params: id, reason, lang
+    **************/
+    public function cancel(Request $request)
+    {
+        $auth_user = auth('sanctum')->user();
+        $lang =   [
+                'reason.required' => __('customer-error.reason_required_en'),
+        ];
+
+        if($request->lang == 2) {
+            $lang =   [
+                'reason.required' => __('customer-error.reason_required_so'),
+            ];
+        }
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:customer_orders,id',
+            'reason' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+            $res = Response::send(false, [], $message = $errors, 422);
+
+        } else {
+            $order = CustomerOrder::find($request->id);
+            
+            $order->status = 6;
+            $order->cancelled_at = date('Y-m-d H:i:s');
+            $order->cancel_reason = $request->reason;
+            if($order->save()) {
+
+                $message = __('customer-success.cancel_order_en');
+
+                if($request->lang  == 2) {
+                    $message = __('customer-success.cancel_order_so');
+                }
+
+                $res = Response::send(true, [], $message, 200);
+
+            } else {
+                $message = __('customer-error.cancel_order_en');
+                if($request->lang  == 2) {
+                    $message = __('customer-error.cancel_order_so');
+                }
+
+                $res = Response::send(false, [], $message, 400);
+            }
+        }
+        return $res;
+    }
+
+    /****** GENERATE CODE *****/
+    function generateCode() 
+    {
+        $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $len = strlen($chars);
+        $code = '';
+        for ($i = 0; $i < 10; $i++) {
+            $code .= $chars[rand(0, $len - 1)];
+        }
+        return $code;
     }
 }
