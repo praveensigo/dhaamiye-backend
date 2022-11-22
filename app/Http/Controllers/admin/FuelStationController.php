@@ -16,6 +16,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Validator;
 
@@ -85,6 +86,7 @@ class FuelStationController extends Controller
             [
                 'name_en' => 'nullable|required_without:name_so|min:3|max:100',
                 'name_so' => 'nullable|required_without:name_en|min:3|max:100',
+
                 'image' => 'nullable|mimes:png,jpg,jpeg,pdf|max:1024|dimensions:max_width=600,  max_height=600',
                 'email' => 'required|email|unique:users',
                 'country_code' => 'required|numeric|exists:country_codes,id',
@@ -228,6 +230,7 @@ class FuelStationController extends Controller
     {
         $fields = $request->input();
         $validator = Validator::make($request->all(),
+
             ['id' => 'required|numeric|exists:fuel_stations,id',
                 'name_en' => 'nullable|required_without:name_so|min:3|max:100',
                 'name_so' => 'nullable|required_without:name_en|min:3|max:100',
@@ -308,6 +311,7 @@ class FuelStationController extends Controller
                 $user->email = $fields['email'];
                 $image_uploaded_path = '';
                 if ($request->file('image') != null) {
+
                     $uploadFolder = 'admin/fuelStations';
                     $image = $request->file('image');
                     $image_uploaded_path = $image->store($uploadFolder, 'public');
@@ -358,6 +362,7 @@ class FuelStationController extends Controller
             $res = Response::send('false', $data = [], $message = $errors, $code = 422);
         } else {
 
+
             $fuel_station_detail = FuelStation::select('fuel_stations.id', 'users.name_en', 'users.name_so', 'users.image', 'added_by', 'added_user', 'updated_by', 'updated_user', 'place', 'latitude', 'longitude', 'address', 'fuel_stations.status', 'country_code_id', 'country_code', 'mobile', 'email', 'role_id', 'fuel_stations.created_at')
                 ->join('users', 'users.user_id', '=', 'fuel_stations.id')
                 ->join('country_codes', 'country_codes.id', '=', 'users.country_code_id')
@@ -380,6 +385,7 @@ class FuelStationController extends Controller
                 ->first();
 
             $res = Response::send('true',
+
                 $data = ['fuel_station_detail' => $fuel_station_detail,
                     'bank_details' => $bank_details,
                     'no_of_orders' => $number,
@@ -426,6 +432,7 @@ class FuelStationController extends Controller
         }
         return $res;
     }
+
     //CHANGE STATUS
     public function status(Request $request)
     {$fields = $request->input();
@@ -1090,4 +1097,106 @@ class FuelStationController extends Controller
         return $res;
     }
 
+=======
+    return $res;
+}
+ //CHANGE STATUS
+ public function status(Request $request)
+ {$fields = $request->input();
+
+     $validator = Validator::make($request->all(),
+         [
+             'id' => 'required|numeric|exists:fuel_stations,id',
+             'status' => 'required|numeric|in:1,2',
+         ],
+         [
+             'status.in' => __('error.status_in'),
+             'id.exists' => __('error.id_exists'),
+         ]
+     );
+     if ($validator->fails()) {
+         $errors = collect($validator->errors());
+         $res = Response::send(false, [], $message = $errors, 422);
+
+     } else {
+         $fuel_station = FuelStation::find($fields['id']);
+         $fuel_station->status = $fields['status'];
+         $result = $fuel_station->save();
+         if ($result) {
+             $user = User::where('user_id', $fields['id'])->where('role_id', '5')->first();
+             $user->status = $fields['status'];
+             $user->save();
+
+             if ($request->status == 1) {
+                 $error_message = __('success.publish_fuel_station');
+             } else {
+                 $error_message = __('success.unpublish_fuel_station');
+             }
+             $res = Response::send('true',
+                 [],
+                 $message = $error_message,
+                 $code = 200);
+         } else {
+             $res = Response::send('false',
+                 [],
+                 $message = $error_message,
+                 $code = 400);
+         }
+     }
+     return $res;
+ }
+ public function FuelStationFuels(Request $request)
+ {
+        $validator = Validator::make($request->all(),
+             [
+                'limit' => 'required|numeric',
+                'keyword' => 'nullable',
+
+              ]);
+        if ($validator->fails()) 
+            {
+                $errors = collect($validator->errors());
+                $res = Response::send(false, [], $message = $errors, 422);
+
+            } else
+                {
+                 $fuels = FuelStationStock::select('fuel_station_stocks.*','users.name_en as fuel_station_name_en','users.name_so as fuel_station_name_so') 
+                            ->leftjoin('users', 'users.user_id', '=', 'fuel_station_stocks.fuel_station_id')
+                                ->with([
+                                   'fuel' 
+                                        ])
+                                ->where('users.role_id', '5')
+                                ->where('fuel_station_stocks.status','1')
+                                ->orderBy('fuel_station_stocks.id', 'desc');
+                
+
+                 if ($request->keyword) 
+                    {   $search_text=$request->keyword;
+                         $fuels->where(function ($query) use ($search_text) 
+                            {
+                                $query->where('users.name_en', 'LIKE', $search_text . '%')
+                                      ->orWhere('users.name_so', 'LIKE', $search_text . '%')
+                                      ->orWhereHas('fuel', function ($query)use($search_text) 
+                                            {
+                                                $query->where('fuel_types.fuel_en', 'Like', '%' . $search_text . '%')
+                                                    ->orWhere('fuel_types.fuel_so', 'Like', '%' . $search_text . '%');
+                                                return $query;       
+                                            },);
+                                     
+
+                            });
+                     }
+                   
+
+            $fuels = $fuels->paginate($request->limit);
+       
+            $data = array(
+                  'fuels' => $fuels,
+                         );
+
+            $res = Response::send(true, $data, '', 200);
+      }
+
+       return $res;
+}
 }

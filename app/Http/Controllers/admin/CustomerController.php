@@ -9,7 +9,9 @@ use App\Models\Service\ResponseSender as Response;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+
 use Illuminate\Support\Facades\DB;
+
 use Illuminate\Validation\Rule;
 use Validator;
 
@@ -31,6 +33,7 @@ class CustomerController extends Controller
             $errors = collect($validator->errors());
             $res = Response::send('false', $data = [], $message = $errors, $code = 422);
         } else {
+
             $customers = Customer::select('customers.id as customer_id', 'users.name_en', 'users.name_so', 'country_codes.country_code', 'users.country_code_id','users.image', 'users.email', 'users.mobile', 'customers.created_at', DB::raw('MAX(customer_orders.created_at)as last_ordered_on'), DB::raw('count(customer_orders.customer_id) as total_orders'), 'customers.status')
                 ->join('users', 'users.user_id', '=', 'customers.id')
                 ->leftjoin('customer_orders', function ($join) {
@@ -106,6 +109,7 @@ class CustomerController extends Controller
                 'mobile.required' => __('error.mobile_required'),
                 'mobile.unique' => __('error.mobile_unique'),
                 'email.unique' => __('error.email_unique'),
+
                 'image.mimes' => __('error.image_mimes'),
 
                 // 'password.not_contains_space' => __('error.password_no_space'),
@@ -178,6 +182,7 @@ class CustomerController extends Controller
                     Rule::unique('users', 'email')->ignore($request->id, 'user_id')],
 
             ],
+
             ['name_en.required_without' => __('error.name_en_required_without'),
             'name_so.required_without' => __('error.name_so_required_without'),
            
@@ -332,6 +337,7 @@ class CustomerController extends Controller
             $res = Response::send(false, [], $message = $errors, 422);
         } else {
 
+
            
             $customer_details = Customer::select('customers.id as customer_id', 'customers.added_by', 'customers.added_user', 'customers.updated_by', 'customers.updated_user', 'customers.created_at', 'customers.updated_at', 'customers.deleted_at', 'customers.status', 'users.*','country_codes.country_code', )
                 ->leftjoin('users', 'users.user_id', '=', 'customers.id')
@@ -388,13 +394,14 @@ class CustomerController extends Controller
                 'email' => ['nullable', 'email',
                     Rule::unique('users', 'email')->ignore($request->id, 'user_id')],
 
+
                 'image' => 'nullable|mimes:png,jpg,jpeg,pdf|max:1024|dimensions:max_width=600,max_height=600',
 
             ],
             ['name_en.required_without' => __('error.name_en_required_without'),
             'name_so.required_without' => __('error.name_so_required_without'),
            
-                'name_en.min' => __('error.name_min'),
+         'name_en.min' => __('error.name_min'),
                 'name_en.max' => __('error.name_max'),
                 'name_so.min' => __('error.name_min'),
                 'name_so.max' => __('error.name_max'),
@@ -426,6 +433,7 @@ class CustomerController extends Controller
                 $user->email = $fields['email'];
                 $image_uploaded_path = '';
                 if ($request->file('image') != null) {
+
                     $uploadFolder = 'admin/customers';
                     $image = $request->file('image');
                     $image_uploaded_path = $image->store($uploadFolder, 'public');
@@ -448,6 +456,7 @@ class CustomerController extends Controller
 
         return $res;
     }
+
 /*GET ORDERS */
     public function order_index(Request $request)
     {
