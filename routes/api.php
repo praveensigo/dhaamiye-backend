@@ -27,7 +27,7 @@ use Illuminate\Support\Facades\Route;
 |
  */
 /*LOGIN API*/
-Route::post('login/custome', [LoginController::class, 'customeLogin']);
+Route::post('login/user', [LoginController::class, 'userLogin']);
 Route::post('login/admin', [LoginController::class, 'adminLogin']);
 
 /*REGISTER API*/
