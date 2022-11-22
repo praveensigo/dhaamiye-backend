@@ -55,7 +55,7 @@ class User extends Authenticatable
     ];
 
     protected $appends = [
-        'converted_created_at',
+       // 'converted_created_at',
         'converted_status',
       //  'converted_gender',
        // 'converted_dob',
@@ -93,10 +93,10 @@ class User extends Authenticatable
     {
         return $this->status == self::ACTIVE ? 'Active' : 'Blocked';
     }
-    public function getConvertedCreatedAtAttribute()
-    {
-        return Formats::customDateTime($this->created_at);
-    }
+    // public function getConvertedCreatedAtAttribute()
+    // {
+    //     return Formats::customDateTime($this->created_at);
+    // }
    /*  public function getConvertedGenderAttribute()
     {
         if ($this->gender) {
