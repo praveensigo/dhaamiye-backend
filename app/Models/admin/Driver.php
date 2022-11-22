@@ -39,9 +39,15 @@ class Driver extends Model
     {
         return $this->belongsTo(Truck::class, 'truck_id', 'id');
     }
+    // public function fuel_station()
+    // {
+    //     return $this->belongsTo(FuelStation::class, 'fuel_station_id', 'id');
+    // }
     public function fuel_station()
     {
-        return $this->belongsTo(FuelStation::class, 'fuel_station_id', 'id');
+        return $this->belongsTo(User::class, 'fuel_station_id', 'user_id')
+                                    ->where('users.role_id','5')
+                                    ->where('users.reg_status','1');
     }
   
     public function orders()
