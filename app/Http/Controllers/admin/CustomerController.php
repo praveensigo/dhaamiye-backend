@@ -27,6 +27,7 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'limit' => 'required|numeric',
             'keyword' => 'nullable',
+            
             'status' => 'nullable|numeric|in:1,2', //1:Active, 2:Blocked
         ]);
         if ($validator->fails()) {
