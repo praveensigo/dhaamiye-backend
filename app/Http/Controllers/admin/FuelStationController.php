@@ -16,7 +16,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Validator;
 
@@ -420,6 +419,8 @@ class FuelStationController extends Controller
         if ($validator->fails()) {
             $errors = collect($validator->errors());
             $res = Response::send(false, [], $message = $errors, 422);
+        
+        
         } else {
             $user = User::where(['user_id' => $request->id, 'role_id' => 5])->first();
             $user->password = bcrypt($request->password);
@@ -890,10 +891,12 @@ class FuelStationController extends Controller
                 $res = Response::send(true, [], __('success.update_stock'), 200);
             } else {
                 $res = Response::send(false, [], __('error.update_stock'), 400);
+
             }
         }
         return $res;
     }
+
 /*GET FUELPRICELOGS*/
     public function FuelPriceLogs(Request $request)
     {
@@ -1097,10 +1100,10 @@ class FuelStationController extends Controller
         return $res;
     }
 
-=======
-    return $res;
-}
- //CHANGE STATUS
+
+
+    
+ /* //CHANGE STATUS
  public function status(Request $request)
  {$fields = $request->input();
 
@@ -1144,7 +1147,7 @@ class FuelStationController extends Controller
          }
      }
      return $res;
- }
+ } */
  public function FuelStationFuels(Request $request)
  {
         $validator = Validator::make($request->all(),
