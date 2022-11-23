@@ -419,6 +419,8 @@ class FuelStationController extends Controller
         if ($validator->fails()) {
             $errors = collect($validator->errors());
             $res = Response::send(false, [], $message = $errors, 422);
+        
+        
         } else {
             $user = User::where(['user_id' => $request->id, 'role_id' => 5])->first();
             $user->password = bcrypt($request->password);
@@ -889,10 +891,12 @@ class FuelStationController extends Controller
                 $res = Response::send(true, [], __('success.update_stock'), 200);
             } else {
                 $res = Response::send(false, [], __('error.update_stock'), 400);
+
             }
         }
         return $res;
     }
+
 /*GET FUELPRICELOGS*/
     public function FuelPriceLogs(Request $request)
     {
@@ -1095,6 +1099,7 @@ class FuelStationController extends Controller
                 $code = 200);}
         return $res;
     }
+
 
 
     
