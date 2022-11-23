@@ -13,6 +13,7 @@ use App\Http\Controllers\admin\CmsController;
 use App\Http\Controllers\admin\EnquiriesController;
 use App\Http\Controllers\admin\SubAdminController;
 use App\Http\Controllers\admin\ReportsController;
+use App\Http\Controllers\admin\NotificationController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -27,8 +28,9 @@ use Illuminate\Support\Facades\Route;
 |
  */
 /*LOGIN API*/
-Route::post('login/custome', [LoginController::class, 'customeLogin']);
+Route::post('login/user', [LoginController::class, 'userLogin']);
 Route::post('login/admin', [LoginController::class, 'adminLogin']);
+Route::post('login/user_with_otp', [LoginController::class, 'loginWithOtp']);
 
 /*REGISTER API*/
 Route::post('register/customer', [RegisterController::class, 'customer']);
@@ -117,6 +119,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('admin/sub_admin/add_module',[SubAdminController::class,'addModules']);
 
     Route::get('admin/sales_reports',[ReportsController::class,'salesReport']);
+
+    Route::get('admin/notification', [NotificationController::class, 'index']);
+    Route::post('admin/notification/add', [NotificationController::class, 'add']);
+    Route::post('admin/notification/edit', [NotificationController::class, 'update']);
+    Route::get('admin/notification/status', [NotificationController::class, 'status']);
+    Route::post('admin/notification/delete', [NotificationController::class, 'delete']);
+
 
     // return $request->user();
 });
