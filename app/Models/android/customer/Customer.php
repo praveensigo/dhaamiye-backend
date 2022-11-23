@@ -17,6 +17,10 @@ class Customer extends Model
       'converted_created_at',
       'converted_status',
    ];
+
+   public function favorites() {
+        return $this->belongsToMany(FuelStation::class, 'customer_favorite_stations', 'customer_id', 'fuel_station_id');
+   }
    
 
    /**
