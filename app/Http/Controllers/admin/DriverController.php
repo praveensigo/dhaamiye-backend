@@ -319,17 +319,34 @@ class DriverController extends Controller
                                 ->orderBy('drivers.id','desc');
                             
                                         
-                if($fields['keyword'])
-                   {
-                        $drivers->where('users.name_en', 'Like', '%' . $fields['keyword'] . '%')
-                                ->orWhere('users.name_so', 'Like', '%' . $fields['keyword'] . '%')
-                                ->orWhere('users.email', 'Like', '%' . $fields['keyword'] . '%')
-                                ->orWhere('users.mobile', 'Like', '%' . $fields['keyword'] . '%')
-                                ->orWhere('drivers.truck_id', 'Like', '%' . $fields['keyword'] . '%')
-                                ->orWhere('drivers.fuel_station_id', 'Like', '%' . $fields['keyword'] . '%'); 
+                // if($fields['keyword'])
+                //    {
+                //         $drivers->where('users.name_en', 'Like', '%' . $fields['keyword'] . '%')
+                //                 ->orWhere('users.name_so', 'Like', '%' . $fields['keyword'] . '%')
+                //                 ->orWhere('users.email', 'Like', '%' . $fields['keyword'] . '%')
+                //                 ->orWhere('users.mobile', 'Like', '%' . $fields['keyword'] . '%')
+                //                 ->orWhere('drivers.truck_id', 'Like', '%' . $fields['keyword'] . '%')
+                //                 ->orWhere('drivers.fuel_station_id', 'Like', '%' . $fields['keyword'] . '%'); 
 
-                    }
-                       
+                //     }
+                   
+                    if($fields['keyword'])
+                            {
+                                 $search_text=$fields['keyword'];
+                                 $drivers->where('users.name_en', 'Like', '%' . $fields['keyword'] . '%')
+                                        ->orWhere('users.name_so', 'Like', '%' . $fields['keyword'] . '%')
+                                        ->orWhere('users.email', 'Like', '%' . $fields['keyword'] . '%')
+                                        ->orWhere('users.mobile', 'Like', '%' . $fields['keyword'] . '%')
+                                         ->orWhereHas('truck', function ($query2)use($search_text) 
+                                             {
+                                                 $query2->where('trucks.truck_no', 'Like',  $search_text . '%');
+                                             })
+                                             ->orWhereHas('fuel_station', function ($query2)use($search_text) 
+                                             {
+                                                 $query2->where('users.name_en', 'Like',  $search_text . '%')
+                                                 ->orWhere('users.name_so', 'Like', '%' . $search_text. '%');
+                                             });
+                             }
                     if ($fields['status'] != '' && $fields['status'] != null) 
                     {
                        if($fields['status'] == 1)
