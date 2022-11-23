@@ -22,6 +22,12 @@ return [
 
     'add_review_en' => 'Review added successfully',
     'add_review_so' => 'Review added successfully',
+
+    'add_favorite_en' => 'Fuel station is added to your favourites',
+    'add_favorite_so' => 'Fuel station is added to your favourites',
+
+    'remove_favorite_en' => 'Fuel station is removed from your favourites',
+    'remove_favorite_so' => 'Fuel station is removed from your favourites',
     
 
 ];

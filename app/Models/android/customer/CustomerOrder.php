@@ -37,6 +37,7 @@ class CustomerOrder extends Model
                     // ->join('users', 'customers.id', '=', 'users.user_id')
                     // ->where('role_id', 3);
     }
+    
 
     public function fuels() {
         return $this->hasMany(CustomerOrderFuel::class, 'order_id', 'id')
