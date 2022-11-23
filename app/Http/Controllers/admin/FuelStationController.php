@@ -16,7 +16,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Validator;
 
@@ -1097,10 +1096,9 @@ class FuelStationController extends Controller
         return $res;
     }
 
-=======
-    return $res;
-}
- //CHANGE STATUS
+
+    
+ /* //CHANGE STATUS
  public function status(Request $request)
  {$fields = $request->input();
 
@@ -1144,7 +1142,7 @@ class FuelStationController extends Controller
          }
      }
      return $res;
- }
+ } */
  public function FuelStationFuels(Request $request)
  {
         $validator = Validator::make($request->all(),
