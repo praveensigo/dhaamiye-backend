@@ -27,11 +27,13 @@ class FuelTypeController extends Controller
             $res    = Response::send('false', $data = [], $message = $errors, $code = 422);
         } else 
         {
-            $fuels = DB::table('fuel_types')->select('id','fuel', 'status', 'created_at')
+            $fuels = DB::table('fuel_types')->select('id','fuel_en','fuel_so', 'status', 'created_at')
                 ->orderBy('id','desc');
             
             if ($fields['keyword']) {
-                $fuels->where('fuel', 'LIKE', $fields['keyword'] . '%');
+                $fuels->where('fuel_en', 'LIKE', $fields['keyword'] . '%')
+                      ->orWhere('fuel_so', 'LIKE', $fields['keyword'] . '%');
+
             }
 
             if ($fields['status'] != '' && $fields['status'] != null) {
@@ -58,13 +60,17 @@ class FuelTypeController extends Controller
     	$fields    = $request->input();
         $validator = Validator::make($request->all(),
             [
-                'fuel' => 'required|min:3|max:100',
-            ],
-            [
-                'fuel.required' => 'Please enter the fuel.',
-                'fuel.min' => 'fuel should have atleast 3 letters.',
-                'fuel.max' => 'Fuel should be maximum of 100 letters.',
-                // 'fuels.contains_alphabets' => 'Fuel should be contains alphabets.',
+                'fuel_en' => 'nullable|required_without:fuel_so|min:3|max:100',
+            'fuel_so' => 'nullable|required_without:fuel_en|min:3|max:100',
+                        ],
+                    [
+                'fuel_en.required_without' => __('error.fuel_en_required_without'),
+                'fuel_so.required_without' => __('error.fuel_so_required_without'),
+                'fuel_en.min' => __('error.fuel_min'),
+                'fuel_en.max' => __('error.fuel_max'),
+                'fuel_so.min' => __('error.fuel_min'),
+                'fuel_so.max' => __('error.fuel_max'),
+            // 'fuels.contains_alphabets' => 'Fuel should be contains alphabets.',
             ]
         );
         if ($validator->fails()) {
@@ -73,7 +79,8 @@ class FuelTypeController extends Controller
 
         } else {
             $fuels = new FuelType;
-            $fuels->fuel = $fields['fuel'];
+            $fuels->fuel_en = $fields['fuel_en'];
+            $fuels->fuel_so = $fields['fuel_so'];
             $result = $fuels->save();
 
             if ($result) {
@@ -99,13 +106,17 @@ class FuelTypeController extends Controller
         $validator = Validator::make($request->all(),
             [
                 'id' => 'required|numeric|exists:fuel_types,id',
-                'fuel' => 'required|min:3|max:100',
-            ],
+                'fuel_en' => 'nullable|required_without:fuel_so|min:3|max:100',
+                'fuel_so' => 'nullable|required_without:fuel_en|min:3|max:100',
+                  ],
             [
-                'fuel.required' => 'Please enter the fuel.',
-                'fuel.min' => 'Fuel should have atleast 3 letters.',
-                'fuel.max' => 'Fuel should be maximum of 100 letters.',
-                 ]
+                'fuel_en.required_without' => __('error.fuel_en_required_without'),
+                'fuel_so.required_without' => __('error.fuel_so_required_without'),
+                'fuel_en.min' => __('error.fuel_min'),
+                'fuel_en.max' => __('error.fuel_max'),
+                'fuel_so.min' => __('error.fuel_min'),
+                'fuel_so.max' => __('error.fuel_max'),
+             ]
         );
         if ($validator->fails()) {
             $errors = collect($validator->errors());
@@ -113,7 +124,8 @@ class FuelTypeController extends Controller
 
         } else {
             $fuels = FuelType::find($fields['id']);
-            $fuels->fuel = $fields['fuel'];
+            $fuels->fuel_en = $fields['fuel_en'];
+            $fuels->fuel_so = $fields['fuel_so'];
             $result = $fuels->save();
 
             if ($result) {
