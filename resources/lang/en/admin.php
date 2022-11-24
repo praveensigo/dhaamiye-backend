@@ -15,4 +15,13 @@ return [
 'notification_status_failed' => 'Failed to publish/unpublish notification at this moment, please try again later',
 'notification_deleted' => 'Notification deleted successfully',
 'notification_delete_failed'=>'Failed to delete notification',
+'title_en_required_without' => 'Please enter  title either in Somali or in English',
+ 'title_so_required_without' => 'Please enter  title either in Somali or in English',
+ 'description_en_required_without' => 'Please enter  description either in Somali or in English',
+ 'description_so_required_without' => 'Please enter  description either in Somali or in English',
+ 'description_min' => 'Description should contain a minimum of 3 characters',
+ 'title_max' => 'Title should contain a maximum of 70 characters',
+ 'title_min' => 'Title should contain a minimum of 3 characters',
+ 'description_max' => 'Description should contain a maximum of 150 characters',
+
 ];
