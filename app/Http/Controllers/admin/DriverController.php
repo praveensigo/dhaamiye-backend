@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Service\ResponseSender as Response;
 use App\Models\admin\Driver;
 use App\Models\admin\CustomerOrderFuel;
+use App\Models\admin\CustomerOrder;
 use App\Models\admin\DriverPayments;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -699,20 +700,26 @@ public function orders(Request $request)
 
     } else {
         
-        $orders = CustomerOrderFuel::select('customer_order_fuels.id as customer_order_fuels_id','customer_order_fuels.customer_id','customer_order_fuels.order_id','customer_order_fuels.fuel_type_id','customer_order_fuels.quantity','customer_order_fuels.price','customer_order_fuels.amount','customer_orders.*')
-                                    ->join('customer_orders', 'customer_orders.id', '=', 'customer_order_fuels.order_id')
-                                    ->with([
-                                        'customer' ,'fuel','driver'
-                                        ])
-                                    ->where('customer_orders.driver_id',$fields['id'])
-                                    ->orderBy('customer_order_fuels.id');
-                   
+        // $orders = CustomerOrderFuel::select('customer_order_fuels.id as customer_order_fuels_id','customer_order_fuels.customer_id','customer_order_fuels.order_id','customer_order_fuels.fuel_type_id','customer_order_fuels.quantity','customer_order_fuels.price','customer_order_fuels.amount','customer_orders.*')
+        //                             ->join('customer_orders', 'customer_orders.id', '=', 'customer_order_fuels.order_id')
+        //                             ->with([
+        //                                 'customer' ,'fuel','driver'
+        //                                 ])
+        //                             ->where('customer_orders.driver_id',$fields['id'])
+        //                             ->orderBy('customer_order_fuels.id');
+        $orders = CustomerOrder::select('customer_orders.*')
+                                //->join('customer_order_fuels', 'customer_order_fuels.order_id', '=', 'customer_orders.id')
+                                ->with([
+                                    'customer' ,'fuel','driver'
+                                    ])
+                                ->where('customer_orders.driver_id',$fields['id'])
+                                ->orderBy('customer_orders.id');         
                                     
             if($fields['keyword'])
                {    
                 $search_text=$fields['keyword'];
-                    $orders->where('customer_order_fuels.amount', 'Like', '%' . $search_text . '%')
-                            ->orWhere('customer_order_fuels.order_id', 'Like', '%' . $search_text . '%')
+                    $orders->where('customer_orders.fuel_quantity_price', 'Like', '%' . $search_text . '%')
+                            ->orWhere('customer_orders.id', 'Like', '%' . $search_text . '%')
                             ->orWhereHas('customer', function ($query)use($search_text) 
                                                 {
                                                     $query->where('users.email', 'Like', '%' . $search_text . '%')
