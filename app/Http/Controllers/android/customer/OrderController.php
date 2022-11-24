@@ -183,6 +183,7 @@ class OrderController extends Controller
                 'fuel_type_ids' => 'required|array',
                 'fuel_type_ids.*' => 'distinct|exists:fuel_types,id|numeric',
                 'quantities' => 'required|array',
+                'quantities.*' => 'numeric',
                 'coupon_code' => 'nullable|exists:coupons,coupon_code',
                 'latitude' => 'required',
                 'longitude' => 'required',
@@ -391,13 +392,6 @@ class OrderController extends Controller
                 ->join('users', 'users.user_id', '=', 'fuel_stations.id')
                 ->active()
                 ->where('role_id', 5)                
-                ->with([                    
-
-                    'favourites' => function ($query) use($auth_user_id) {
-                        $query->select('customers.id', 'name_en', 'name_so', 'customers.created_at', 'customers.status')
-                        ->where('customer_favorite_stations.customer_id', '=', $auth_user_id);
-                    },
-                ])
                 ->first();
 
             $settings = DB::table('settings')
@@ -470,12 +464,19 @@ class OrderController extends Controller
                         'created_at' => $order_fuel->created_at,
                         'updated_at' => $order_fuel->updated_at,
                     ));
-                }                
+                }     
 
-                // $created_order =CustomerOrder::select('id', 'fuel_station_id', 'customer_id', 'order_type', 'fuel_quantity_price', 'tax', 'delivery_charge', 'coupon_code', 'promotion_discount', 'other_charges', 'total', 'status', 'created_at')
-                //                 ->where('id', $order->id)
-                //                 ->with(['fuel_station', 'customer', 'fuels'])
-                //                 ->first();
+                DB::table('customer_order_address')->insert(array(
+                        'customer_id' => $auth_user->user_id,
+                        'order_id' => $order->id,  
+                        'country_code_id' => $auth_user->country_code_id,
+                        'phone' => $auth_user->mobile,
+                        'latitude' => $request->latitude,
+                        'longitude' => $request->longitude,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                ));
+
                 $data = [
                     'order' => $this->getOrder($order->id)
                 ];
@@ -511,12 +512,13 @@ class OrderController extends Controller
         $validator = Validator::make($request->all(),
             [
                 'order_id' => 'required|exists:customer_orders,id',
-                'latitude' => 'required',
-                'longitude' => 'required',
+                //'latitude' => 'required',
+                //'longitude' => 'required',
+                'order_type' => 'required|in:1,2',
                 'address' => 'required',
                 'payment_type' => 'required',
-                'delivery_date' => 'nullable|date',
-                'delivery_time' => 'nullable',
+                'delivery_date' => 'required_if:order_type,=,2|nullable|date',
+                'delivery_time' => 'required_if:order_type,=,2|nullable',
 
             ]
         );
@@ -529,18 +531,27 @@ class OrderController extends Controller
 
             if($order->status == 0) {
                 $order->status = 1;
+                $order->delivery_date = $request->delivery_date;
+                $order->delivery_time = $request->delivery_time;
                 $order->save();
 
-                DB::table('customer_order_address')->insert(array(
-                        'customer_id' => $order->customer_id,
-                        'order_id' => $order->id,
-                        'address' => $request->address,
-                        'latitude' => $request->latitude,
-                        'longitude' => $request->longitude,
-                        'special_instructions' => $request->special_instructions,
-                        'created_at' => date('Y-m-d H:i:s'),
-                        'updated_at' => date('Y-m-d H:i:s'),
-                ));
+                // DB::table('customer_order_address')->insert(array(
+                //         'customer_id' => $order->customer_id,
+                //         'order_id' => $order->id,
+                //         'address' => $request->address,
+                //         'latitude' => $request->latitude,
+                //         'longitude' => $request->longitude,
+                //         'special_instructions' => $request->special_instructions,
+                //         'created_at' => date('Y-m-d H:i:s'),
+                //         'updated_at' => date('Y-m-d H:i:s'),
+                // ));
+
+                DB::table('customer_order_address')->where('order_id',$request->order_id)->update(
+                     array(
+                            'address' => $request->address,
+                            'special_instructions' => $request->special_instructions,
+                     )
+                ); 
                 DB::table('customer_order_payments')->insert(array(
                         'customer_id' => $order->customer_id,
                         'order_id' => $order->id,
@@ -563,8 +574,9 @@ class OrderController extends Controller
                 $res = Response::send(false, [], $message, 400);
             }
 
-            return $res;
+            
         }
+        return $res;
     }
 
     /*************
@@ -585,9 +597,10 @@ class OrderController extends Controller
 
         } else {
 
-            $orders = CustomerOrder::select('customer_orders.id', 'customer_id', 'fuel_station_id', 'created_at')
+            $orders = CustomerOrder::select('customer_orders.id', 'customer_id', 'fuel_station_id', 'status', 'created_at')
                 ->descending()
                 ->where('customer_orders.customer_id', $auth_user->user_id)
+                ->where('status', '!=',0)
                 ->status($request->status)
                 ->with([
                     'fuel_station', 'fuels', 
@@ -599,7 +612,6 @@ class OrderController extends Controller
             $data = array(
                 'orders' => $orders,
             );
-
 
             $res = Response::send(true, $data, '', 200);
         }
@@ -633,7 +645,8 @@ class OrderController extends Controller
     }
 
     public function getOrder($order_id) {
-        $order = CustomerOrder::select('customer_orders.*')
+        $order = CustomerOrder::select('customer_orders.*', 'address', 'country_code_id', 'phone', 'latitude', 'longitude', 'location', 'special_instructions')
+                ->join('customer_order_address', 'customer_orders.id', '=', 'customer_order_address.order_id')
                 ->descending()
                 ->where('customer_orders.id', $order_id)
                 ->with([
@@ -707,7 +720,7 @@ class OrderController extends Controller
     /****** GENERATE CODE *****/
     function generateCode() 
     {
-        $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $chars = '0123456789';
         $len = strlen($chars);
         $code = '';
         for ($i = 0; $i < 10; $i++) {
