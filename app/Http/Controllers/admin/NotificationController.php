@@ -86,17 +86,28 @@ class NotificationController extends Controller
     {
         $validator = Validator::make($request->all(),
 
-            ['title_en' => 'nullable|required_without:title_so|string|max:70',
-                'title_so' => 'nullable||required_without:title_en|string|max:70',
+            ['title_en' => 'nullable|required_without:title_so|string|min:3|max:70',
+                'title_so' => 'nullable||required_without:title_en|string|min:3|max:70',
                 'type' => 'required|in:1,2,3,4,5',
                 'user_id' => 'nullable',
-                'description_en' => 'nullable|required_without:description_so|string|max:70',
-                'description_so' => 'nullable|required_without:description_en|string|max:70',
+                'description_en' => 'nullable|required_without:description_so|string|min:3|max:150',
+                'description_so' => 'nullable|required_without:description_en|string|min:3|max:150',
                 //'description' => 'nullable|starts_with_alphanumeric',
 
             ],
-            [
-                'title.required' => 'Please enter the title',
+            ['title_en.required_without' => __('admin.title_en_required_without'),
+            'title_so.required_without' => __('admin.title_so_required_without'),
+            'description_en.required_without' => __('admin.description_en_required_without'),
+            'description_so.required_without' => __('admin.description_so_required_without'),
+            'title_en.min' => __('admin.title_min'),
+            'title_so.min' => __('admin.title_min'),
+            'title_en.max' => __('admin.title_max'),
+            'title_so.max' => __('admin.title_max'),
+            'description_en.min' => __('admin.description_min'),
+            'description_so.min' => __('admin.description_min'),
+            'description_en.max' => __('admin.description_max'),
+            'description_so.max' => __('admin.description_max'),
+        
                 'type.required' => 'Please select the type,1:All users,2:Sub admins,3:Customers,4:Drivers,5:Fuel stations',
                 'description.required' => 'Please enter the description',
 
@@ -135,20 +146,31 @@ class NotificationController extends Controller
         $fields = $request->input();
         $validator = Validator::make($request->all(),
             ['id' => 'required|numeric|exists:notifications,id',
-                'title_en' => 'nullable|required_without:title_so|string|max:70',
-                'title_so' => 'nullable||required_without:title_en|string|max:70',
+                'title_en' => 'nullable|required_without:title_so|string|min:3|max:70',
+                'title_so' => 'nullable||required_without:title_en|string|min:3|max:70',
                 'type' => 'required|in:1,2,3,4,5',
                 'user_id' => 'nullable',
-                'description_en' => 'nullable|required_without:description_so|string|max:70',
-                'description_so' => 'nullable|required_without:description_en|string|max:70',
+                'description_en' => 'nullable|required_without:description_so|string|min:3|max:150',
+                'description_so' => 'nullable|required_without:description_en|string|min:3|max:150',
                 //'description' => 'nullable|starts_with_alphanumeric',
 
             ],
             [
-                'title.required' => 'Please enter the title',
+                'title_en.required_without' => __('admin.title_en_required_without'),
+                'title_so.required_without' => __('admin.title_so_required_without'),
+                'description_en.required_without' => __('admin.description_en_required_without'),
+                'description_so.required_without' => __('admin.description_so_required_without'),
+                
                 'type.required' => 'Please select the type,1:All users,2:Sub admins,3:Customers,4:Drivers,5:Fuel stations',
-                'description.required' => 'Please enter the description',
-
+                'title_en.min' => __('admin.title_min'),
+                'title_so.min' => __('admin.title_min'),
+                'title_en.max' => __('admin.title_max'),
+                'title_so.max' => __('admin.title_max'),
+                'description_en.min' => __('admin.description_min'),
+                'description_so.min' => __('admin.description_min'),
+                'description_en.max' => __('admin.description_max'),
+                'description_so.max' => __('admin.description_max'),
+            
                 //'description.starts_with_alphanumeric' => __('admin.notification_description_starts_with_alphanumeric'),
             ]
         );
