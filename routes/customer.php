@@ -10,6 +10,7 @@ use App\Http\Controllers\android\customer\HomeController;
 use App\Http\Controllers\android\customer\OrderController;
 use App\Http\Controllers\android\customer\ReviewController;
 use App\Http\Controllers\android\customer\FavoriteController;
+use App\Http\Controllers\android\customer\PromotionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,4 +47,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('order/add-review', [ReviewController::class, 'add']);
     Route::post('favourites/add-remove', [FavoriteController::class, 'addRemove']);
     Route::get('favourites', [FavoriteController::class, 'index']);
+    Route::get('promotions', [PromotionController::class, 'index']);
 });

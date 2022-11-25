@@ -22,5 +22,7 @@ class PromotionController extends Controller
         );
 
         $res = Response::send(true, $data, 'Data found', 200);
+
+        return $res;
     }
 }
