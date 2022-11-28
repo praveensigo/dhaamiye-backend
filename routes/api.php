@@ -127,5 +127,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('admin/notification/delete', [NotificationController::class, 'delete']);
 
 
+    Route::get('admin/fuelStation/orders', [FuelStationController::class, 'order_index']);
+    Route::get('admin/fuelStation/trucks', [FuelStationController::class, 'trucks']);
+    Route::get('admin/fuelStation/drivers', [FuelStationController::class, 'drivers']);
+    Route::get('admin/fuelStation/fuelTypes', [FuelStationController::class, 'FuelTypes']);
+    Route::get('admin/fuelStation/addFuel', [FuelStationController::class, 'addFuel']);
+    Route::get('admin/fuelStation/updatePrice', [FuelStationController::class, 'updatePrice']);
+    Route::get('admin/fuelStation/updateStock', [FuelStationController::class, 'updateStock']);
+    Route::get('admin/fuelStation/fuelPriceLogs', [FuelStationController::class, 'FuelPriceLogs']);
+    Route::get('admin/fuelStation/fuelStockLogs', [FuelStationController::class, 'FuelStockLogs']);
+    Route::get('admin/fuelStation/paymentLogs', [FuelStationController::class, 'paymentLogs']);
+    Route::get('admin/fuelStation/earningLogs', [FuelStationController::class, 'earningLogs']);
+
     // return $request->user();
 });
