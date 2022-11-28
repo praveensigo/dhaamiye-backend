@@ -23,7 +23,7 @@ use App\Http\Controllers\android\customer\PromotionController;
 |
 */
 
-Route::post('login', [LoginController::class, 'customeLogin']);
+Route::post('login', [LoginController::class, 'userLogin']);
 Route::post('forgot-password', [CheckController::class, 'isMobileRegistered']);
 Route::post('forgot-password', [CheckController::class, 'isMobileRegistered']);
 Route::post('register/check', [CheckController::class, 'isRegistrable']);

@@ -11,10 +11,13 @@ use Validator;
 
 class PromotionController extends Controller
 {
-    public function index($request) {
+    public function index() {
+
         $promotions = DB::table('coupons')
-                    ->select('*')
+                    ->select('coupons.*')
                     ->where('status', 1)
+                    ->where('expiry_date', '>=', date('Y-m-d'))
+                    ->whereRaw('used_count < count')
                     ->get();
 
         $data = array(
