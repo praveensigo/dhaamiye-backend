@@ -42,4 +42,9 @@ class Truck extends Model
          return $this->belongsToMany(FuelType::class, 'truck_fuels', 'truck_id','fuel_type_id');
     
      }
+     public function driver()
+    {
+        return $this->hasOne(Driver::class, 'id', 'truck_id');
+    }
+    
 }

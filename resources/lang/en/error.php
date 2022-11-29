@@ -80,5 +80,10 @@ return [
  'fuel_min' => 'Fuel should contain a minimum of 3 characters',
  'fuel_max' => 'Fuel should contain a maximum of 100 characters',
  
+ 'update_price' => 'Failed to update price, please try again',
+ 'update_stock' => 'Failed to update stock, please try again',
+
+//ORDER
+ 'driver_assign_failed' => 'Failed to  assign driver',
 
 ];
