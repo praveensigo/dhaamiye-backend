@@ -101,6 +101,12 @@ return [
     'add_review_en' => 'Failed to add review',
     'add_review_so' => 'Failed to add review',
 
+    'favourite_exists_en' => 'This fuel station is already added to your favorites',
+    'favourite_exists_so' => 'This fuel station is already added to your favorites',
 
+    'add_favorite_en' => 'Failed to add fuel station to your favourites',
+    'add_favorite_so' => 'Failed to add fuel station to your favourites',
 
+    'remove_favorite_en' => 'Failed to remove fuel station from your favourites',
+    'remove_favorite_so' => 'Failed to remove fuel station from your favourites',
 ];

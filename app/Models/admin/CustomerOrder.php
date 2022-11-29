@@ -23,7 +23,7 @@ class CustomerOrder extends Model
     {
         return $this->belongsTo(CustomerOrder::class, 'id', 'driver_id');
     }
-    public function fuels()
+    public function fuel()
     {
         return $this->belongsToMany(FuelType::class, 'customer_order_fuels', 'order_id','fuel_type_id');
     }
@@ -37,6 +37,7 @@ class CustomerOrder extends Model
                                     ->where('users.role_id','5')
                                     ->where('users.reg_status','1');
     }
+
     public function drivers()
     {
         return $this->belongsTo(Driver::class, 'driver_id', 'id');
@@ -62,5 +63,19 @@ class CustomerOrder extends Model
     }
  
 
+
+
+    public function customer()
+    {
+        return $this->belongsTo(User::class, 'customer_id', 'user_id')
+                                    ->where('users.role_id','3')
+                                    ->where('users.reg_status','1');
+    }
+    public function driver()
+    {
+        return $this->belongsTo(User::class, 'driver_id', 'user_id')
+                                    ->where('users.role_id','4')
+                                    ->where('users.reg_status','1');
+    }
 
 }

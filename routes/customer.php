@@ -9,6 +9,8 @@ use App\Http\Controllers\android\customer\CheckController;
 use App\Http\Controllers\android\customer\HomeController;
 use App\Http\Controllers\android\customer\OrderController;
 use App\Http\Controllers\android\customer\ReviewController;
+use App\Http\Controllers\android\customer\FavoriteController;
+use App\Http\Controllers\android\customer\PromotionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,7 +23,7 @@ use App\Http\Controllers\android\customer\ReviewController;
 |
 */
 
-Route::post('login', [LoginController::class, 'customeLogin']);
+Route::post('login', [LoginController::class, 'userLogin']);
 Route::post('forgot-password', [CheckController::class, 'isMobileRegistered']);
 Route::post('forgot-password', [CheckController::class, 'isMobileRegistered']);
 Route::post('register/check', [CheckController::class, 'isRegistrable']);
@@ -43,5 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('order/details', [OrderController::class, 'details']);
     Route::post('order/cancel', [OrderController::class, 'cancel']);
     Route::post('order/add-review', [ReviewController::class, 'add']);
-
+    Route::post('favourites/add-remove', [FavoriteController::class, 'addRemove']);
+    Route::get('favourites', [FavoriteController::class, 'index']);
+    Route::get('promotions', [PromotionController::class, 'index']);
 });
