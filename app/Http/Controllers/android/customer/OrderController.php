@@ -9,7 +9,7 @@ use App\Models\android\customer\FuelStationStock;
 use App\Models\android\customer\FuelType;
 use App\Models\android\customer\CustomerOrder;
 use Illuminate\Support\Facades\DB;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use Illuminate\Validation\Rule;
 use Validator;
 
