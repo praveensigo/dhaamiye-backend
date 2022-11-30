@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\android\customer\FuelStation;
 use App\Models\android\customer\FuelStationStock;
 use Illuminate\Support\Facades\DB;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use Illuminate\Validation\Rule;
 use Validator;
 
