@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\android\customer\ProfileController;
 use App\Http\Controllers\android\customer\CheckController;
 use App\Http\Controllers\android\customer\HomeController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\android\customer\PromotionController;
 */
 
 Route::post('login', [LoginController::class, 'userLogin']);
+Route::post('register', [RegisterController::class, 'customer']);
 Route::post('forgot-password', [CheckController::class, 'isMobileRegistered']);
 Route::post('forgot-password', [CheckController::class, 'isMobileRegistered']);
 Route::post('register/check', [CheckController::class, 'isRegistrable']);
