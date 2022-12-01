@@ -12,6 +12,10 @@ return
     
     'update_fuel_station' => 'Fuel Station updated successfully',
     'publish_fuel_station' => 'Fuel Station published successfully!',
-    'unpublish_fuel_station' => 'Fuel Station unpublished successfully!',    
-
+    'unpublish_fuel_station' => 'Fuel Station unpublished successfully!',  
+    
+    'update_price' => 'Price updated successfully!',
+    'update_stock' => 'Stock updated successfully!',
+//ORDER
+    'driver_assign' => 'Driver assigned successfully',
 ];
