@@ -139,5 +139,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/fuelStation/paymentLogs', [FuelStationController::class, 'paymentLogs']);
     Route::get('admin/fuelStation/earningLogs', [FuelStationController::class, 'earningLogs']);
 
+    Route::get('admin/sliders',[SliderController::class,'index']);
+    Route::post('admin/slider/add',[SliderController::class,'add']);
+    Route::get('admin/slider/status',[SliderController::class,'status']);
+    Route::get('admin/slider/delete',[SliderController::class,'delete']);
+
+    Route::get('admin/customerRatings',[RatingController::class,'customerRatings']);
+    Route::get('admin/driverRatings',[RatingController::class,'driverRatings']);
+
+
     // return $request->user();
 });
