@@ -14,7 +14,8 @@ use App\Http\Controllers\admin\EnquiriesController;
 use App\Http\Controllers\admin\SubAdminController;
 use App\Http\Controllers\admin\ReportsController;
 use App\Http\Controllers\admin\NotificationController;
-
+use App\Http\Controllers\admin\SliderController;
+use App\Http\Controllers\admin\RatingController;
 use Illuminate\Support\Facades\Route;
 
 /*
