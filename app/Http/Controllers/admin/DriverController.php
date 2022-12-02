@@ -706,11 +706,11 @@ public function orders(Request $request)
         //                                 'customer' ,'fuel','driver'
         //                                 ])
         //                             ->where('customer_orders.driver_id',$fields['id'])
-        //                             ->orderBy('customer_order_fuels.id');
+        //                             ->orderBy('customer_orders.id');
         $orders = CustomerOrder::select('customer_orders.*')
                                 //->join('customer_order_fuels', 'customer_order_fuels.order_id', '=', 'customer_orders.id')
                                 ->with([
-                                    'customer' ,'fuel','driver'
+                                    'customer' ,'fuels','driver','fuel'
                                     ])
                                 ->where('customer_orders.driver_id',$fields['id'])
                                 ->orderBy('customer_orders.id');         
@@ -734,42 +734,45 @@ public function orders(Request $request)
                                                     $query->where('fuel_types.fuel_en', 'Like', '%' . $search_text . '%')
                                                         ->orWhere('fuel_types.fuel_so', 'Like', '%' . $search_text . '%');
                                                     return $query;       
-                                                },);
+                                                },)
+                            ;
 
                 }
                    
                 if ($fields['status'] != '' && $fields['status'] != null) 
-                {
-                   if($fields['status'] == 0)
-                     {
-                      $orders->where('customer_orders.status', $fields['status']);
+                { 
+                    $orders->where('customer_orders.status', $fields['status']);
+
+                //    if($fields['status'] == 0)
+                //      {
+                //       $orders->where('status', $fields['status']);
                      
-                     }
-                     if($fields['status'] == 1)
-                     {
-                      $orders->where('customer_orders.status', $fields['status']);
+                //      }
+                //      if($fields['status'] == 1)
+                //      {
+                //       $orders->where('customer_orders.status', $fields['status']);
                      
-                     }
-                     if($fields['status'] == 2)
-                     {
-                      $orders->where('customer_orders.status', $fields['status']);
+                //      }
+                //      if($fields['status'] == 2)
+                //      {
+                //       $orders->where('customer_orders.status', $fields['status']);
                      
-                     } if($fields['status'] == 3)
-                     {
-                      $orders->where('customer_orders.status', $fields['status']);
+                //      } if($fields['status'] == 3)
+                //      {
+                //       $orders->where('customer_orders.status', $fields['status']);
                      
-                     } if($fields['status'] == 4)
-                     {
-                      $orders->where('customer_orders.status', $fields['status']);
+                //      } if($fields['status'] == 4)
+                //      {
+                //       $orders->where('customer_orders.status', $fields['status']);
                      
-                     } if($fields['status'] == 5)
-                     {
-                      $orders->where('customer_orders.status', $fields['status']);
-                     }
-                     if($fields['status'] == 6)
-                     {
-                      $orders->where('customer_orders.status', $fields['status']);
-                     }
+                //      } if($fields['status'] == 5)
+                //      {
+                //       $orders->where('customer_orders.status', $fields['status']);
+                //      }
+                //      if($fields['status'] == 6)
+                //      {
+                //       $orders->where('customer_orders.status', $fields['status']);
+                //      }
                     }
     
              $orders = $orders->paginate($fields['limit']);
@@ -783,7 +786,59 @@ public function orders(Request $request)
        return $res;
 }
 
+public function earnings(Request $request)
+{
+    $fields    = $request->input();
+    $validator = Validator::make($request->all(), [
+        'id' => 'required|numeric|exists:drivers,id',
+        'limit' => 'required|numeric',
+        'keyword' => 'nullable',
+        'status' => 'nullable|numeric',
 
+    ]);
+    if ($validator->fails()) {
+        $errors = collect($validator->errors());
+        $res = Response::send(false, [], $message = $errors, 422);
+
+    } else {
+        // $from = Carbon::now()->startOfMonth();
+        // $to   = Carbon::now()->endOfMonth();
+        // $payments = DriverPayments::query()
+        //                         ->select(
+        //                         DB::raw('DAY(created_at), SUM(amount) AS total_completed_amount')
+        //                         )
+        //                         //->whereBetween('created_at', [$from, $to])
+        //                         ->groupBy(DB::raw('DAY(created_at)'))
+        //                         ->get();
+        //DB::raw("(SELECT name FROM doctors WHERE notifications.user_id = doctors.id and notifications.type=2) as doctor_name"), DB::raw("(SELECT name FROM patients WHERE notifications.user_id = patients.id and notifications.type=3) as patient_name")       
+        // $payments = DB::table('driver_payments')->orderBy('created_at', 'DESC')->get();
+        
+        // foreach ($payments as $payment){
+        //     if($payment->payment_type=="1"){
+        //         $payment->select(
+        //             DB::raw('DAY(created_at), SUM(amount)  AS total_completed_amount')
+        //         );
+        //     }
+            // elseif($payment->gender=="female"){
+            //     $data[$payment->student_class]['female'][] = $payment->amount;
+            // }
+        $payments = DriverPayments::query()
+                                ->select(
+                                DB::raw('DAY(created_at)'), DB::raw('SUM(amount)  AS total_completed_amount'),
+                                DB::raw("(SELECT SUM(amount) FROM driver_payments WHERE driver_payments.payment_type = '1' OrderBy(created_at ) as mobile")
+                                )
+                                //->whereBetween('created_at', [$from, $to])
+                                ->groupBy(DB::raw('DAY(created_at)'),'payment_type')
+                                ->get();
+
+            $data = array(
+                  'payments' => $payments,
+                         );
+
+            $res = Response::send(true, $data, '', 200);
+      }
+       return $res;
+}
 
 }
 
