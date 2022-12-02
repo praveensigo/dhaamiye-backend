@@ -47,9 +47,11 @@ class LoginController extends Controller
 
                         if ($check->role_id == '1') {
 
+
                             $user = 'Admin';
 
                             
+
 
 
                         } elseif ($check->role_id == '2') {
