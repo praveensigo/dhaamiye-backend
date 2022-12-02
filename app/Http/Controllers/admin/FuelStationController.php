@@ -1150,7 +1150,7 @@ class FuelStationController extends Controller
          }
      }
      return $res;
- } */
+} */
  public function FuelStationFuels(Request $request)
  {
         $validator = Validator::make($request->all(),

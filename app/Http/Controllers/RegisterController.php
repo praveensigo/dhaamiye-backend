@@ -7,7 +7,7 @@ use App\Models\android\FuelStation;
 use App\Models\android\SubAdmin;
 use App\Models\web\DriverFuelStation;
 use App\Models\android\Driver;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Validator;

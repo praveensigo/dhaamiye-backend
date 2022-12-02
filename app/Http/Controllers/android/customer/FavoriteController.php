@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\android\customer\CustomerFavoriteStation;
 use App\Models\android\customer\Customer;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Validator;

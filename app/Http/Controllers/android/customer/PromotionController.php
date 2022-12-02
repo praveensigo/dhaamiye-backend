@@ -4,7 +4,7 @@ namespace App\Http\Controllers\android\customer;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Validator;

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\android\customer\FuelStation;
 use App\Models\android\customer\FuelStationStock;
 use Illuminate\Support\Facades\DB;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use Illuminate\Validation\Rule;
 use Validator;
 
@@ -54,7 +54,7 @@ class HomeController extends Controller
                         ->where('fuel_station_stocks.status', '=', 1);
                     },
 
-                    'favourites' => function ($query) use($auth_user_id) {
+                    'favorites' => function ($query) use($auth_user_id) {
                         $query->select('customers.id', 'name_en', 'name_so', 'customers.created_at', 'customers.status')
                         ->where('customer_favorite_stations.customer_id', '=', $auth_user_id);
                     },
@@ -162,7 +162,7 @@ class HomeController extends Controller
                        ->where('fuel_station_stocks.status', '=', 1);
                     },
 
-                    'favourites' => function ($query) use($auth_user_id) {
+                    'favorites' => function ($query) use($auth_user_id) {
                         $query->select('customers.id', 'name_en', 'name_so', 'customers.created_at', 'customers.status')
                         ->where('customer_favorite_stations.customer_id', '=', $auth_user_id);
                     },

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -46,7 +46,11 @@ class LoginController extends Controller
                     if ($check->status == '1') {
 
                         if ($check->role_id == '1') {
+
                             $user = 'Admin';
+
+                            
+
 
                         } elseif ($check->role_id == '2') {
                             $user = DB::table('sub_admins')->where('id', $check->user_id)->first();
