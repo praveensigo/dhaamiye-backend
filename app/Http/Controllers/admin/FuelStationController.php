@@ -21,6 +21,7 @@ use Validator;
 
 class FuelStationController extends Controller
 { /*GET FUELSTATIONS*/
+    
     public function index(Request $request)
     {
         $fields = $request->input();
