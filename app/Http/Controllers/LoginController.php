@@ -46,7 +46,7 @@ class LoginController extends Controller
                     if ($check->status == '1') {
 
                         if ($check->role_id == '1') {
-                            $user = DB::table('admin')->where('id', $check->user_id)->first();
+                            $user = DB::table('users')->where('user_id', $check->user_id)->first();
 
                         } elseif ($check->role_id == '2') {
                             $user = DB::table('sub_admins')->where('id', $check->user_id)->first();
