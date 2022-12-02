@@ -7,7 +7,7 @@ use App\Models\android\FuelStation;
 use App\Models\android\SubAdmin;
 use App\Models\web\DriverFuelStation;
 use App\Models\android\Driver;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Validator;
@@ -18,18 +18,23 @@ class RegisterController extends Controller
     {
         $fields    = $request->input();
         $validator = Validator::make($request->all(), [
-                'name' => 'required|min:3|max:100',
+            'name_en' => 'nullable|required_without:name_so|min:3|max:100',
+            'name_so' => 'nullable|required_without:name_en|min:3|max:100',
                 'country_code' => 'required|numeric|exists:country_codes,id',
-                'mobile' => 'required|numeric|digits:10|starts_with:6,7,8,9|unique:users,mobile',
+                'mobile' => 'required|integer|digits_between:6,14|unique:users,mobile',
                 'email'  => 'nullable|unique:users,email|email|max:200|regex:/^([a-z0-9\+_\-]+)(\.[a-z0-9\+_\-]+)*@([a-z0-9\-]+\.)+[a-z]{2,6}$/ix',
                 'password'    => 'required|min:6|max:16',
-                'password_confirmation' => 'required|same:password|min:6|max:16',
+                //'password_confirmation' => 'required|same:password|min:6|max:16',
                 'fcm'            => 'nullable'
             ],
             [
-                'name.required' =>  __('error2.name_required'),
-                'name.min' => __('error2.name_min'),
-                'name.max' =>  __('error2.name_max'),
+                'name_en.required_without' => __('error2.name_en_required_without'),
+                 'name_en.min' => __('error2.name_en_min'),
+                 'name_en.max' =>  __('error2.name_en_max'),
+                 //'name_so.required' =>  __('error2.name_so_required'),
+                 'name_so.required_without' => __('error2.name_so_required_without'),
+                 'name_so.min' => __('error2.name_so_min'),
+                 'name_so.max' =>  __('error2.name_so_max'),
                 'country_code.required' => __('error2.country_code_required'),
                 'country_code.exists' => __('error2.country_code_exists'),
                 'country_code.numeric' => __('error2.country_code_numeric'),
@@ -39,8 +44,8 @@ class RegisterController extends Controller
                 'email.exists' => __('error2.email_exists'),
                 'email.unique' => __('error2.email_unique'),
                 'password.required' => __('error2.password_required'),
-                'password_confirmation.required'=> __('error2.password_confirmation_required'),
-                'password_confirmation.same' =>  __('error2.password_confirmation_same'),
+                //'password_confirmation.required'=> __('error2.password_confirmation_required'),
+                //'password_confirmation.same' =>  __('error2.password_confirmation_same'),
                 'password.min' => __('error2.password_min'),
                 'password.max' => __('error2.password_max'),
             ]
@@ -59,7 +64,8 @@ class RegisterController extends Controller
             if($result)
             {
                 $user  = new User;
-                $user->name_en        = $fields['name'];
+                $user->name_en        = $fields['name_en'];
+                $user->name_so        = $fields['name_so'];               
                 $user->country_code_id = $fields['country_code'];
                 $user->mobile    = $fields['mobile'];
                 $user->email     = $fields['email'];
@@ -72,7 +78,7 @@ class RegisterController extends Controller
                 $user->save();
 
                 $user_details = DB::table('users')
-                                    ->select('customers.id','users.name_en','users.country_code_id','country_codes.country_code','users.mobile','users.email')
+                                    ->select('customers.id','users.name_en','users.name_so','users.country_code_id','country_codes.country_code','users.mobile','users.email')
                                     ->join('customers','customers.id','=','users.user_id')
                                     ->join('country_codes','country_codes.id','=','users.country_code_id')
                                     ->where('users.role_id','3')
@@ -103,10 +109,10 @@ class RegisterController extends Controller
     {
         $fields    = $request->input();
         $validator = Validator::make($request->all(), [
-                'name_en' => 'nullable|min:3|max:100',
-                'name_so' => 'nullable|min:3|max:100',
+                'name_en' => 'nullable|required_without:name_so|min:3|max:100',
+                'name_so' => 'nullable|required_without:name_en|min:3|max:100',
                 'country_code' => 'required|numeric|exists:country_codes,id',
-                'mobile' => 'required|numeric|digits:10|starts_with:6,7,8,9|unique:users,mobile',
+                'mobile' => 'required|integer|digits_between:6,14|unique:users,mobile',
                 'email'  => 'nullable|unique:users,email|email|max:200|regex:/^([a-z0-9\+_\-]+)(\.[a-z0-9\+_\-]+)*@([a-z0-9\-]+\.)+[a-z]{2,6}$/ix',
                 'fuel_station' => 'required|numeric|exists:fuel_stations,id',
                 'image'     => 'required|max:4096|mimes:png,jpg,jpeg',
@@ -114,14 +120,15 @@ class RegisterController extends Controller
                 'license'     => 'required|max:4096|mimes:png,jpg,jpeg',
                 'license_expiry'    => 'required|date_format:Y-m-d|after:today',
                 'password'    => 'required|min:6|max:16',
-                'password_confirmation' => 'required|same:password|min:6|max:16',
+                //'password_confirmation' => 'required|same:password|min:6|max:16',
                 'fcm'            => 'nullable'
             ],
             [
-                //'name_en.required' =>  __('error2.name_en_required'),
+                'name_en.required_without' => __('error2.name_en_required_without'),
                 'name_en.min' => __('error2.name_en_min'),
                 'name_en.max' =>  __('error2.name_en_max'),
                 //'name_so.required' =>  __('error2.name_so_required'),
+                'name_so.required_without' => __('error2.name_so_required_without'),
                 'name_so.min' => __('error2.name_so_min'),
                 'name_so.max' =>  __('error2.name_so_max'),
                 'country_code.required' => __('error2.country_code_required'),
@@ -136,8 +143,8 @@ class RegisterController extends Controller
                 'fuel_station.exists' => __('error2.fuel_station_exists'),
                 'fuel_station.numeric' => __('error2.fuel_station_numeric'),
                 'password.required' => __('error2.password_required'),
-                'password_confirmation.required'=> __('error2.password_confirmation_required'),
-                'password_confirmation.same' =>  __('error2.password_confirmation_same'),
+                // 'password_confirmation.required'=> __('error2.password_confirmation_required'),
+                // 'password_confirmation.same' =>  __('error2.password_confirmation_same'),
                 'password.min' => __('error2.password_min'),
                 'password.max' => __('error2.password_max'),
                 'image.required'=> __('error2.image_required'),
@@ -165,9 +172,6 @@ class RegisterController extends Controller
             $driver->fuel_station_id = $fields['fuel_station'];
             $driver->added_by  = '4';
             $driver->created_at  = date('Y-m-d H:i:s');
-
-            $driver->reg_status  = '0';
-
 
             $passport_uploaded_path = '';
             if ($request->file('passport')!=null) {
@@ -212,9 +216,7 @@ class RegisterController extends Controller
                 $result1 = $user->save();
                
                 $user_details = DB::table('users')
-
                                     ->select('drivers.id','users.name_en','users.name_so','users.image','users.country_code_id','country_codes.country_code','users.mobile','users.email')
-
                                     ->join('drivers','drivers.id','=','users.user_id')
                                     ->join('country_codes','country_codes.id','=','users.country_code_id')
                                     ->where('users.role_id','4')

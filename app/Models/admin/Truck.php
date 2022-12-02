@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Truck extends Model
 {
     use HasFactory;
-    use HasFactory;
     const ACTIVE = 1;
     const BLOCKED = 2;
 
@@ -43,4 +42,9 @@ class Truck extends Model
          return $this->belongsToMany(FuelType::class, 'truck_fuels', 'truck_id','fuel_type_id');
     
      }
+     public function driver()
+    {
+        return $this->hasOne(Driver::class, 'id', 'truck_id');
+    }
+    
 }

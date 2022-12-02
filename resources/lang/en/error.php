@@ -29,6 +29,9 @@ return [
 
 
  //customer
+ 'name_en_required_without' => 'Please enter  name either in Somali or in English',
+ 'name_so_required_without' => 'Please enter  name either in Somali or in English',
+
  'name_required' => 'Please enter name',
  'name_min' => 'Name should contain a minimum of 3 characters',
  'name_max' => 'Name should contain a maximum of 100 characters',
@@ -68,5 +71,19 @@ return [
  'publish_fuel_station' => 'Failed to publish Fuel Station, please try again',
  'unpublish_fuel_station' => 'Failed to unpublish Fuel Station, please try again',
 
+//fuel
+
+'fuel_en_required_without' => 'Please enter  fuel either in Somali or in English',
+ 'fuel_so_required_without' => 'Please enter  fuel either in Somali or in English',
+
+ 'fuel_required' => 'Please enter fuel',
+ 'fuel_min' => 'Fuel should contain a minimum of 3 characters',
+ 'fuel_max' => 'Fuel should contain a maximum of 100 characters',
+ 
+ 'update_price' => 'Failed to update price, please try again',
+ 'update_stock' => 'Failed to update stock, please try again',
+
+//ORDER
+ 'driver_assign_failed' => 'Failed to  assign driver',
 
 ];

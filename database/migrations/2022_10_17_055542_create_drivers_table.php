@@ -29,6 +29,7 @@ return new class extends Migration
             $table->integer('status')->default(1)->comment('1:Active, 2:Blocked');
             $table->integer('reg_status')->default(1)->comment('0:Pending, 1:Approved, 2:Rejected');
             $table->integer('online')->default(2)->comment('1:Online ,2:Offline');
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
     }

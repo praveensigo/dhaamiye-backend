@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -46,7 +46,13 @@ class LoginController extends Controller
                     if ($check->status == '1') {
 
                         if ($check->role_id == '1') {
-                            $user = DB::table('admin')->where('id', $check->user_id)->first();
+
+
+                            $user = 'Admin';
+
+                            
+
+
 
                         } elseif ($check->role_id == '2') {
                             $user = DB::table('sub_admins')->where('id', $check->user_id)->first();
@@ -84,13 +90,13 @@ class LoginController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return Json
      */
-    public function customeLogin(Request $request)
+    public function userLogin(Request $request)
     {
 
         $validator = Validator::make($request->all(),
             [
                 'country_code' => 'required|numeric|exists:country_codes,id',
-                'mobile' => 'required|numeric',
+                'mobile' => 'required|numeric|digits_between:6,14',
                 'password' => 'required|min:6|max:16',
             ],
             [
@@ -246,4 +252,68 @@ class LoginController extends Controller
         }
         return $res;
     }
+    public function loginWithOtp(Request $request)
+    {
+
+        $validator = Validator::make($request->all(),
+            [
+                'country_code' => 'required|numeric|exists:country_codes,id',
+                'mobile' => 'required|numeric|digits_between:6,14',
+            ],
+            [
+                'country_code.required' => __('error.country_code_required'),
+                'country_code.exists' => __('error.country_code_exists'),
+                'mobile.required' => __('error.mobile_required'),
+            ]
+        );
+        
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+
+            $res = Response::send(false, [], $message = $errors, 422);
+        } else {
+            $user = new User;
+            $custome = User::withTrashed()->where('mobile', $request->mobile)->where('country_code_id', $request->country_code)->first();
+            if ($custome) {
+                if ($custome->deleted_at) {
+                    $res = Response::send(false, [], $message = ['mobile' => [__('error.account_deleted')]], 422);
+                } else {
+
+                            $custome->fcm = $request->fcm;
+                            $custome->save();
+                            if ($custome->role_id == '3') {
+                                $user = DB::table('customers')->where('id', $custome->user_id)->first();
+
+                            } elseif ($custome->role_id == '4') {
+                                $user = DB::table('drivers')->where('id', $custome->user_id)->first();
+                            } elseif ($custome->role_id == '5') {
+                                $user = DB::table('fuel_stations')->where('id', $custome->user_id)->first();
+                            }
+                            $details = $custome;
+                            $user_details = $details;
+
+                            /* Create Token */
+                            $token = $details->createToken('my-app-token')->plainTextToken;
+                            $user_details->token = $token;
+
+                              /* User Array */
+                            $user_array = [
+                                'details' => $custome,
+                                'other_details' => $user,
+
+                            ];
+
+                            $res = Response::send(true, $user_array, __('auth.login_success'), 200);
+
+                      
+                    } 
+                
+            } 
+        
+        }
+        return $res;
+    }
+
 }
+
+

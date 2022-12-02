@@ -17,6 +17,13 @@ class FuelStation extends Model
         return $this->belongsToMany(FuelType::class, 'fuel_station_stocks', 'fuel_station_id', 'fuel_type_id');
     }
 
+    public function favorites()
+    {
+        return $this->belongsToMany(Customer::class, 'customer_favorite_stations', 'fuel_station_id', 'customer_id')
+                ->join('users', 'users.user_id', '=', 'customers.id')
+                ->where('role_id', 3);
+    }
+
 
     /**
      * * Scopes

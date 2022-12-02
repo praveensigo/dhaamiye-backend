@@ -65,5 +65,48 @@ return [
     'email_exists_en' => 'The given email is already registered',
     'email_exists_so' => 'The given email is already registered',
 
+    'out_of_stock_en' => 'Out of stock',
+    'out_of_stock_so' => 'Out of stock',
 
+    'coupon_exists_en' => 'Invalid coupon code',
+    'coupon_exists_so' => 'Invalid coupon code',
+
+    'coupon_expired_en' => 'Coupon expired',
+    'coupon_expired_so' => 'Coupon expired',
+
+    'coupon_used_en' => 'Already used',
+    'coupon_used_so' => 'Already used',
+
+    'quantity_required_en' => 'Please enter qunatity',
+    'quantity_required_so' => 'Please enter qunatity',
+
+    'confirm_order_en' => 'This order is already confirmed',
+    'confirm_order_so' => 'This order is already confirmed',
+
+    'reason_required_en' => 'Please enter a reason',
+    'reason_required_so' => 'Please enter a reason',
+
+    'cancel_order_en' => 'Failed to cancel the order',
+    'cancel_order_so' => 'Failed to cancel the order',
+
+    'rating_required_en' => 'Please pick your rating',
+    'rating_required_so' => 'Please pick your rating',
+
+    'review_required_en' => 'Please enter your review',
+    'review_required_so' => 'Please enter your review',
+
+    'add_review_status_en' => 'You cannot add review as your order is not completed',
+    'add_review_status_so' => 'You cannot add review as your order is not completed',
+
+    'add_review_en' => 'Failed to add review',
+    'add_review_so' => 'Failed to add review',
+
+    'favourite_exists_en' => 'This fuel station is already added to your favorites',
+    'favourite_exists_so' => 'This fuel station is already added to your favorites',
+
+    'add_favorite_en' => 'Failed to add fuel station to your favourites',
+    'add_favorite_so' => 'Failed to add fuel station to your favourites',
+
+    'remove_favorite_en' => 'Failed to remove fuel station from your favourites',
+    'remove_favorite_so' => 'Failed to remove fuel station from your favourites',
 ];

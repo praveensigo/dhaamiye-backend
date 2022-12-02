@@ -7,7 +7,15 @@ use App\Http\Controllers\admin\FuelTypeController;
 use App\Http\Controllers\admin\CustomerOrderController;
 use App\Http\Controllers\admin\DriverController;
 use App\Http\Controllers\admin\TruckController;
-
+use App\Http\Controllers\admin\CouponController;
+use App\Http\Controllers\admin\SettingsController;
+use App\Http\Controllers\admin\CmsController;
+use App\Http\Controllers\admin\EnquiriesController;
+use App\Http\Controllers\admin\SubAdminController;
+use App\Http\Controllers\admin\ReportsController;
+use App\Http\Controllers\admin\NotificationController;
+use App\Http\Controllers\admin\SliderController;
+use App\Http\Controllers\admin\RatingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,8 +29,9 @@ use Illuminate\Support\Facades\Route;
 |
  */
 /*LOGIN API*/
-Route::post('login/custome', [LoginController::class, 'customeLogin']);
+Route::post('login/user', [LoginController::class, 'userLogin']);
 Route::post('login/admin', [LoginController::class, 'adminLogin']);
+Route::post('login/user_with_otp', [LoginController::class, 'loginWithOtp']);
 
 /*REGISTER API*/
 Route::post('register/customer', [RegisterController::class, 'customer']);
@@ -82,6 +91,63 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('admin/truck/approve', [TruckController::class, 'approve']);
     Route::get('admin/truck/pending_trucks', [TruckController::class, 'pendingIndex']);
     Route::get('admin/driver/pending_trucks/details', [TruckController::class, 'pendingDetails']);
+
+
+    Route::post('admin/coupon/add', [CouponController::class, 'add']);
+    Route::post('admin/coupon/edit', [CouponController::class, 'update']);
+    Route::get('admin/coupons', [CouponController::class, 'index']);
+    Route::get('admin/coupon/status', [CouponController::class, 'status']);
+
+    Route::get('admin/settings/index',[SettingsController::class,'index']);
+    Route::post('admin/edit',[SettingsController::class,'updateAdmin']);
+    Route::post('admin/change_password',[SettingsController::class,'changePassword']);
+    Route::post('admin/settings/charge_update',[SettingsController::class,'updateCharges']);
+    Route::post('admin/settings/maintenance_update',[SettingsController::class,'updateMaintenance']);
+    Route::post('admin/settings/version_control_update',[SettingsController::class,'updateVersionControl']);
+
+    Route::post('admin/about/edit',[CmsController::class,'updateAbout']);
+    Route::post('admin/policy/edit',[CmsController::class,'updatePolicy']);
+    Route::post('admin/term/edit',[CmsController::class,'updateTerm']);
+    Route::get('admin/about',[CmsController::class,'indexAbout']);
+    Route::get('admin/terms',[CmsController::class,'indexTerms']);
+    Route::get('admin/policy',[CmsController::class,'indexPolicy']);
+    Route::get('admin/enquiries',[EnquiriesController::class,'index']);
+
+    Route::post('admin/sub_admin/add',[SubAdminController::class,'add']);
+    Route::post('admin/sub_admin/edit',[SubAdminController::class,'update']);
+    Route::get('admin/sub_admin/status',[SubAdminController::class,'status']);
+    Route::get('admin/sub_admins',[SubAdminController::class,'index']);
+    Route::post('admin/sub_admin/add_module',[SubAdminController::class,'addModules']);
+
+    Route::get('admin/sales_reports',[ReportsController::class,'salesReport']);
+
+    Route::get('admin/notification', [NotificationController::class, 'index']);
+    Route::post('admin/notification/add', [NotificationController::class, 'add']);
+    Route::post('admin/notification/edit', [NotificationController::class, 'update']);
+    Route::get('admin/notification/status', [NotificationController::class, 'status']);
+    Route::post('admin/notification/delete', [NotificationController::class, 'delete']);
+
+
+    Route::get('admin/fuelStation/orders', [FuelStationController::class, 'order_index']);
+    Route::get('admin/fuelStation/trucks', [FuelStationController::class, 'trucks']);
+    Route::get('admin/fuelStation/drivers', [FuelStationController::class, 'drivers']);
+    Route::get('admin/fuelStation/fuelTypes', [FuelStationController::class, 'FuelTypes']);
+    Route::get('admin/fuelStation/addFuel', [FuelStationController::class, 'addFuel']);
+    Route::get('admin/fuelStation/updatePrice', [FuelStationController::class, 'updatePrice']);
+    Route::get('admin/fuelStation/updateStock', [FuelStationController::class, 'updateStock']);
+    Route::get('admin/fuelStation/fuelPriceLogs', [FuelStationController::class, 'FuelPriceLogs']);
+    Route::get('admin/fuelStation/fuelStockLogs', [FuelStationController::class, 'FuelStockLogs']);
+    Route::get('admin/fuelStation/paymentLogs', [FuelStationController::class, 'paymentLogs']);
+    Route::get('admin/fuelStation/earningLogs', [FuelStationController::class, 'earningLogs']);
+
+    Route::get('admin/sliders',[SliderController::class,'index']);
+    Route::post('admin/slider/add',[SliderController::class,'add']);
+    Route::get('admin/slider/status',[SliderController::class,'status']);
+    Route::get('admin/slider/delete',[SliderController::class,'delete']);
+
+    Route::get('admin/customerRatings',[RatingController::class,'customerRatings']);
+    Route::get('admin/driverRatings',[RatingController::class,'driverRatings']);
+
 
     // return $request->user();
 });

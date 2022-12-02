@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Service\ResponseSender as Response;
 use App\Models\admin\Driver;
 use App\Models\admin\CustomerOrderFuel;
+use App\Models\admin\CustomerOrder;
 use App\Models\admin\DriverPayments;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -30,7 +31,7 @@ class DriverController extends Controller
                 'name_en' => 'nullable|required_without:name_so|min:3|max:100',
                 'name_so' => 'nullable|required_without:name_en|min:3|max:100',
                 'country_code' => 'required|numeric|exists:country_codes,id',
-                'mobile' => 'required|numeric|digits:10|starts_with:6,7,8,9|unique:users,mobile',
+                'mobile' => 'required|integer|digits_between:6,14|unique:users,mobile',
                 'email'  => 'nullable|unique:users,email|email|max:200|regex:/^([a-z0-9\+_\-]+)(\.[a-z0-9\+_\-]+)*@([a-z0-9\-]+\.)+[a-z]{2,6}$/ix',
                 'fuel_station' => 'required|numeric|exists:fuel_stations,id',
                 'truck' => 'required|numeric|exists:trucks,id',
@@ -167,7 +168,7 @@ class DriverController extends Controller
                 'name_en' => 'nullable|required_without:name_so|min:3|max:100',
                 'name_so' => 'nullable|required_without:name_en|min:3|max:100',
                 'country_code' => 'required|numeric|exists:country_codes,id',
-                'mobile' => ['required','numeric','digits:10',            
+                'mobile' => ['required','integer','digits_between:6,14',            
                                 Rule::unique('users', 'mobile')->ignore($request->id, 'user_id'),
                 ],
                 'email' => ['nullable','email',            
@@ -305,29 +306,48 @@ class DriverController extends Controller
             
 
           
-            $drivers = Driver::select( 'drivers.id as driver_id','drivers.fuel_station_id','drivers.truck_id','drivers.passport_url','drivers.license_url','drivers.license_expiry','drivers.status as driver_status','drivers.added_by','drivers.added_user','drivers.approval_by','drivers.approval_user','drivers.updated_by','drivers.updated_user','drivers.online',
-                                        'users.*')
+            $drivers = Driver::select( 'drivers.id as driver_id','drivers.fuel_station_id','drivers.truck_id','drivers.status as driver_status','drivers.online','drivers.created_at',
+                                DB::raw('count(customer_orders.driver_id) as no_of_orders'),'users.name_en','users.name_so','users.email','users.image','users.country_code_id','users.mobile', )
                                 ->join('users', 'users.user_id', '=', 'drivers.id')
+                                ->leftjoin('customer_orders', 'customer_orders.driver_id', '=', 'drivers.id')
                                 ->join('country_codes', 'country_codes.id', '=', 'users.country_code_id')
                                 ->where('users.role_id','4')
                                 ->where('users.reg_status','1')
                                 ->with([
-                                    'truck','fuel_station','orders' 
+                                    'truck','fuel_station', 
                                         ])
-                                ->orderBy('drivers.id');
+                                ->groupBy('drivers.id','drivers.fuel_station_id','drivers.truck_id','driver_status','drivers.online','drivers.created_at','users.name_en','users.name_so','users.email','users.image','users.country_code_id','users.mobile')
+                                ->orderBy('drivers.id','desc');
                             
                                         
-                if($fields['keyword'])
-                   {
-                        $drivers->where('users.name_en', 'Like', '%' . $fields['keyword'] . '%')
-                                ->orWhere('users.name_so', 'Like', '%' . $fields['keyword'] . '%')
-                                ->orWhere('users.email', 'Like', '%' . $fields['keyword'] . '%')
-                                ->orWhere('users.mobile', 'Like', '%' . $fields['keyword'] . '%')
-                                ->orWhere('drivers.truck_id', 'Like', '%' . $fields['keyword'] . '%')
-                                ->orWhere('drivers.fuel_station_id', 'Like', '%' . $fields['keyword'] . '%'); 
+                // if($fields['keyword'])
+                //    {
+                //         $drivers->where('users.name_en', 'Like', '%' . $fields['keyword'] . '%')
+                //                 ->orWhere('users.name_so', 'Like', '%' . $fields['keyword'] . '%')
+                //                 ->orWhere('users.email', 'Like', '%' . $fields['keyword'] . '%')
+                //                 ->orWhere('users.mobile', 'Like', '%' . $fields['keyword'] . '%')
+                //                 ->orWhere('drivers.truck_id', 'Like', '%' . $fields['keyword'] . '%')
+                //                 ->orWhere('drivers.fuel_station_id', 'Like', '%' . $fields['keyword'] . '%'); 
 
-                    }
-                       
+                //     }
+                   
+                    if($fields['keyword'])
+                            {
+                                 $search_text=$fields['keyword'];
+                                 $drivers->where('users.name_en', 'Like', '%' . $fields['keyword'] . '%')
+                                        ->orWhere('users.name_so', 'Like', '%' . $fields['keyword'] . '%')
+                                        ->orWhere('users.email', 'Like', '%' . $fields['keyword'] . '%')
+                                        ->orWhere('users.mobile', 'Like', '%' . $fields['keyword'] . '%')
+                                         ->orWhereHas('truck', function ($query2)use($search_text) 
+                                             {
+                                                 $query2->where('trucks.truck_no', 'Like',  $search_text . '%');
+                                             })
+                                             ->orWhereHas('fuel_station', function ($query2)use($search_text) 
+                                             {
+                                                 $query2->where('users.name_en', 'Like',  $search_text . '%')
+                                                 ->orWhere('users.name_so', 'Like', '%' . $search_text. '%');
+                                             });
+                             }
                     if ($fields['status'] != '' && $fields['status'] != null) 
                     {
                        if($fields['status'] == 1)
@@ -680,20 +700,26 @@ public function orders(Request $request)
 
     } else {
         
-        $orders = CustomerOrderFuel::select('customer_order_fuels.id as customer_order_fuels_id','customer_order_fuels.customer_id','customer_order_fuels.order_id','customer_order_fuels.fuel_type_id','customer_order_fuels.quantity','customer_order_fuels.price','customer_order_fuels.amount','customer_orders.*')
-                                    ->join('customer_orders', 'customer_orders.id', '=', 'customer_order_fuels.order_id')
-                                    ->with([
-                                        'customer' ,'fuel','driver'
-                                        ])
-                                    ->where('customer_orders.driver_id',$fields['id'])
-                                    ->orderBy('customer_order_fuels.id');
-                   
+        // $orders = CustomerOrderFuel::select('customer_order_fuels.id as customer_order_fuels_id','customer_order_fuels.customer_id','customer_order_fuels.order_id','customer_order_fuels.fuel_type_id','customer_order_fuels.quantity','customer_order_fuels.price','customer_order_fuels.amount','customer_orders.*')
+        //                             ->join('customer_orders', 'customer_orders.id', '=', 'customer_order_fuels.order_id')
+        //                             ->with([
+        //                                 'customer' ,'fuel','driver'
+        //                                 ])
+        //                             ->where('customer_orders.driver_id',$fields['id'])
+        //                             ->orderBy('customer_orders.id');
+        $orders = CustomerOrder::select('customer_orders.*')
+                                //->join('customer_order_fuels', 'customer_order_fuels.order_id', '=', 'customer_orders.id')
+                                ->with([
+                                    'customer' ,'fuels','driver','fuel'
+                                    ])
+                                ->where('customer_orders.driver_id',$fields['id'])
+                                ->orderBy('customer_orders.id');         
                                     
             if($fields['keyword'])
                {    
                 $search_text=$fields['keyword'];
-                    $orders->where('customer_order_fuels.amount', 'Like', '%' . $search_text . '%')
-                            ->orWhere('customer_order_fuels.order_id', 'Like', '%' . $search_text . '%')
+                    $orders->where('customer_orders.fuel_quantity_price', 'Like', '%' . $search_text . '%')
+                            ->orWhere('customer_orders.id', 'Like', '%' . $search_text . '%')
                             ->orWhereHas('customer', function ($query)use($search_text) 
                                                 {
                                                     $query->where('users.email', 'Like', '%' . $search_text . '%')
@@ -708,42 +734,45 @@ public function orders(Request $request)
                                                     $query->where('fuel_types.fuel_en', 'Like', '%' . $search_text . '%')
                                                         ->orWhere('fuel_types.fuel_so', 'Like', '%' . $search_text . '%');
                                                     return $query;       
-                                                },);
+                                                },)
+                            ;
 
                 }
                    
                 if ($fields['status'] != '' && $fields['status'] != null) 
-                {
-                   if($fields['status'] == 0)
-                     {
-                      $orders->where('customer_orders.status', $fields['status']);
+                { 
+                    $orders->where('customer_orders.status', $fields['status']);
+
+                //    if($fields['status'] == 0)
+                //      {
+                //       $orders->where('status', $fields['status']);
                      
-                     }
-                     if($fields['status'] == 1)
-                     {
-                      $orders->where('customer_orders.status', $fields['status']);
+                //      }
+                //      if($fields['status'] == 1)
+                //      {
+                //       $orders->where('customer_orders.status', $fields['status']);
                      
-                     }
-                     if($fields['status'] == 2)
-                     {
-                      $orders->where('customer_orders.status', $fields['status']);
+                //      }
+                //      if($fields['status'] == 2)
+                //      {
+                //       $orders->where('customer_orders.status', $fields['status']);
                      
-                     } if($fields['status'] == 3)
-                     {
-                      $orders->where('customer_orders.status', $fields['status']);
+                //      } if($fields['status'] == 3)
+                //      {
+                //       $orders->where('customer_orders.status', $fields['status']);
                      
-                     } if($fields['status'] == 4)
-                     {
-                      $orders->where('customer_orders.status', $fields['status']);
+                //      } if($fields['status'] == 4)
+                //      {
+                //       $orders->where('customer_orders.status', $fields['status']);
                      
-                     } if($fields['status'] == 5)
-                     {
-                      $orders->where('customer_orders.status', $fields['status']);
-                     }
-                     if($fields['status'] == 6)
-                     {
-                      $orders->where('customer_orders.status', $fields['status']);
-                     }
+                //      } if($fields['status'] == 5)
+                //      {
+                //       $orders->where('customer_orders.status', $fields['status']);
+                //      }
+                //      if($fields['status'] == 6)
+                //      {
+                //       $orders->where('customer_orders.status', $fields['status']);
+                //      }
                     }
     
              $orders = $orders->paginate($fields['limit']);
@@ -757,6 +786,59 @@ public function orders(Request $request)
        return $res;
 }
 
+public function earnings(Request $request)
+{
+    $fields    = $request->input();
+    $validator = Validator::make($request->all(), [
+        'id' => 'required|numeric|exists:drivers,id',
+        'limit' => 'required|numeric',
+        'keyword' => 'nullable',
+        'status' => 'nullable|numeric',
+
+    ]);
+    if ($validator->fails()) {
+        $errors = collect($validator->errors());
+        $res = Response::send(false, [], $message = $errors, 422);
+
+    } else {
+        // $from = Carbon::now()->startOfMonth();
+        // $to   = Carbon::now()->endOfMonth();
+        // $payments = DriverPayments::query()
+        //                         ->select(
+        //                         DB::raw('DAY(created_at), SUM(amount) AS total_completed_amount')
+        //                         )
+        //                         //->whereBetween('created_at', [$from, $to])
+        //                         ->groupBy(DB::raw('DAY(created_at)'))
+        //                         ->get();
+        //DB::raw("(SELECT name FROM doctors WHERE notifications.user_id = doctors.id and notifications.type=2) as doctor_name"), DB::raw("(SELECT name FROM patients WHERE notifications.user_id = patients.id and notifications.type=3) as patient_name")       
+        // $payments = DB::table('driver_payments')->orderBy('created_at', 'DESC')->get();
+        
+        // foreach ($payments as $payment){
+        //     if($payment->payment_type=="1"){
+        //         $payment->select(
+        //             DB::raw('DAY(created_at), SUM(amount)  AS total_completed_amount')
+        //         );
+        //     }
+            // elseif($payment->gender=="female"){
+            //     $data[$payment->student_class]['female'][] = $payment->amount;
+            // }
+        $payments = DriverPayments::query()
+                                ->select(
+                                DB::raw('DAY(created_at)'), DB::raw('SUM(amount)  AS total_completed_amount'),
+                                DB::raw("(SELECT SUM(amount) FROM driver_payments WHERE driver_payments.payment_type = '1' OrderBy(created_at ) as mobile")
+                                )
+                                //->whereBetween('created_at', [$from, $to])
+                                ->groupBy(DB::raw('DAY(created_at)'),'payment_type')
+                                ->get();
+
+            $data = array(
+                  'payments' => $payments,
+                         );
+
+            $res = Response::send(true, $data, '', 200);
+      }
+       return $res;
+}
 
 }
 
