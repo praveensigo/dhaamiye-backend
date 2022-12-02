@@ -138,8 +138,11 @@ class CustomerOrder extends Model
                                     ->where('users.role_id','4')
                                     ->where('users.reg_status','1');
     }
+
+
    public function fuels() {
         return $this->hasMany(CustomerOrderFuel::class, 'order_id', 'id')
                 ->join('fuel_types', 'fuel_types.id', '=', 'customer_order_fuels.fuel_type_id');
     }
+
 }
