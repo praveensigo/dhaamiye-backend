@@ -9,7 +9,12 @@ use App\Models\android\customer\FuelStationStock;
 use App\Models\android\customer\FuelType;
 use App\Models\android\customer\CustomerOrder;
 use Illuminate\Support\Facades\DB;
+use App\Models\Service\ResponseSender as Response;
+
+use App\Models\android\customer\CustomerOrder;
+use Illuminate\Support\Facades\DB;
 use App\Models\service\ResponseSender as Response;
+
 use Illuminate\Validation\Rule;
 use Validator;
 
@@ -183,7 +188,9 @@ class OrderController extends Controller
                 'fuel_type_ids' => 'required|array',
                 'fuel_type_ids.*' => 'distinct|exists:fuel_types,id|numeric',
                 'quantities' => 'required|array',
+
                 'quantities.*' => 'numeric',
+
                 'coupon_code' => 'nullable|exists:coupons,coupon_code',
                 'latitude' => 'required',
                 'longitude' => 'required',
@@ -197,7 +204,8 @@ class OrderController extends Controller
 
             $fuels = [];
             $i = 0;
-            $fuel_quantity_price = 0;
+
+            $total = 0;
             $quantities = $request->quantities;
             foreach($request->fuel_type_ids as $fuel_type) {
 
@@ -205,6 +213,9 @@ class OrderController extends Controller
                         ->select('fuel_station_stocks.fuel_type_id', 'fuel_en', 'fuel_so', 'price', 'stock')
                         ->join('fuel_types', 'fuel_station_stocks.fuel_type_id', '=', 'fuel_types.id')
                         ->first();
+
+
+
 
                 if($type) {
                     if($quantities[$i] <= $type->stock) {
@@ -216,6 +227,13 @@ class OrderController extends Controller
                             'quantity' => $quantities[$i],
                             'price' => $type->price,
                             'total' => $type->price * $quantities[$i],
+
+                        ];
+                        
+                        $total = $total + ($type->price * $quantities[$i]);
+                        $i++;
+                    }
+
                             'stock_status' => 1,
                             'converted_stock_status' => 'In Stock',
                         ];
@@ -236,6 +254,7 @@ class OrderController extends Controller
                         ];
                     }
                     $i++;
+
                 }               
             }
 
@@ -263,7 +282,9 @@ class OrderController extends Controller
 
             $delivery_charge = $fuel_station->distance * $settings->fuel_delivery_range;
 
-            $tax = $fuel_quantity_price * $settings->tax / 100;
+
+            $tax = $total * $settings->tax / 100;
+
 
             /************* coupon starts ***************/
             $promotion_discount = 0;
@@ -282,14 +303,18 @@ class OrderController extends Controller
                 if($coupon) {
 
                     if($coupon->type == 1) {
-                        if($coupon->amount > $fuel_quantity_price) {
-                            $promotion_discount = $fuel_quantity_price;
+
+                        if($coupon->amount > $total) {
+                            $promotion_discount = $total;
+
                         } else {
                             $promotion_discount = $coupon->amount;
                         }
 
                     } else if($coupon->type == 2) {
-                        $promotion_discount = $fuel_quantity_price * $coupon->amount/100;
+
+                        $promotion_discount = $total * $coupon->amount/100;
+
                     }
                 }
             }
@@ -297,12 +322,16 @@ class OrderController extends Controller
 
             $other_charges = 0;
 
-            $grand_total = $fuel_quantity_price - $promotion_discount + $delivery_charge + $tax + $other_charges;
+
+            $grand_total = $total - $promotion_discount + $delivery_charge + $tax + $other_charges;
+
 
             $data = [
                 'fuel_station' => $fuel_station,
                 'fuels' => $fuels,
-                'total_price' => $fuel_quantity_price,
+
+                'total_price' => $total,
+
                 'coupon_code' => $request->coupon_code,
                 'promotion_discount' => $promotion_discount,
                 'delivery_charge' => $delivery_charge,
@@ -316,6 +345,7 @@ class OrderController extends Controller
 
         return $res;
     }
+
 
     /*************
     Book Now & Schedule
@@ -750,4 +780,5 @@ class OrderController extends Controller
         }
         return $code;
     }
+
 }
