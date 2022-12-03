@@ -59,7 +59,7 @@ class GeneralController extends Controller
      * @params: null
      */
     public function getAbout() {
-        $about   = DB::table('terms')->select('title_en', 'title_so', 'content_en', 'content_so')->first();
+        $about   = DB::table('about')->select('title_en', 'title_so', 'content_en', 'content_so')->first();
 
         $data = array (
             'about' => $about
