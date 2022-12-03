@@ -11,7 +11,7 @@ use App\Models\admin\FuelStationPriceLog;
 use App\Models\admin\FuelStationStock;
 use App\Models\admin\FuelStationStockLog;
 use App\Models\admin\Truck;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -791,6 +791,12 @@ class FuelStationController extends Controller
                 $stock->fuel_station_id = $fields['fuel_station_id'];
                 $stock->fuel_type_id = $fields['fuel_type_id'];
                 $stock->price = $fields['price'];
+               
+                
+                $role_id = auth('sanctum')->user()->role_id;
+                $user_id = auth('sanctum')->user()->user_id;
+                $stock->added_by = $role_id;
+                $stock->added_user = $user_id;
                 $result = $stock->save();
                 $res = Response::send('true',
                     [],
@@ -827,7 +833,7 @@ class FuelStationController extends Controller
             $fuel_station = FuelStationStock::find($fields['id']);
             $fuel_station->price = $fields['price'];
             $result = $fuel_station->save();
-            $logs = DB::table('Fuel_station_stocks')->select('Fuel_station_stocks.id', 'Fuel_station_stocks.fuel_station_id', 'Fuel_station_stocks.fuel_type_id')->where('id', $fields['id'])
+            $logs = DB::table('fuel_station_stocks')->select('fuel_station_stocks.id', 'fuel_station_stocks.fuel_station_id', 'fuel_station_stocks.fuel_type_id')->where('id', $fields['id'])
                 ->where('id', $fields['id'])->first();
             $fuel_station_id = $logs->fuel_station_id;
             $fuel_type_id = $logs->fuel_type_id;
@@ -873,14 +879,14 @@ class FuelStationController extends Controller
             $fuel_station = FuelStationStock::find($fields['id']);
             $fuel_station->stock = $fields['stock'];
             $result = $fuel_station->save();
-            $logs = DB::table('Fuel_station_stocks')->select('Fuel_station_stocks.id', 'Fuel_station_stocks.fuel_station_id', 'Fuel_station_stocks.fuel_type_id')
+            $logs = DB::table('fuel_station_stocks')->select('fuel_station_stocks.id', 'fuel_station_stocks.fuel_station_id', 'fuel_station_stocks.fuel_type_id')
                 ->where('id', $fields['id'])->first();
             $fuel_station_id = $logs->fuel_station_id;
             $fuel_type_id = $logs->fuel_type_id;
 
             if ($result) {
 
-                $stock = new FuelStationstockLog;
+                $stock = new FuelStationStockLog;
                 $stock->fuel_station_id = $fuel_station_id;
                 $stock->fuel_type_id = $fuel_type_id;
                 $stock->stock = $fields['stock'];
@@ -914,7 +920,7 @@ class FuelStationController extends Controller
             $res = Response::send('false', $data = [], $message = $errors, $code = 422);
         } else {
 
-            $logs = DB::table('Fuel_station_stocks')->select('Fuel_station_stocks.id', 'Fuel_station_stocks.fuel_station_id', 'Fuel_station_stocks.fuel_type_id')
+            $logs = DB::table('fuel_station_stocks')->select('fuel_station_stocks.id', 'fuel_station_stocks.fuel_station_id', 'fuel_station_stocks.fuel_type_id')
                 ->where('id', $fields['fuel_station_stock_id'])->first();
             $fuel_station_id = $logs->fuel_station_id;
             $fuel_type_id = $logs->fuel_type_id;
@@ -964,7 +970,7 @@ class FuelStationController extends Controller
             $res = Response::send('false', $data = [], $message = $errors, $code = 422);
         } else {
 
-            $logs = DB::table('Fuel_station_stocks')->select('Fuel_station_stocks.id', 'Fuel_station_stocks.fuel_station_id', 'Fuel_station_stocks.fuel_type_id')
+            $logs = DB::table('fuel_station_stocks')->select('fuel_station_stocks.id', 'fuel_station_stocks.fuel_station_id', 'fuel_station_stocks.fuel_type_id')
                 ->where('id', $fields['fuel_station_stock_id'])->first();
             $fuel_station_id = $logs->fuel_station_id;
             $fuel_type_id = $logs->fuel_type_id;
