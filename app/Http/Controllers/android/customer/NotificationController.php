@@ -5,6 +5,7 @@ namespace App\Http\Controllers\android\customer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\android\customer\CustomerOrder;
+use App\Models\android\customer\Notification;
 use App\Models\service\ResponseSender as Response;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
@@ -20,14 +21,14 @@ class NotificationController extends Controller
 
       if($validator->fails())  {   
          $errors = collect($validator->errors());
-         $res    = sendResponse('false', $data = [], $message = $errors, $code = 422);
+         $res = Response::send(false, [], $message = $errors, 422);
 
       } else {
          $auth_user  = auth('sanctum')->user();
          $user_id = $auth_user->user_id;
          $created_date = $auth_user->created_at;
 
-         $notification_date = DB::table('notifications')->select('notifications.date')
+         $notification_dates = DB::table('notifications')->select('notifications.date')
             
             ->whereIn('notifications.type',[3, 1])
             ->where(function($query) use ($user_id){
@@ -38,12 +39,12 @@ class NotificationController extends Controller
          ->orderBy('notifications.date','desc')
          ->distinct()->paginate($request->limit, ['notifications.date']);
 
-         foreach($notification_date as $date)  {
+         foreach($notification_dates as $date)  {
 
             $date->notifications = DB::table('notifications')->select('notifications.id', 'title_en', 'title_so', 'description_en', 'description_so', 'notifications.date', 'notifications.time','customer_orders.created_at')
                ->join('customer_orders','customer_orders.id','=','notifications.order_id','left outer')
                ->whereIn('notifications.type',['3','1'])
-               ->where(function($query) use ($id){
+               ->where(function($query) use ($user_id){
                   $query->where('notifications.user_id','=',$user_id)
                   ->orWhereNull('notifications.user_id');
                })
@@ -59,7 +60,7 @@ class NotificationController extends Controller
          }
          
          $data = [
-            'notifications' => $notifications,
+            'notifications' => $notification_dates,
 
          ];  
          $res = Response::send(true, $data, '', 200); 
