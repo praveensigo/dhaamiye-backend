@@ -4,7 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\admin\Slider;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Validator;
