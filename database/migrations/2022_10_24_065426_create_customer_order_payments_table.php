@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignId('driver_id')->references('id')->on('drivers')->nullable();
             $table->integer('payment_type')->comment('1:Mobile, 2:Cash')->nullable();
             $table->string('payment_id')->nullable();
-            $table->decimal('total_amount', 12, 2);
+            $table->decimal('total_amount', 12, 2)->nullable();
             $table->integer('status')->default(1)->comment('1:Pending, 2:Completed');
             $table->timestamps();
         });
