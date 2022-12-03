@@ -16,7 +16,7 @@ class GeneralController extends Controller
     public function getCountryCodes()
     {
         $country_codes =  DB::table('country_codes')
-                        ->select('country_code')
+                        ->select('id', 'country_code')
                         ->get();   
 
         $data = array(
