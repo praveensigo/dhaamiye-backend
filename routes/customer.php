@@ -13,7 +13,7 @@ use App\Http\Controllers\android\customer\OrderController;
 use App\Http\Controllers\android\customer\ReviewController;
 use App\Http\Controllers\android\customer\FavoriteController;
 use App\Http\Controllers\android\customer\PromotionController;
-use App\Http\Controllers\android\customer\NotificationsController;
+use App\Http\Controllers\android\customer\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,5 +54,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('favourites/add-remove', [FavoriteController::class, 'addRemove']);
     Route::get('favourites', [FavoriteController::class, 'index']);
     Route::get('promotions', [PromotionController::class, 'index']);
-    Route::get('notifications', [NotificationsController::class, 'index']);
+    Route::get('notifications', [NotificationController::class, 'index']);
 });
