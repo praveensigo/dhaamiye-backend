@@ -11,7 +11,7 @@ use App\Models\admin\FuelStationPriceLog;
 use App\Models\admin\FuelStationStock;
 use App\Models\admin\FuelStationStockLog;
 use App\Models\admin\Truck;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
