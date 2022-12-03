@@ -14,6 +14,7 @@ use App\Http\Controllers\android\customer\ReviewController;
 use App\Http\Controllers\android\customer\FavoriteController;
 use App\Http\Controllers\android\customer\PromotionController;
 use App\Http\Controllers\android\customer\NotificationController;
+use App\Http\Controllers\android\customer\ContactController;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,6 +59,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('favourites', [FavoriteController::class, 'index']);
     Route::get('promotions', [PromotionController::class, 'index']);
     Route::get('notifications', [NotificationController::class, 'index']);
-
-
+    Route::get('issue-types', [ContactController::class, 'getIssueTypes']);
+    Route::post('add-enquiry', [ContactController::class, 'addEnquiry']);
 });
