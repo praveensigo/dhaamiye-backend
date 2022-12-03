@@ -11,7 +11,7 @@ use App\Models\admin\FuelStationPriceLog;
 use App\Models\admin\FuelStationStock;
 use App\Models\admin\FuelStationStockLog;
 use App\Models\admin\Truck;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +21,7 @@ use Validator;
 
 class FuelStationController extends Controller
 { /*GET FUELSTATIONS*/
+    
     public function index(Request $request)
     {
         $fields = $request->input();
@@ -235,7 +236,7 @@ class FuelStationController extends Controller
                 'name_so' => 'nullable|required_without:name_en|min:3|max:100',
                 'image' => 'nullable|mimes:png,jpg,jpeg|max:1024|dimensions:max_width=600,max_height=600',
                 'country_code' => 'required|numeric|exists:country_codes,id',
-                'mobile' => ['required', 'numeric', 'digits:10',
+                'mobile' => ['required', 'numeric',
                     Rule::unique('users', 'mobile')->ignore($request->id, 'user_id')],
                 'email' => ['required', 'email',
                     Rule::unique('users', 'email')->ignore($request->id, 'user_id')],
@@ -723,7 +724,7 @@ class FuelStationController extends Controller
             $errors = collect($validator->errors());
             $res = Response::send('false', $data = [], $message = $errors, $code = 422);
         } else {
-            $fuels = FuelStationStock::select('fuel_station_stocks.*', 'fuel_types.fuel', )
+            $fuels = FuelStationStock::select('fuel_station_stocks.*', 'fuel_types.fuel_en','fuel_types.fuel_so', )
 
                 ->join('fuel_types', 'fuel_types.id', '=', 'fuel_station_stocks.fuel_type_id')
                 ->where('fuel_station_stocks.fuel_station_id', $fields['fuel_station_id'])
@@ -736,7 +737,8 @@ class FuelStationController extends Controller
             // SEARCH BY KEYWORD
             if ($request->keyword) {
                 $fuels->where(function ($query) use ($request) {
-                    $query->where('fuel', 'LIKE', '%' . $request->keyword . '%')
+                    $query->where('fuel_en', 'LIKE', '%' . $request->keyword . '%')
+                         ->orWhere('fuel_so', 'LIKE', '%' . $request->keyword . '%')
                         ->orWhere('fuel_station_stocks.stock', 'LIKE', '%' . $request->keyword . '%')
                         ->orWhere('fuel_station_stocks.price', 'LIKE', '%' . $request->keyword . '%')
 
@@ -917,7 +919,7 @@ class FuelStationController extends Controller
             $fuel_station_id = $logs->fuel_station_id;
             $fuel_type_id = $logs->fuel_type_id;
 
-            $fuel_price = FuelStationPriceLog::select('fuel_station_price_logs.*', 'fuel_types.fuel')->join('fuel_types', 'fuel_types.id', '=', 'fuel_station_price_logs.fuel_type_id')
+            $fuel_price = FuelStationPriceLog::select('fuel_station_price_logs.*', 'fuel_types.fuel_en','fuel_types.fuel_so')->join('fuel_types', 'fuel_types.id', '=', 'fuel_station_price_logs.fuel_type_id')
                 ->with([
                     'fuel_station', 'fuel_type', 'user',
                 ])
@@ -967,7 +969,7 @@ class FuelStationController extends Controller
             $fuel_station_id = $logs->fuel_station_id;
             $fuel_type_id = $logs->fuel_type_id;
 
-            $fuel_stock = FuelStationStockLog::select('fuel_station_stock_logs.*', 'fuel_types.fuel')->join('fuel_types', 'fuel_types.id', '=', 'fuel_station_stock_logs.fuel_type_id')
+            $fuel_stock = FuelStationStockLog::select('fuel_station_stock_logs.*', 'fuel_types.fuel_en','fuel_types.fuel_so',)->join('fuel_types', 'fuel_types.id', '=', 'fuel_station_stock_logs.fuel_type_id')
                 ->with([
                     'fuel_station', 'fuel_type', 'user',
                 ])
@@ -1004,7 +1006,7 @@ class FuelStationController extends Controller
         $validator = Validator::make($request->all(), [
             'limit' => 'required|numeric',
             'keyword' => 'nullable',
-            'type' => 'nullable|numeric|in:1,2', //1:Active, 2:Blocked
+            'type' => 'nullable|numeric|in:1,2', //1:Credit, 2:Debit
             'fuel_station_id' => 'required|numeric|exists:fuel_stations,id',
 
         ]);
@@ -1027,6 +1029,7 @@ class FuelStationController extends Controller
                     $query->where('amount', 'LIKE', '%' . $request->keyword . '%')
                         ->orwhere('balance', 'LIKE', '%' . $request->keyword . '%')
                         ->orwhere('order_id', 'LIKE', '%' . $request->keyword . '%')
+                        ->orwhere('created_at', 'LIKE', '%' . $request->keyword . '%')
 
                     ;});
             }
@@ -1147,7 +1150,7 @@ class FuelStationController extends Controller
          }
      }
      return $res;
- } */
+} */
  public function FuelStationFuels(Request $request)
  {
         $validator = Validator::make($request->all(),
