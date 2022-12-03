@@ -791,6 +791,12 @@ class FuelStationController extends Controller
                 $stock->fuel_station_id = $fields['fuel_station_id'];
                 $stock->fuel_type_id = $fields['fuel_type_id'];
                 $stock->price = $fields['price'];
+               
+                
+                $role_id = auth('sanctum')->user()->role_id;
+                $user_id = auth('sanctum')->user()->user_id;
+                $stock->added_by = $role_id;
+                $stock->added_user = $user_id;
                 $result = $stock->save();
                 $res = Response::send('true',
                     [],
