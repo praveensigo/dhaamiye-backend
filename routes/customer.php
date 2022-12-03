@@ -34,6 +34,9 @@ Route::post('forgot-password', [CheckController::class, 'isMobileRegistered']);
 Route::post('register/check', [CheckController::class, 'isRegistrable']);
 Route::post('reset-password', [CheckController::class, 'resetPassword']);
 Route::get('get-countrycodes', [GeneralController::class, 'getCountryCodes']);
+Route::get('about', [GeneralController::class, 'getAbout']);
+Route::get('privacy-policy', [GeneralController::class, 'getPrivacyPolicy']);
+Route::get('terms-and-conditions', [GeneralController::class, 'getTermsandConditions']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('profile', [ProfileController::class, 'index']);
@@ -55,4 +58,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('favourites', [FavoriteController::class, 'index']);
     Route::get('promotions', [PromotionController::class, 'index']);
     Route::get('notifications', [NotificationController::class, 'index']);
+
+
 });
