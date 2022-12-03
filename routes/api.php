@@ -119,7 +119,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/sub_admins',[SubAdminController::class,'index']);
     Route::post('admin/sub_admin/add_module',[SubAdminController::class,'addModules']);
 
-    Route::get('admin/sales_reports',[ReportsController::class,'salesReport']);
+    Route::get('admin/sales_report',[ReportsController::class,'salesReport']);
+    Route::get('admin/earning_report',[ReportsController::class,'earningReport']);
+    Route::get('admin/sales_report_download',[ReportsController::class,'salesReportDownload']);
+    Route::get('admin/earning_report_download',[ReportsController::class,'earningReportDownload']);
 
     Route::get('admin/notification', [NotificationController::class, 'index']);
     Route::post('admin/notification/add', [NotificationController::class, 'add']);
