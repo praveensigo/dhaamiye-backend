@@ -18,4 +18,7 @@ return
     'update_stock' => 'Stock updated successfully!',
 //ORDER
     'driver_assign' => 'Driver assigned successfully',
+
+    'update_deposite' => 'Deposite updated successfully!',
+
 ];
