@@ -312,7 +312,9 @@ class LoginController extends Controller
                       
                     } 
                 
-            } 
+            } else {
+                $res = Response::send(false, [], $message = ['mobile' => [__('auth.mobile_not_registered')]], 422);
+            }
         
         }
         return $res;
