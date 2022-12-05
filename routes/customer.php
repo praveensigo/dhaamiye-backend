@@ -43,6 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('profile', [ProfileController::class, 'index']);
     Route::post('profile/change-password', [ProfileController::class, 'changePassword']);
     Route::post('profile/update', [ProfileController::class, 'update']);
+    Route::post('profile/check-mobile', [ProfileController::class, 'isMobileUnique']);
     Route::get('home', [HomeController::class, 'index']);
     Route::get('search', [HomeController::class, 'search']);
     Route::get('fuel-types', [HomeController::class, 'getFuelStationFuels']);

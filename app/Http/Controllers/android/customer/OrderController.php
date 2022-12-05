@@ -632,13 +632,15 @@ class OrderController extends Controller
 
     /*************
     Orders Details
-    @params: id
+    @params: id, latitude, longitude
     **************/
     public function details(Request $request)
     {
         $auth_user = auth('sanctum')->user();
         $validator = Validator::make($request->all(), [
             'id' => 'required|exists:customer_orders,id',
+            'latitude' => 'required',
+            'longitude' => 'required',
         ]);
 
         if ($validator->fails()) {
