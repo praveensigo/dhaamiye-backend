@@ -17,7 +17,7 @@ use App\Http\Controllers\admin\NotificationController;
 use App\Http\Controllers\admin\SliderController;
 use App\Http\Controllers\admin\RatingController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\admin\DashBoardController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -135,9 +135,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/fuelStation/trucks', [FuelStationController::class, 'trucks']);
     Route::get('admin/fuelStation/drivers', [FuelStationController::class, 'drivers']);
     Route::get('admin/fuelStation/fuelTypes', [FuelStationController::class, 'FuelTypes']);
-    Route::get('admin/fuelStation/addFuel', [FuelStationController::class, 'addFuel']);
-    Route::get('admin/fuelStation/updatePrice', [FuelStationController::class, 'updatePrice']);
-    Route::get('admin/fuelStation/updateStock', [FuelStationController::class, 'updateStock']);
+    Route::post('admin/fuelStation/addFuel', [FuelStationController::class, 'addFuel']);
+    Route::post('admin/fuelStation/updatePrice', [FuelStationController::class, 'updatePrice']);
+    Route::post('admin/fuelStation/updateStock', [FuelStationController::class, 'updateStock']);
     Route::get('admin/fuelStation/fuelPriceLogs', [FuelStationController::class, 'FuelPriceLogs']);
     Route::get('admin/fuelStation/fuelStockLogs', [FuelStationController::class, 'FuelStockLogs']);
     Route::get('admin/fuelStation/paymentLogs', [FuelStationController::class, 'paymentLogs']);
@@ -151,6 +151,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/customerRatings',[RatingController::class,'customerRatings']);
     Route::get('admin/driverRatings',[RatingController::class,'driverRatings']);
 
+    Route::get('admin/dashboard',[DashboardController::class,'index']);
+
+    Route::get('admin/order/cancelOrder',[CustomerOrderController::class,'cancelOrder']);
+    Route::post('admin/order/assignDriver',[CustomerOrderController::class,'assignDriver']);
+    Route::get('admin/orders',[CustomerOrderController::class,'index']);
+    Route::get('admin/order/details',[CustomerOrderController::class,'details']);
+    
+    Route::post('admin/fuelStation/updateDeposite', [FuelStationController::class, 'updateDeposite']);
 
     // return $request->user();
 });
