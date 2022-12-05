@@ -232,9 +232,9 @@ class HomeController extends Controller
         return $res;
     }
 
-    function GetDrivingDistance($lat1, $lat2, $long1,$long2)
+    function GetDrivingDistance(Request $request)
     {
-        $url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=".$lat1.",".$long1."&destinations=".$lat2."%2C".$long2."&mode=driving&language=pl-PL&key=AIzaSyDmehs_u8H6kgD9d9aVV38RuAS-GSZT598";
+        $url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=".$request->latitude1.",".$request->longitude1."&destinations=".$request->latitude2."%2C".$request->longitude2."&mode=driving&language=pl-PL&key=AIzaSyDmehs_u8H6kgD9d9aVV38RuAS-GSZT598";
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -244,9 +244,17 @@ class HomeController extends Controller
         $response = curl_exec($ch);
         curl_close($ch);
         $response_a = json_decode($response, true);
-        $dist = $response_a['rows'][0]['elements'][0]['distance']['text'];
-        $time = $response_a['rows'][0]['elements'][0]['duration']['text'];
-    
-        return array('distance' => $dist, 'time' => $time);
+        //return $response_a;
+        if(array_key_exists('distance', $response_a['rows'][0]['elements'][0]) ) {
+            $dist = $response_a['rows'][0]['elements'][0]['distance']['text'];
+            $time = $response_a['rows'][0]['elements'][0]['duration']['text'];
+        
+            $array = array('distance' => $dist, 'time' => $time);
+            $exploded = explode(' ', $array['distance']);
+            $distance   = intval($exploded[0]);
+            return $distance;
+        } else {
+            return '';
+        }
     }  
 }

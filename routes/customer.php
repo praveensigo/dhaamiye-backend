@@ -61,4 +61,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::get('issue-types', [ContactController::class, 'getIssueTypes']);
     Route::post('add-enquiry', [ContactController::class, 'addEnquiry']);
+
+    Route::get('get-distance', [HomeController::class, 'GetDrivingDistance']);
 });
