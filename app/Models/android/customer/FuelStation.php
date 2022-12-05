@@ -44,9 +44,7 @@ class FuelStation extends Model
         $destination_lat = $this->latitude;
         $destination_lng = $this->longitude;
 
-        $array = $this->GetDrivingDistance($origin_lat, $destination_lat, $origin_lng, $destination_lng);
-        $exploded = explode(' ', $array['distance']);
-        $distance   = intval($exploded[0]);
+        $distance = $this->GetDrivingDistance($origin_lat, $destination_lat, $origin_lng, $destination_lng);
         return $distance;
     }
 
@@ -81,10 +79,20 @@ class FuelStation extends Model
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         $response = curl_exec($ch);
         curl_close($ch);
-        $response_a = json_decode($response, true);
-        $dist = $response_a['rows'][0]['elements'][0]['distance']['text'];
-        $time = $response_a['rows'][0]['elements'][0]['duration']['text'];
+        $response_a = json_decode($response, true);        
     
-        return array('distance' => $dist, 'time' => $time);
+        //return array('distance' => $dist, 'time' => $time);
+
+        if(array_key_exists('distance', $response_a['rows'][0]['elements'][0]) ) {
+            $dist = $response_a['rows'][0]['elements'][0]['distance']['text'];
+            $time = $response_a['rows'][0]['elements'][0]['duration']['text'];
+        
+            $array = array('distance' => $dist, 'time' => $time);
+            $exploded = explode(' ', $array['distance']);
+            $distance   = intval($exploded[0]);
+            return $distance;
+        } else {
+            return '';
+        }
     }  
 }
