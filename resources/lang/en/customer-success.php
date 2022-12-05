@@ -29,5 +29,6 @@ return [
     'remove_favorite_en' => 'Fuel station is removed from your favourites',
     'remove_favorite_so' => 'Fuel station is removed from your favourites',
     
-
+    'add_comment_en' => 'Your comments added successfully',
+    'add_comment_so' => 'Your comments added successfully',
 ];

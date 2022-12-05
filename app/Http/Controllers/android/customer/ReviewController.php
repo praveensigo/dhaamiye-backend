@@ -27,8 +27,8 @@ class ReviewController extends Controller
 
         if($request->lang == 2) {
             $lang =   [
-                'rating.required' => __('customer-error.rating_required_en'),
-                'review.required' => __('customer-error.review_required_en'),
+                'rating.required' => __('customer-error.rating_required_so'),
+                'review.required' => __('customer-error.review_required_so'),
             ];
         }
         $validator = Validator::make($request->all(), [

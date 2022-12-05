@@ -558,6 +558,25 @@ class OrderController extends Controller
                         'payment_type' => $request->payment_type,
                 ));
 
+                $title_en = 'Order Placed';
+                $title_so = 'Order Placed';
+                $description_en = 'Your order with ID #' . $order->id  . ' has been placed successfully';
+                $description_so = 'Your order with ID #' . $order->id  . ' has been placed successfully';
+
+                DB::table('notifications')->insert(array(
+                    'title_en' => $title_en,
+                    'title_so' => $title_so,
+                    'description_en' => $description_en,
+                    'description_so' => $description_so,
+                    'type' => 3,
+                    'user_id' => $auth_user->user_id,
+                    'order_id' => $order->id,
+                    'date' => date('Y-m-d'),
+                    'time' => date('H:i:s'),
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ));
+
                 $message = __('customer-success.confirm_order_en');
                 if($request->lang == 2) {
                     $message = __('customer-success.confirm_order_so');
