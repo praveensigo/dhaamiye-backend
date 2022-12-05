@@ -85,5 +85,8 @@ return [
 
 //ORDER
  'driver_assign_failed' => 'Failed to  assign driver',
+ 
+ 'reason_cancel_required'=>'Please enter the reason for cancellation',
+ 'update_deposite' => 'Failed to update deposite, please try again',
 
 ];

@@ -105,6 +105,7 @@ class FuelStationController extends Controller
                 'account_type' => 'required|in:1,2',
                 'ifsc_code' => 'required|min:9|max:12',
                 'upi_id' => 'required|min:6|max:50|regex:^(.+)@(.+)$^',
+                'deposite'=>'required'
 
             ],
             ['name_en.required_without' => __('error.name_en_required_without'),
@@ -192,6 +193,25 @@ class FuelStationController extends Controller
                     $user->image = '';
                 }
                 $user->save();
+                DB::table('fuel_station_deposits')->insert(
+                    array('fuel_station_id' => $fuel_station->id,
+                        'balance' => $fields['deposite'],
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+
+                    )
+                );
+                DB::table('fuel_station_payment_logs')->insert(
+                    array('fuel_station_id' => $fuel_station->id,
+                            'order_id' => 0,
+                        'amount' => $fields['deposite'],
+                        'type' => 1,
+                        'balance'=>$fields['deposite'],
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+
+                    )
+                );
                 DB::table('fuel_station_bank_details')->insert(
                     array('fuel_station_id' => $fuel_station->id,
                         'bank_name' => $fields['bank_name'],
@@ -798,6 +818,17 @@ class FuelStationController extends Controller
                 $stock->added_by = $role_id;
                 $stock->added_user = $user_id;
                 $result = $stock->save();
+
+          if($result){ $price = new FuelStationPriceLog;
+                $price->fuel_station_id =$stock->fuel_station_id;
+                $price->fuel_type_id = $stock->fuel_type_id;
+                $price->price = $stock->price;
+                $role_id = auth('sanctum')->user()->role_id;
+                $user_id = auth('sanctum')->user()->user_id;
+                $price->added_by = $role_id;
+                $price->added_user = $user_id;
+                $price->save();
+            }
                 $res = Response::send('true',
                     [],
                     $message = 'Fuel added successfully.',
@@ -1211,4 +1242,50 @@ class FuelStationController extends Controller
 
        return $res;
 }
+//UPDATE DEPOSITE
+public function updateDeposite(Request $request)
+{$fields = $request->input();
+
+    $validator = Validator::make($request->all(),
+        [
+            'fuel_station_id' => 'required|numeric|exists:fuel_stations,id',
+            'deposite' => 'required|numeric',
+        ],
+        [
+            'deposite.required' => 'Please enter the deposite.',
+        ]
+    );
+    if ($validator->fails()) {
+        $errors = collect($validator->errors());
+        $res = Response::send(false, [], $message = $errors, 422);
+
+    } else {
+        $fuel_station_deposite = DB::table('fuel_station_deposits')->select('fuel_station_deposits.*')
+        ->where('fuel_station_id', $fields['fuel_station_id'])
+        ->first(); 
+        $balance=$fuel_station_deposite->balance;
+        $new_bal=$balance+$fields['deposite'];
+       $result= DB::table('fuel_station_deposits')
+        ->where('fuel_station_id', $fields['fuel_station_id'])
+        ->update(['balance' =>$new_bal]);
+       if ($result) {
+              DB::table('fuel_station_payment_logs')->insert(
+            array('fuel_station_id' =>$fields['fuel_station_id'],
+                    'order_id' => 0,
+                'amount' => $fields['deposite'],
+                'type' => 1,
+                'balance'=>$new_bal,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+
+            )
+        );
+            $res = Response::send(true, [], __('success.update_deposite'), 200);
+        } else {
+            $res = Response::send(false, [], __('error.update_deposite'), 400);
+        }
+    }
+    return $res;
+}
+
 }
