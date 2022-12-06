@@ -239,17 +239,13 @@ class OrderController extends Controller
                 }               
             }
 
-            $fuel_station = FuelStation::select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at', DB::raw("ROUND(6371 * acos(cos(radians(" . floatval($request->latitude) . ")) 
-                * cos(radians(fuel_stations.latitude)) 
-                * cos(radians(fuel_stations.longitude) - radians(" . floatval($request->longitude) . ")) 
-                + sin(radians(" .$request->latitude. ")) 
-                * sin(radians(fuel_stations.latitude))), 2) AS distance"))
+            $fuel_station = FuelStation::select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at')
                 ->join('users', 'users.user_id', '=', 'fuel_stations.id')
                 ->active()
                 ->where('role_id', 5)                
                 ->with([                    
 
-                    'favourites' => function ($query) use($auth_user_id) {
+                    'favorites' => function ($query) use($auth_user_id) {
                         $query->select('customers.id', 'name_en', 'name_so', 'customers.created_at', 'customers.status')
                         ->where('customer_favorite_stations.customer_id', '=', $auth_user_id);
                     },
@@ -384,11 +380,7 @@ class OrderController extends Controller
                 }               
             }
 
-            $fuel_station = FuelStation::select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at', DB::raw("ROUND(6371 * acos(cos(radians(" . floatval($request->latitude) . ")) 
-                * cos(radians(fuel_stations.latitude)) 
-                * cos(radians(fuel_stations.longitude) - radians(" . floatval($request->longitude) . ")) 
-                + sin(radians(" .$request->latitude. ")) 
-                * sin(radians(fuel_stations.latitude))), 2) AS distance"))
+            $fuel_station = FuelStation::select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at')
                 ->join('users', 'users.user_id', '=', 'fuel_stations.id')
                 ->active()
                 ->where('role_id', 5)                
@@ -531,6 +523,7 @@ class OrderController extends Controller
 
             if($order->status == 0) {
                 $order->status = 1;
+                $order->pin = $this->generatePIN();
                 $order->delivery_date = $request->delivery_date;
                 $order->delivery_time = $request->delivery_time;
                 $order->save();
@@ -622,7 +615,14 @@ class OrderController extends Controller
                 ->where('status', '!=',0)
                 ->status($request->status)
                 ->with([
-                    'fuel_station', 'fuels', 
+                    // 'fuel_station', 'fuels', 
+                    'fuel_station'=> function($query) use($request) {
+                        $query->select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at')
+                        ->join('users', 'users.user_id', '=', 'fuel_stations.id')
+                        ->where('role_id', 5);
+
+                    }, 'fuels'
+
                 ]);
            
 
@@ -639,13 +639,15 @@ class OrderController extends Controller
 
     /*************
     Orders Details
-    @params: id
+    @params: id, latitude, longitude
     **************/
     public function details(Request $request)
     {
         $auth_user = auth('sanctum')->user();
         $validator = Validator::make($request->all(), [
             'id' => 'required|exists:customer_orders,id',
+            'latitude' => 'required',
+            'longitude' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -669,7 +671,13 @@ class OrderController extends Controller
                 ->descending()
                 ->where('customer_orders.id', $order_id)
                 ->with([
-                    'fuel_station', 'fuels', 
+                    // 'fuel_station', 'fuels', 
+                    'fuel_station'=> function($query) {
+                        $query->select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at')
+                        ->join('users', 'users.user_id', '=', 'fuel_stations.id')
+                        ->where('role_id', 5);
+
+                    }, 'fuels',
                     'customer' => function($query) {
                         $query->join('users', 'customers.id', '=', 'users.user_id')
                         ->select('customers.id', 'name_en', 'name_so', 'email', 'mobile', 'country_code_id', 'country_code', 'customers.created_at', 'customers.status')
@@ -736,15 +744,15 @@ class OrderController extends Controller
         return $res;
     }
 
-    /****** GENERATE CODE *****/
-    function generateCode() 
+    /****** GENERATE PIN *****/
+    function generatePIN() 
     {
         $chars = '0123456789';
         $len = strlen($chars);
-        $code = '';
-        for ($i = 0; $i < 10; $i++) {
-            $code .= $chars[rand(0, $len - 1)];
+        $pin = '';
+        for ($i = 0; $i < 4; $i++) {
+            $pin .= $chars[rand(0, $len - 1)];
         }
-        return $code;
+        return $pin;
     }
 }

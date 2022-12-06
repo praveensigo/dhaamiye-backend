@@ -246,4 +246,56 @@ class ProfileController extends Controller
         return $res;
     }
 
+    /*************
+    Check if the given mobile number is unique
+    @params: country_code, mobile, lang
+    **************/
+    public function isMobileUnique(Request $request)
+    {        
+        $auth_user = auth('sanctum')->user();
+        $lang = [
+            'country_code.required' => __('customer-error.country_code_required_en'),
+            'mobile.required' => __('customer-error.mobile_required_en'),
+        ];
+
+        if($request->lang == 2) {
+            $lang = [
+            'country_code.required' => __('customer-error.country_code_required_so'),
+            'mobile.required' => __('customer-error.mobile_required_so'),
+            ];
+        }
+        $validator = Validator::make($request->all(),
+            [
+                'country_code' => 'required|numeric',
+                'mobile' => 'required|numeric',
+            ], $lang
+            
+        );
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+            $res = Response::send(false, [], $message = $errors, 422);
+
+        } else {
+            $user = User::withTrashed()
+                    ->where('mobile', $request->mobile)
+                    ->where('country_code_id', $request->country_code)
+                    //->where('role_id', 3)
+                    ->where('id', '<>', $auth_user->id)
+                    ->first();
+            if ($user) {                
+
+                $message = __('customer-error.mobile_exists_en');
+                if($request->lang  == 2) {
+                    $message = __('customer-error.mobile_exists_so');
+                }
+                $res = Response::send(false, [], $message = ['mobile' => $message], 422);
+
+            } else {
+              
+                $res = Response::send(true, [], '', 200);
+            }
+        }
+        return $res;
+    }
+
 }

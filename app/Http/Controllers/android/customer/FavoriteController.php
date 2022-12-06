@@ -122,14 +122,10 @@ class FavoriteController extends Controller
                 ->where('customer_favorite_stations.customer_id', $auth_user->user_id)
                 ->with([
                     'fuel_station'=> function($query) use($request) {
-                        $query->select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at', DB::raw("ROUND(6371 * acos(cos(radians(" . floatval($request->latitude) . ")) 
-                        * cos(radians(fuel_stations.latitude)) 
-                        * cos(radians(fuel_stations.longitude) - radians(" . floatval($request->longitude) . ")) 
-                        + sin(radians(" .$request->latitude. ")) 
-                        * sin(radians(fuel_stations.latitude))), 2) AS distance"))
+                        $query->select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at')
                         ->join('users', 'users.user_id', '=', 'fuel_stations.id')
                         ->where('role_id', 5);
-                    },
+                    }, 'fuel_station.fuels'
                 ])
                 ->get();  
 
