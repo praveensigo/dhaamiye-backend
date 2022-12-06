@@ -620,6 +620,7 @@ class OrderController extends Controller
                         $query->select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at')
                         ->join('users', 'users.user_id', '=', 'fuel_stations.id')
                         ->where('role_id', 5);
+
                     }, 'fuels'
                 ]);
            
@@ -674,7 +675,9 @@ class OrderController extends Controller
                         $query->select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at')
                         ->join('users', 'users.user_id', '=', 'fuel_stations.id')
                         ->where('role_id', 5);
+
                     }, 'fuels',
+                    
                     'customer' => function($query) {
                         $query->join('users', 'customers.id', '=', 'users.user_id')
                         ->select('customers.id', 'name_en', 'name_so', 'email', 'mobile', 'country_code_id', 'country_code', 'customers.created_at', 'customers.status')
