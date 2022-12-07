@@ -677,7 +677,7 @@ class OrderController extends Controller
                         ->join('users', 'users.user_id', '=', 'fuel_stations.id')
                         ->where('role_id', 5);
 
-                    }, 'fuels',
+                    }, 'fuels', 'meter_readings',
 
                     'customer' => function($query) {
                         $query->join('users', 'customers.id', '=', 'users.user_id')
