@@ -41,7 +41,6 @@ class RouteServiceProvider extends ServiceProvider
             ->group(base_path('routes/customer.php'));
 
 
-
             Route::prefix('driver')
             ->namespace($this->namespace)
             ->group(base_path('routes/driver.php'));
@@ -50,7 +49,6 @@ class RouteServiceProvider extends ServiceProvider
             Route::prefix('fuelstation')
             ->namespace($this->namespace)
             ->group(base_path('routes/fuelstation.php'));
-
 
         });
     }
