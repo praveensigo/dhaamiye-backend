@@ -121,7 +121,7 @@ class DashboardController extends Controller
             $confirmed_month = array();
         
             for ($iM = 1; $iM <= 12; $iM++) {
-            $completed_month[] = DB::table('customer_orders')->where('status', '6')->whereYear('created_at', '=', $year)->whereMonth('created_at', '=', $iM)->get()->count();
+            $completed_month[] = DB::table('customer_orders')->where('status', '5')->whereYear('created_at', '=', $year)->whereMonth('created_at', '=', $iM)->get()->count();
         
             }
 
