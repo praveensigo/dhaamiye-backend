@@ -666,9 +666,9 @@ class OrderController extends Controller
     }
 
     public function getOrder($order_id) {
-        $order = CustomerOrder::select('customer_orders.*', 'address', 'country_code_id', 'phone', 'latitude', 'longitude', 'location', 'special_instructions')
+        $order = CustomerOrder::select('customer_orders.*', 'address', 'country_code_id', 'phone', 'latitude', 'longitude', 'location', 'special_instructions', 'payment_type')
                 ->join('customer_order_address', 'customer_orders.id', '=', 'customer_order_address.order_id')
-                ->descending()
+                ->join('customer_order_payments', 'customer_orders.id', '=', 'customer_order_payments.order_id')
                 ->where('customer_orders.id', $order_id)
                 ->with([
                     // 'fuel_station', 'fuels', 
