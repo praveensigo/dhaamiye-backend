@@ -44,6 +44,10 @@ class CustomerOrder extends Model
                 ->join('fuel_types', 'fuel_types.id', '=', 'customer_order_fuels.fuel_type_id');
     }
 
+    public function meter_readings() {
+        return $this->hasMany(MeterImage::class, 'order_id', 'id');
+    }
+
     public function review() {
         return $this->hasMany(Rating::class, 'order_id', 'id');
     }
