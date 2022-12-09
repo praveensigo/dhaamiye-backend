@@ -32,6 +32,10 @@ use App\Http\Controllers\admin\DashBoardController;
 Route::post('login/user', [LoginController::class, 'userLogin']);
 Route::post('login/admin', [LoginController::class, 'adminLogin']);
 Route::post('login/user_with_otp', [LoginController::class, 'loginWithOtp']);
+Route::post('login/driver', [LoginController::class, 'driverLogin']);
+Route::post('login/fuel_station', [LoginController::class, 'fuelStationLogin']);
+Route::post('login/user_with_otp/driver', [LoginController::class, 'loginWithOtpDriver']);
+Route::post('login/user_with_otp/fuel_station', [LoginController::class, 'loginWithOtpFuelStation']);
 
 /*REGISTER API*/
 Route::post('register/customer', [RegisterController::class, 'customer']);
