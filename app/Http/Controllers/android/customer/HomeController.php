@@ -210,7 +210,8 @@ class HomeController extends Controller
             $fuel_station = FuelStation::select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at')
                 ->join('users', 'users.user_id', '=', 'fuel_stations.id')
                 ->active()
-                ->where('role_id', 5)                
+                ->where('role_id', 5)  
+                ->where('fuel_stations.id', $request->id)              
                 ->with([
                     'fuels' => function ($query) {
                         $query->select('fuel_type_id', 'fuel_en', 'fuel_so', 'price', 'stock')
