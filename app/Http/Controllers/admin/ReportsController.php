@@ -108,7 +108,7 @@ class ReportsController extends Controller
         } else 
         {
 
-            $orders = CustomerOrder::select('customer_orders.id','customer_orders.fuel_station_id','customer_orders.amount_commision','customer_orders.delivery_charge_commision','customer_orders.total_commision',)
+            $orders = CustomerOrder::select('customer_orders.id','customer_orders.fuel_station_id','customer_orders.amount_commission','customer_orders.delivery_charge_commission','customer_orders.total_commission',)
                                     ->join('customer_order_payments','customer_order_payments.order_id','=','customer_orders.id')
                                     ->with([
                                        'fuel_station'
@@ -120,9 +120,9 @@ class ReportsController extends Controller
                     {
 
                         $search_text=$fields['keyword'];
-                        $orders->where('customer_orders.amount_commision', 'Like', '%' . $search_text . '%')
-                                ->orWhere('customer_orders.delivery_charge_commision', 'Like', '%' . $search_text . '%')
-                                ->orWhere('customer_orders.total_commision', 'Like', '%' . $search_text . '%')
+                        $orders->where('customer_orders.amount_commission', 'Like', '%' . $search_text . '%')
+                                ->orWhere('customer_orders.delivery_charge_commission', 'Like', '%' . $search_text . '%')
+                                ->orWhere('customer_orders.total_commission', 'Like', '%' . $search_text . '%')
                                 ->orWhereHas('fuel_station', function ($query)use($search_text) 
                                                     {
                                                         $query->where('users.name_en', 'Like', '%' . $search_text . '%')
@@ -234,12 +234,12 @@ class ReportsController extends Controller
                 //                     ->join('customer_orders','customer_orders.fuel_station_id','=','users.user_id')
                 //                     ->where('users.role_id','5') 
                 //                     ->where('customer_orders.id',$order->id)->first()->name_so;
-                $order->amount_commision =DB::table('customer_orders')->select('amount_commision')
-                                    ->where('customer_orders.id',$order->id)->first()->amount_commision;
-                $order->delivery_charge_commision =DB::table('customer_orders')->select('delivery_charge_commision')
-                                    ->where('customer_orders.id',$order->id)->first()->delivery_charge_commision;
-                $order->total_commision =DB::table('customer_orders')->select('total_commision')
-                                    ->where('customer_orders.id',$order->id)->first()->total_commision;
+                $order->amount_commission =DB::table('customer_orders')->select('amount_commission')
+                                    ->where('customer_orders.id',$order->id)->first()->amount_commission;
+                $order->delivery_charge_commission =DB::table('customer_orders')->select('delivery_charge_commission')
+                                    ->where('customer_orders.id',$order->id)->first()->delivery_charge_commission;
+                $order->total_commission =DB::table('customer_orders')->select('total_commission')
+                                    ->where('customer_orders.id',$order->id)->first()->total_commission;
                  $order->date =DB::table('customer_orders')->select('created_at')
                                     ->where('customer_orders.id',$order->id)->first()->created_at;
                         $i++;  
@@ -469,7 +469,7 @@ class ReportsController extends Controller
     //     } else 
     //     {
 
-    //         $orders = CustomerOrder::select('customer_orders.id','customer_orders.fuel_station_id','customer_orders.amount_commision','customer_orders.delivery_charge_commision','customer_orders.total_commision',)
+    //         $orders = CustomerOrder::select('customer_orders.id','customer_orders.fuel_station_id','customer_orders.amount_commission','customer_orders.delivery_charge_commission','customer_orders.total_commission',)
     //                                 ->join('customer_order_payments','customer_order_payments.order_id','=','customer_orders.id')
     //                                 ->with([
     //                                    'fuel_station'
@@ -481,9 +481,9 @@ class ReportsController extends Controller
     //                 {
 
     //                     $search_text=$fields['keyword'];
-    //                     $orders->where('customer_orders.amount_commision', 'Like', '%' . $search_text . '%')
-    //                             ->orWhere('customer_orders.delivery_charge_commision', 'Like', '%' . $search_text . '%')
-    //                             ->orWhere('customer_orders.total_commision', 'Like', '%' . $search_text . '%')
+    //                     $orders->where('customer_orders.amount_commission', 'Like', '%' . $search_text . '%')
+    //                             ->orWhere('customer_orders.delivery_charge_commission', 'Like', '%' . $search_text . '%')
+    //                             ->orWhere('customer_orders.total_commission', 'Like', '%' . $search_text . '%')
     //                             ->orWhereHas('fuel_station', function ($query)use($search_text) 
     //                                                 {
     //                                                     $query->where('users.name_en', 'Like', '%' . $search_text . '%')
