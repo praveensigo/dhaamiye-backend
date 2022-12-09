@@ -20,9 +20,14 @@ class ContactController extends Controller
         $issue_types =  DB::table('issue_types')
                         ->select('id', 'issue_en', 'issue_so')
                         ->where('status', 1)
-                        ->get();   
+                        ->get();  
+        $contact =  DB::table('settings')
+                        ->select('country_code_id', 'country_code', 'mobile', 'email')
+                        ->join('country_codes','country_codes.id','=','settings.country_code_id') 
+                        ->first();  
 
         $data = array(
+            'contact' => $contact,
             'issue_types' => $issue_types,
         );
 
