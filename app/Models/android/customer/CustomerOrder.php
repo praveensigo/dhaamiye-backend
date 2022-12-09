@@ -21,6 +21,7 @@ class CustomerOrder extends Model
     protected $appends = [
         'converted_created_at',
         'converted_status',
+        'converted_payment_type'
     ];
 
     /**
@@ -42,6 +43,10 @@ class CustomerOrder extends Model
     public function fuels() {
         return $this->hasMany(CustomerOrderFuel::class, 'order_id', 'id')
                 ->join('fuel_types', 'fuel_types.id', '=', 'customer_order_fuels.fuel_type_id');
+    }
+
+    public function meter_readings() {
+        return $this->hasMany(MeterImage::class, 'order_id', 'id');
     }
 
     public function review() {
@@ -121,5 +126,16 @@ class CustomerOrder extends Model
     public function getConvertedCreatedAtAttribute()
     {
         return date('d M Y, h:i a', strtotime($this->created_at));
+    }
+    public function getConvertedPaymentTypeAttribute() {
+        if($this->payment_type == 1) {
+            return 'Mobile Payment';
+
+        } else if($this->payment_type == 2) {
+            return 'Cash Payment';
+
+        } else {
+            return '';
+        }
     }
 }
