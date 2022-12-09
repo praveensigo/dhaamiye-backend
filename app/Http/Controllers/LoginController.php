@@ -202,7 +202,9 @@ class LoginController extends Controller
 
                             $driver->fcm = $request->fcm;
                             $driver->save();
+
                             if ($driver->role_id == '4') {
+                           
                                 $user = DB::table('drivers')->where('id', $driver->user_id)->first();
 
                             } 
