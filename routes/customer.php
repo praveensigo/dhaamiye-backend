@@ -14,6 +14,7 @@ use App\Http\Controllers\android\customer\ReviewController;
 use App\Http\Controllers\android\customer\FavoriteController;
 use App\Http\Controllers\android\customer\PromotionController;
 use App\Http\Controllers\android\customer\NotificationController;
+use App\Http\Controllers\android\customer\ContactController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,15 +31,18 @@ Route::post('login', [LoginController::class, 'userLogin']);
 Route::post('login-with-otp', [LoginController::class, 'loginWithOtp']);
 Route::post('register', [RegisterController::class, 'customer']);
 Route::post('forgot-password', [CheckController::class, 'isMobileRegistered']);
-Route::post('forgot-password', [CheckController::class, 'isMobileRegistered']);
 Route::post('register/check', [CheckController::class, 'isRegistrable']);
 Route::post('reset-password', [CheckController::class, 'resetPassword']);
 Route::get('get-countrycodes', [GeneralController::class, 'getCountryCodes']);
+Route::get('about', [GeneralController::class, 'getAbout']);
+Route::get('privacy-policy', [GeneralController::class, 'getPrivacyPolicy']);
+Route::get('terms-and-conditions', [GeneralController::class, 'getTermsandConditions']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('profile', [ProfileController::class, 'index']);
     Route::post('profile/change-password', [ProfileController::class, 'changePassword']);
     Route::post('profile/update', [ProfileController::class, 'update']);
+    Route::post('profile/check-mobile', [ProfileController::class, 'isMobileUnique']);
     Route::get('home', [HomeController::class, 'index']);
     Route::get('search', [HomeController::class, 'search']);
     Route::get('fuel-types', [HomeController::class, 'getFuelStationFuels']);
@@ -55,4 +59,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('favourites', [FavoriteController::class, 'index']);
     Route::get('promotions', [PromotionController::class, 'index']);
     Route::get('notifications', [NotificationController::class, 'index']);
+    Route::get('issue-types', [ContactController::class, 'getIssueTypes']);
+    Route::post('add-enquiry', [ContactController::class, 'addEnquiry']);
+
+    Route::get('get-distance', [HomeController::class, 'GetDrivingDistance']);
 });

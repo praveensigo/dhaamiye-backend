@@ -9,12 +9,7 @@ use App\Models\android\customer\FuelStationStock;
 use App\Models\android\customer\FuelType;
 use App\Models\android\customer\CustomerOrder;
 use Illuminate\Support\Facades\DB;
-use App\Models\Service\ResponseSender as Response;
-
-use App\Models\android\customer\CustomerOrder;
-use Illuminate\Support\Facades\DB;
 use App\Models\service\ResponseSender as Response;
-
 use Illuminate\Validation\Rule;
 use Validator;
 
@@ -188,9 +183,7 @@ class OrderController extends Controller
                 'fuel_type_ids' => 'required|array',
                 'fuel_type_ids.*' => 'distinct|exists:fuel_types,id|numeric',
                 'quantities' => 'required|array',
-
                 'quantities.*' => 'numeric',
-
                 'coupon_code' => 'nullable|exists:coupons,coupon_code',
                 'latitude' => 'required',
                 'longitude' => 'required',
@@ -204,8 +197,7 @@ class OrderController extends Controller
 
             $fuels = [];
             $i = 0;
-
-            $total = 0;
+            $fuel_quantity_price = 0;
             $quantities = $request->quantities;
             foreach($request->fuel_type_ids as $fuel_type) {
 
@@ -213,9 +205,6 @@ class OrderController extends Controller
                         ->select('fuel_station_stocks.fuel_type_id', 'fuel_en', 'fuel_so', 'price', 'stock')
                         ->join('fuel_types', 'fuel_station_stocks.fuel_type_id', '=', 'fuel_types.id')
                         ->first();
-
-
-
 
                 if($type) {
                     if($quantities[$i] <= $type->stock) {
@@ -227,13 +216,6 @@ class OrderController extends Controller
                             'quantity' => $quantities[$i],
                             'price' => $type->price,
                             'total' => $type->price * $quantities[$i],
-
-                        ];
-                        
-                        $total = $total + ($type->price * $quantities[$i]);
-                        $i++;
-                    }
-
                             'stock_status' => 1,
                             'converted_stock_status' => 'In Stock',
                         ];
@@ -254,21 +236,16 @@ class OrderController extends Controller
                         ];
                     }
                     $i++;
-
                 }               
             }
 
-            $fuel_station = FuelStation::select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at', DB::raw("ROUND(6371 * acos(cos(radians(" . floatval($request->latitude) . ")) 
-                * cos(radians(fuel_stations.latitude)) 
-                * cos(radians(fuel_stations.longitude) - radians(" . floatval($request->longitude) . ")) 
-                + sin(radians(" .$request->latitude. ")) 
-                * sin(radians(fuel_stations.latitude))), 2) AS distance"))
+            $fuel_station = FuelStation::select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at')
                 ->join('users', 'users.user_id', '=', 'fuel_stations.id')
                 ->active()
                 ->where('role_id', 5)                
                 ->with([                    
 
-                    'favourites' => function ($query) use($auth_user_id) {
+                    'favorites' => function ($query) use($auth_user_id) {
                         $query->select('customers.id', 'name_en', 'name_so', 'customers.created_at', 'customers.status')
                         ->where('customer_favorite_stations.customer_id', '=', $auth_user_id);
                     },
@@ -282,9 +259,7 @@ class OrderController extends Controller
 
             $delivery_charge = $fuel_station->distance * $settings->fuel_delivery_range;
 
-
-            $tax = $total * $settings->tax / 100;
-
+            $tax = $fuel_quantity_price * $settings->tax / 100;
 
             /************* coupon starts ***************/
             $promotion_discount = 0;
@@ -303,18 +278,14 @@ class OrderController extends Controller
                 if($coupon) {
 
                     if($coupon->type == 1) {
-
-                        if($coupon->amount > $total) {
-                            $promotion_discount = $total;
-
+                        if($coupon->amount > $fuel_quantity_price) {
+                            $promotion_discount = $fuel_quantity_price;
                         } else {
                             $promotion_discount = $coupon->amount;
                         }
 
                     } else if($coupon->type == 2) {
-
-                        $promotion_discount = $total * $coupon->amount/100;
-
+                        $promotion_discount = $fuel_quantity_price * $coupon->amount/100;
                     }
                 }
             }
@@ -322,16 +293,12 @@ class OrderController extends Controller
 
             $other_charges = 0;
 
-
-            $grand_total = $total - $promotion_discount + $delivery_charge + $tax + $other_charges;
-
+            $grand_total = $fuel_quantity_price - $promotion_discount + $delivery_charge + $tax + $other_charges;
 
             $data = [
                 'fuel_station' => $fuel_station,
                 'fuels' => $fuels,
-
-                'total_price' => $total,
-
+                'total_price' => $fuel_quantity_price,
                 'coupon_code' => $request->coupon_code,
                 'promotion_discount' => $promotion_discount,
                 'delivery_charge' => $delivery_charge,
@@ -345,7 +312,6 @@ class OrderController extends Controller
 
         return $res;
     }
-
 
     /*************
     Book Now & Schedule
@@ -414,11 +380,7 @@ class OrderController extends Controller
                 }               
             }
 
-            $fuel_station = FuelStation::select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at', DB::raw("ROUND(6371 * acos(cos(radians(" . floatval($request->latitude) . ")) 
-                * cos(radians(fuel_stations.latitude)) 
-                * cos(radians(fuel_stations.longitude) - radians(" . floatval($request->longitude) . ")) 
-                + sin(radians(" .$request->latitude. ")) 
-                * sin(radians(fuel_stations.latitude))), 2) AS distance"))
+            $fuel_station = FuelStation::select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at')
                 ->join('users', 'users.user_id', '=', 'fuel_stations.id')
                 ->active()
                 ->where('role_id', 5)                
@@ -477,7 +439,6 @@ class OrderController extends Controller
             $order->promotion_discount = $promotion_discount;
             $order->other_charges = $other_charges;
             $order->total = $grand_total;
-            $order->status = 0;
             $order->created_at = date('Y-m-d H:i:s');
             $order->updated_at = date('Y-m-d H:i:s');
 
@@ -507,8 +468,6 @@ class OrderController extends Controller
                         'created_at' => date('Y-m-d H:i:s'),
                         'updated_at' => date('Y-m-d H:i:s'),
                 ));
-
-                
 
                 $data = [
                     'order' => $this->getOrder($order->id)
@@ -564,6 +523,7 @@ class OrderController extends Controller
 
             if($order->status == 0) {
                 $order->status = 1;
+                $order->pin = $this->generatePIN();
                 $order->delivery_date = $request->delivery_date;
                 $order->delivery_time = $request->delivery_time;
                 $order->save();
@@ -655,7 +615,14 @@ class OrderController extends Controller
                 ->where('status', '!=',0)
                 ->status($request->status)
                 ->with([
-                    'fuel_station', 'fuels', 
+                    // 'fuel_station', 'fuels', 
+                    'fuel_station'=> function($query) use($request) {
+                        $query->select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at')
+                        ->join('users', 'users.user_id', '=', 'fuel_stations.id')
+                        ->where('role_id', 5);
+
+                    }, 'fuels'
+
                 ]);
            
 
@@ -672,13 +639,15 @@ class OrderController extends Controller
 
     /*************
     Orders Details
-    @params: id
+    @params: id, latitude, longitude
     **************/
     public function details(Request $request)
     {
         $auth_user = auth('sanctum')->user();
         $validator = Validator::make($request->all(), [
             'id' => 'required|exists:customer_orders,id',
+            'latitude' => 'required',
+            'longitude' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -697,12 +666,21 @@ class OrderController extends Controller
     }
 
     public function getOrder($order_id) {
-        $order = CustomerOrder::select('customer_orders.*', 'address', 'country_code_id', 'phone', 'latitude', 'longitude', 'location', 'special_instructions')
-                ->join('customer_order_address', 'customer_orders.id', '=', 'customer_order_address.order_id')
-                ->descending()
+        $order = CustomerOrder::select('customer_orders.*', 'address', 'country_code_id', 'phone', 'latitude', 'longitude', 'location', 'special_instructions', 'payment_type')
+
+                ->leftjoin('customer_order_address', 'customer_orders.id', '=', 'customer_order_address.order_id')
+                ->leftjoin('customer_order_payments', 'customer_orders.id', '=', 'customer_order_payments.order_id')
+
                 ->where('customer_orders.id', $order_id)
                 ->with([
-                    'fuel_station', 'fuels', 
+                    // 'fuel_station', 'fuels', 
+                    'fuel_station'=> function($query) {
+                        $query->select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at')
+                        ->join('users', 'users.user_id', '=', 'fuel_stations.id')
+                        ->where('role_id', 5);
+
+                    }, 'fuel_station.favorites', 'fuels', 'meter_readings',
+
                     'customer' => function($query) {
                         $query->join('users', 'customers.id', '=', 'users.user_id')
                         ->select('customers.id', 'name_en', 'name_so', 'email', 'mobile', 'country_code_id', 'country_code', 'customers.created_at', 'customers.status')
@@ -769,16 +747,15 @@ class OrderController extends Controller
         return $res;
     }
 
-    /****** GENERATE CODE *****/
-    function generateCode() 
+    /****** GENERATE PIN *****/
+    function generatePIN() 
     {
         $chars = '0123456789';
         $len = strlen($chars);
-        $code = '';
-        for ($i = 0; $i < 10; $i++) {
-            $code .= $chars[rand(0, $len - 1)];
+        $pin = '';
+        for ($i = 0; $i < 4; $i++) {
+            $pin .= $chars[rand(0, $len - 1)];
         }
-        return $code;
+        return $pin;
     }
-
 }

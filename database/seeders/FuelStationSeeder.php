@@ -24,6 +24,16 @@ class FuelStationSeeder extends Seeder
                 'status' => '1',
                 'created_at' => date("Y-m-d H:i:s"),
                 'updated_at' => date("Y-m-d H:i:s"),
+            ),
+            array(
+                'place' => 'Chalakudy, Kerala',
+                'latitude' => '10.3070105',
+                'longitude' => '76.3340589',
+                'address'  => 'Chalakudy, Kerala, India',
+                'added_by' => '1',
+                'status' => '1',
+                'created_at' => date("Y-m-d H:i:s"),
+                'updated_at' => date("Y-m-d H:i:s"),
             )
         );
         DB::table('fuel_stations')->insert($array);

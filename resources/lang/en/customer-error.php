@@ -109,4 +109,13 @@ return [
 
     'remove_favorite_en' => 'Failed to remove fuel station from your favourites',
     'remove_favorite_so' => 'Failed to remove fuel station from your favourites',
+
+    'issue_type_required_en' => 'Please select your issue',
+    'issue_type_required_so' => 'Please select your issue',
+
+    'comment_required_en' => 'Please enter your comments',
+    'comment_required_so' => 'Please enter your comments',
+
+    'add_comment_en' => 'Failed to add your comments',
+    'add_comment_so' => 'Failed to add your comments',
 ];

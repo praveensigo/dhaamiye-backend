@@ -24,6 +24,9 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             SettingSeeder::class,
             FuelTypeSeeder::class,
+            AboutSeeder::class,
+            PrivacyPolicySeeder::class,
+            TermSeeder::class,
         ]);
     }
 }
