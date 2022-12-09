@@ -25,13 +25,7 @@ class ProfileController extends Controller
                     ->join('country_codes','country_codes.id','=','users.country_code_id')                    
                     ->where('customers.id',$auth_user->user_id)
                     ->where('users.role_id','3')
-                    ->first();
-
-        // $doctorname = "Dr. Riya" ;
-        // $patientname = "Lisa Mathew";
-        // $mobile = '9999999999';
-        // $message='Hello ' . $patientname . ' ! Your registration has been done successfully. Start Feeling Better Today! Thank You for choosing Medicino. Kindly choose the specialized Doctor for you.';
-        // $msg = rawurlencode($message);
+                    ->first();        
 
         if($customer) {
             $res = Response::send(

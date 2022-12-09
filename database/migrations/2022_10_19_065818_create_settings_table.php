@@ -19,6 +19,9 @@ return new class extends Migration
             $table->decimal('commision', 12, 2);
             $table->decimal('tax', 12, 2);
             $table->decimal('min_fuel_level', 12, 2);
+            $table->foreignId('country_code_id')->references('id')->on('country_codes');
+            $table->string('mobile');
+            $table->string('email');
             $table->string('android_version_driver');
             $table->string('android_version_customer');
             $table->string('ios_version_driver');

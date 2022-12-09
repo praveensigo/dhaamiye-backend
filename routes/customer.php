@@ -31,7 +31,6 @@ Route::post('login', [LoginController::class, 'userLogin']);
 Route::post('login-with-otp', [LoginController::class, 'loginWithOtp']);
 Route::post('register', [RegisterController::class, 'customer']);
 Route::post('forgot-password', [CheckController::class, 'isMobileRegistered']);
-Route::post('forgot-password', [CheckController::class, 'isMobileRegistered']);
 Route::post('register/check', [CheckController::class, 'isRegistrable']);
 Route::post('reset-password', [CheckController::class, 'resetPassword']);
 Route::get('get-countrycodes', [GeneralController::class, 'getCountryCodes']);
