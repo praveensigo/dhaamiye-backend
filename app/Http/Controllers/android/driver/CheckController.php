@@ -4,6 +4,11 @@ namespace App\Http\Controllers\android\driver;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\android\driver\User;
+use App\Models\service\ResponseSender as Response;
+use Illuminate\Validation\Rule;
+use Validator;
+use Illuminate\Support\Facades\Hash;
 
 class CheckController extends Controller
 {
@@ -68,7 +73,7 @@ class CheckController extends Controller
                 if($request->lang  == 2) {
                     $message = __('customer-error.mobile_not_registered_so');
                 }
-                $res = Response::send(false, [], $message = ['mobile' => $message], 422);
+                $res = Response::send(false, $user, $message = ['mobile' => $message], 422);
             }
         }
         return $res;

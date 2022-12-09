@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\GeneralController;
+use App\Http\Controllers\android\driver\CheckController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,7 +22,6 @@ use App\Http\Controllers\GeneralController;
 Route::post('login', [LoginController::class, 'driverLogin']);
 Route::post('login-with-otp', [LoginController::class, 'loginWithOtp']);
 Route::post('register', [RegisterController::class, 'driver']);
-Route::post('forgot-password', [CheckController::class, 'isMobileRegistered']);
 Route::post('forgot-password', [CheckController::class, 'isMobileRegistered']);
 Route::post('register/check', [CheckController::class, 'isRegistrable']);
 Route::post('reset-password', [CheckController::class, 'resetPassword']);
