@@ -8,6 +8,7 @@ use App\Models\Service\ResponseSender as Response;
 use App\Models\admin\Driver;
 use App\Models\admin\CustomerOrderFuel;
 use App\Models\admin\CustomerOrder;
+use App\Models\admin\CustomerOrderPayment;
 use App\Models\admin\DriverPayments;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -786,6 +787,101 @@ public function orders(Request $request)
        return $res;
 }
 
+// public function earnings(Request $request)
+// {
+//     $fields    = $request->input();
+//     $validator = Validator::make($request->all(), [
+//         'id' => 'required|numeric|exists:drivers,id',
+//         'limit' => 'required|numeric',
+//         'keyword' => 'nullable',
+//         'status' => 'nullable|numeric',
+
+//     ]);
+//     if ($validator->fails()) {
+//         $errors = collect($validator->errors());
+//         $res = Response::send(false, [], $message = $errors, 422);
+
+//     } else {
+       
+//         $payments = CustomerOrderPayment::select(DB::raw('DATE(created_at) as day' ))
+//                                 ->where('customer_order_payments.driver_id',$fields['id'])
+//                                 ->groupBy(DB::raw('DATE(created_at)'),)
+//                                 ->get();
+       
+//          foreach($payments as $payment){
+
+//             $payment-> total_completed = DriverPayments::query()
+//                                         ->select(
+//                                             DB::raw('SUM(amount) AS total_completed_amount')
+//                                         )
+//                                         ->whereDATE('created_at', $payment->day)
+//                                         ->first()->total_completed_amount;
+
+//             $payment-> mobile_completed = DriverPayments::query()
+//                                         ->select(
+//                                             DB::raw('SUM(amount) AS mobile_amount')
+//                                         )
+//                                         ->where('payment_type', '1')
+//                                         ->whereDATE('created_at', $payment->day)
+//                                         ->first()->mobile_amount;
+//             $payment-> cash_completed = DriverPayments::query()
+//                                         ->select(
+//                                             DB::raw('SUM(amount) AS cash')
+//                                         )
+//                                         ->where('payment_type', '2')
+//                                         ->whereDATE('created_at', $payment->day)
+//                                         ->first()->cash;
+//             $payment-> total_pending = CustomerOrderPayment::query()
+//                                         ->select(
+//                                             DB::raw('SUM(total_amount) AS total_pending_amount')
+//                                         )
+//                                         ->whereDATE('created_at', $payment->day)
+//                                         ->whereNotIn('customer_order_payments.order_id', function ($query) {
+//                                             $query->select('order_id')
+//                                             ->from('driver_payments');
+//                                         })
+//                                         ->first()->total_pending_amount;
+
+//              $payment-> mobile_pending = CustomerOrderPayment::query()
+//                                         ->select(
+//                                             DB::raw('SUM(total_amount) AS mobile_pending')
+//                                         )
+//                                         ->whereDATE('created_at', $payment->day)
+//                                         ->where('payment_type', '1')
+//                                         ->whereNotIn('customer_order_payments.order_id', function ($query) {
+//                                             $query->select('order_id')
+//                                             ->from('driver_payments');
+//                                         })
+//                                         ->first()->mobile_pending;
+
+//             $payment-> cash_pending = CustomerOrderPayment::query()
+//                                         ->select(
+//                                             DB::raw('SUM(total_amount) AS cash_pending')
+//                                         )
+//                                         ->whereDATE('created_at', $payment->day)
+//                                         ->where('payment_type', '2')
+//                                         ->whereNotIn('customer_order_payments.order_id', function ($query) {
+//                                             $query->select('order_id')
+//                                             ->from('driver_payments');
+//                                         })
+//                                         ->first()->cash_pending;                            
+//                                 }
+//             if ($fields['keyword']) 
+//                            {
+//                          $search_text=$fields['keyword'];
+//                       $payments->where('customer_order_payments.total_amount',  $search_text . '%')
+                            
+//                                                   ;
+                            
+//                            }                       
+//             $data = array(
+//                   'payments' => $payments,
+//                          );
+
+//             $res = Response::send(true, $data, '', 200);
+//       }
+//        return $res;
+// }
 public function earnings(Request $request)
 {
     $fields    = $request->input();
@@ -801,36 +897,152 @@ public function earnings(Request $request)
         $res = Response::send(false, [], $message = $errors, 422);
 
     } else {
-        // $from = Carbon::now()->startOfMonth();
-        // $to   = Carbon::now()->endOfMonth();
-        // $payments = DriverPayments::query()
-        //                         ->select(
-        //                         DB::raw('DAY(created_at), SUM(amount) AS total_completed_amount')
-        //                         )
-        //                         //->whereBetween('created_at', [$from, $to])
-        //                         ->groupBy(DB::raw('DAY(created_at)'))
-        //                         ->get();
-        //DB::raw("(SELECT name FROM doctors WHERE notifications.user_id = doctors.id and notifications.type=2) as doctor_name"), DB::raw("(SELECT name FROM patients WHERE notifications.user_id = patients.id and notifications.type=3) as patient_name")       
-        // $payments = DB::table('driver_payments')->orderBy('created_at', 'DESC')->get();
-        
-        // foreach ($payments as $payment){
-        //     if($payment->payment_type=="1"){
-        //         $payment->select(
-        //             DB::raw('DAY(created_at), SUM(amount)  AS total_completed_amount')
-        //         );
-        //     }
-            // elseif($payment->gender=="female"){
-            //     $data[$payment->student_class]['female'][] = $payment->amount;
-            // }
-        $payments = DriverPayments::query()
-                                ->select(
-                                DB::raw('DAY(created_at)'), DB::raw('SUM(amount)  AS total_completed_amount'),
-                                DB::raw("(SELECT SUM(amount) FROM driver_payments WHERE driver_payments.payment_type = '1' OrderBy(created_at ) as mobile")
-                                )
-                                //->whereBetween('created_at', [$from, $to])
-                                ->groupBy(DB::raw('DAY(created_at)'),'payment_type')
+       
+        $payments = CustomerOrderPayment::select(DB::raw('DATE(created_at) as day' ))
+                                ->where('customer_order_payments.driver_id',$fields['id'])
+                                ->groupBy(DB::raw('DATE(created_at)'),)
+                                ->orderBy('day','desc')
                                 ->get();
+         if ($fields['status'] == '0') 
+         {
+       
+         foreach($payments as $payment){
+           
+            $payment-> total_pending = CustomerOrderPayment::query()
+                                        ->select(
+                                            DB::raw('SUM(total_amount) AS total_pending_amount')
+                                        )
+                                        ->whereDATE('created_at', $payment->day)
+                                        ->whereNotIn('customer_order_payments.order_id', function ($query) {
+                                            $query->select('order_id')
+                                            ->from('driver_payments');
+                                        })
+                                        ->first()->total_pending_amount;
 
+             $payment-> mobile_pending = CustomerOrderPayment::query()
+                                        ->select(
+                                            DB::raw('SUM(total_amount) AS mobile_pending')
+                                        )
+                                        ->whereDATE('created_at', $payment->day)
+                                        ->where('payment_type', '1')
+                                        ->whereNotIn('customer_order_payments.order_id', function ($query) {
+                                            $query->select('order_id')
+                                            ->from('driver_payments');
+                                        })
+                                        ->first()->mobile_pending;
+
+            $payment-> cash_pending = CustomerOrderPayment::query()
+                                        ->select(
+                                            DB::raw('SUM(total_amount) AS cash_pending')
+                                        )
+                                        ->whereDATE('created_at', $payment->day)
+                                        ->where('payment_type', '2')
+                                        ->whereNotIn('customer_order_payments.order_id', function ($query) {
+                                            $query->select('order_id')
+                                            ->from('driver_payments');
+                                        })
+                                        ->first()->cash_pending;                            
+                                }
+                            }
+           elseif ($fields['status'] == '1') 
+                {
+                          
+                 foreach($payments as $payment){
+                   
+                $payment-> total_completed = DriverPayments::query()
+                                                ->select(
+                                                    DB::raw('SUM(amount) AS total_completed_amount')
+                                                     )
+                                                 ->whereDATE('created_at', $payment->day)
+                                                ->first()->total_completed_amount;
+                   
+                 $payment-> mobile_completed = DriverPayments::query()
+                                                        ->select(
+                                                        DB::raw('SUM(amount) AS mobile_amount')
+                                                        )
+                                                        ->where('payment_type', '1')
+                                                        ->whereDATE('created_at', $payment->day)
+                                                        ->first()->mobile_amount;
+                 $payment-> cash_completed = DriverPayments::query()
+                                                           ->select(
+                                                               DB::raw('SUM(amount) AS cash')
+                                                           )
+                                                           ->where('payment_type', '2')
+                                                           ->whereDATE('created_at', $payment->day)
+                                                           ->first()->cash;
+                
+                                               }}
+                else{
+                          
+              foreach($payments as $payment){
+                                                  
+                $payment-> total_completed = DriverPayments::query()
+                                        ->select(
+                                            DB::raw('SUM(amount) AS total_completed_amount')
+                                        )
+                                        ->whereDATE('created_at', $payment->day)
+                                        ->first()->total_completed_amount;
+
+                 $payment-> mobile_completed = DriverPayments::query()
+                                            ->select(
+                                                DB::raw('SUM(amount) AS mobile_amount')
+                                            )
+                                            ->where('payment_type', '1')
+                                            ->whereDATE('created_at', $payment->day)
+                                            ->first()->mobile_amount;
+            $payment-> cash_completed = DriverPayments::query()
+                                        ->select(
+                                            DB::raw('SUM(amount) AS cash')
+                                        )
+                                        ->where('payment_type', '2')
+                                        ->whereDATE('created_at', $payment->day)
+                                        ->first()->cash;
+            $payment-> total_pending = CustomerOrderPayment::query()
+                                        ->select(
+                                            DB::raw('SUM(total_amount) AS total_pending_amount')
+                                        )
+                                        ->whereDATE('created_at', $payment->day)
+                                        ->whereNotIn('customer_order_payments.order_id', function ($query) {
+                                            $query->select('order_id')
+                                            ->from('driver_payments');
+                                        })
+                                        ->first()->total_pending_amount;
+
+            $payment-> mobile_pending = CustomerOrderPayment::query()
+                                        ->select(
+                                            DB::raw('SUM(total_amount) AS mobile_pending')
+                                        )
+                                        ->whereDATE('created_at', $payment->day)
+                                        ->where('payment_type', '1')
+                                        ->whereNotIn('customer_order_payments.order_id', function ($query) {
+                                            $query->select('order_id')
+                                            ->from('driver_payments');
+                                        })
+                                        ->first()->mobile_pending;
+
+            $payment-> cash_pending = CustomerOrderPayment::query()
+                                        ->select(
+                                            DB::raw('SUM(total_amount) AS cash_pending')
+                                        )
+                                        ->whereDATE('created_at', $payment->day)
+                                        ->where('payment_type', '2')
+                                        ->whereNotIn('customer_order_payments.order_id', function ($query) {
+                                            $query->select('order_id')
+                                            ->from('driver_payments');
+                                        })
+                                        ->first()->cash_pending;                            
+                                
+                                               
+                                                }}
+            if ($fields['keyword']) 
+                           {
+                         $search_text=$fields['keyword'];
+                         $payments = $payments
+                         //->where('DATE(created_at)', 'LIKE', $search_text . '%')
+                                            ->where('driver_payments.created_at', $search_text )
+                                                  ;
+                            
+                           }                       
             $data = array(
                   'payments' => $payments,
                          );
@@ -839,6 +1051,5 @@ public function earnings(Request $request)
       }
        return $res;
 }
-
 }
 

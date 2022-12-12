@@ -170,9 +170,9 @@
 						<th>Order ID</th>
 						<th>Delivery Date</th>
                         <th>Fuel Station</th>
-						<th>Commision (Order Amount)</th>
-						<th>Commision (Delivery Charge)</th>	
-						<th>Total Commision</th>
+						<th>Commission (Order Amount)</th>
+						<th>Commission (Delivery Charge)</th>	
+						<th>Total Commission</th>
                       						
 							
 					</tr>						
@@ -183,9 +183,9 @@
 							<td>{{ $order->order_id }}</td>
 							<td>{{ $order->converted_created_at }}</td>
                             <td>{{ $order->fuel_station_name }}</td>
-							<td>{{ $order->amount_commision }}</td>
-							<td>{{ $order->delivery_charge_commision }}</td>
-							<td>{{ $order->total_commision }}</td>
+							<td>{{ $order->amount_commission }}</td>
+							<td>{{ $order->delivery_charge_commission }}</td>
+							<td>{{ $order->total_commission }}</td>
 
 							<!-- <td></td>
 							<td></td>
