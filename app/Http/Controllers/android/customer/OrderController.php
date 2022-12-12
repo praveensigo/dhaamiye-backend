@@ -180,9 +180,9 @@ class OrderController extends Controller
         $validator = Validator::make($request->all(),
             [
                 'fuel_station_id' => 'required|exists:fuel_stations,id',
-                'fuel_type_ids' => 'required|array',
+                'fuel_type_ids' => 'required',
                 'fuel_type_ids.*' => 'distinct|exists:fuel_types,id|numeric',
-                'quantities' => 'required|array',
+                'quantities' => 'required',
                 'quantities.*' => 'numeric',
                 'coupon_code' => 'nullable|exists:coupons,coupon_code',
                 'latitude' => 'required',
@@ -198,12 +198,17 @@ class OrderController extends Controller
             $fuels = [];
             $i = 0;
             $fuel_quantity_price = 0;
-            $quantities = $request->quantities;
-            foreach($request->fuel_type_ids as $fuel_type) {
+            //$quantities = $request->quantities;
+
+            $fuel_type_ids = json_decode($request->fuel_type_ids, true);
+            $quantities = json_decode($request->quantities, true);
+
+            foreach($fuel_type_ids as $fuel_type) {
 
                 $type = DB::table('fuel_station_stocks')
                         ->select('fuel_station_stocks.fuel_type_id', 'fuel_en', 'fuel_so', 'price', 'stock')
                         ->join('fuel_types', 'fuel_station_stocks.fuel_type_id', '=', 'fuel_types.id')
+                        ->where('fuel_type_id', $fuel_type)
                         ->first();
 
                 if($type) {
@@ -334,9 +339,10 @@ class OrderController extends Controller
         $validator = Validator::make($request->all(),
             [
                 'fuel_station_id' => 'required|exists:fuel_stations,id',
-                'fuel_type_ids' => 'required|array',
+                'fuel_type_ids' => 'required',
                 'fuel_type_ids.*' => 'distinct|exists:fuel_types,id|numeric',
-                'quantities' => 'required|array',
+                'quantities' => 'required',
+                'quantities.*' => 'numeric',
                 'coupon_code' => 'nullable|exists:coupons,coupon_code',
                 'latitude' => 'required',
                 'longitude' => 'required',
@@ -353,7 +359,11 @@ class OrderController extends Controller
             $order_fuels = [];
             $i = 0;
             $fuel_quantity_price = 0;
-            $quantities = $request->quantities;
+            //$quantities = $request->quantities;
+
+            $fuel_type_ids = json_decode($request->fuel_type_ids, true);
+            $quantities = json_decode($request->quantities, true);
+
             foreach($request->fuel_type_ids as $fuel_type) {
 
                 $type = DB::table('fuel_station_stocks')
