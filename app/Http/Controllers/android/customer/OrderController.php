@@ -364,7 +364,7 @@ class OrderController extends Controller
             $fuel_type_ids = json_decode($request->fuel_type_ids, true);
             $quantities = json_decode($request->quantities, true);
 
-            foreach($request->fuel_type_ids as $fuel_type) {
+            foreach($fuel_type_ids as $fuel_type) {
 
                 $type = DB::table('fuel_station_stocks')
                         ->select('fuel_station_stocks.fuel_type_id', 'fuel_en', 'fuel_so', 'price', 'stock')
