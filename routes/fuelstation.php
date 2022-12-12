@@ -7,6 +7,9 @@ use App\Http\Controllers\LoginController;
 
 use App\Http\Controllers\fuelstation\DashboardController;
 use App\Http\Controllers\fuelstation\ProfileController;
+use App\Http\Controllers\fuelstation\FuelController;
+use App\Http\Controllers\fuelstation\NotificationController;
+use App\Http\Controllers\fuelstation\RatingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,7 +22,7 @@ use App\Http\Controllers\fuelstation\ProfileController;
 |
 */
 
-Route::post('login', [LoginController::class, 'userLogin']);
+Route::post('login/fuel_station', [LoginController::class, 'fuelStationLogin']);
 Route::post('login-with-otp', [LoginController::class, 'loginWithOtp']);
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -28,8 +31,24 @@ Route::middleware('auth:sanctum')->group(function () {
    
    
     Route::get('fuel_station/profile',[ProfileController::class,'profile']);
-    Route::post('fuel_station/update_profile', [ProfileController::class, 'updateProfile']);
-    Route::post('fuel_station/change_password', [ProfileController::class, 'changePassword']);
+    Route::post('fuel_station/profile/update_profile', [ProfileController::class, 'updateProfile']);
+    Route::post('fuel_station/profile/change_password', [ProfileController::class, 'changePassword']);
 
+    Route::get('fuel_station/fuel_types', [FuelController::class, 'index']);
+    Route::post('fuel_station/fuel/add_fuel', [FuelController::class, 'addFuel']);
+    Route::post('fuel_station/fuel/update_price', [FuelController::class, 'updatePrice']);
+    Route::post('fuel_station/fuel/update_stock', [FuelController::class, 'updateStock']);
+    Route::get('fuel_station/fuel/fuel_stock_logs', [FuelController::class, 'fuelStockLogs']);
+    Route::get('fuel_station/fuel/fuel_price_logs', [FuelController::class, 'fuelPriceLogs']);
+    
+    Route::get('fuel_station/notification/received', [NotificationController::class, 'receivedIndex']);
+    Route::get('fuel_station/notification/send', [NotificationController::class, 'sendIndex']);
+    Route::post('fuel_station/notification/add', [NotificationController::class, 'add']);
+    Route::post('fuel_station/notification/edit', [NotificationController::class, 'update']);
+    Route::get('fuel_station/notification/status', [NotificationController::class, 'status']);
+    Route::post('fuel_station/notification/delete', [NotificationController::class, 'delete']);
+
+    Route::get('fuel_station/customerRatings',[RatingController::class,'customerRatings']);
+    Route::get('fuel_station/driverRatings',[RatingController::class,'driverRatings']);
 
     });

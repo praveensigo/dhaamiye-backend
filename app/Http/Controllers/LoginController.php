@@ -119,9 +119,9 @@ class LoginController extends Controller
             $res = Response::send(false, [], $message = $errors, 422);
         } else {
             $user = new User;
-            $custome = User::withTrashed()->where('mobile', $request->mobile)->where('country_code_id', $request->country_code)->first();
-            if ($custome) {
-                if ($custome->deleted_at) {
+            $customer = User::withTrashed()->where('mobile', $request->mobile)->where('country_code_id', $request->country_code)->where('role_id',3 )->first();
+            if ($customer) {
+                if ($customer->deleted_at) {
                     $res = Response::send(false, [], $message = ['mobile' => [__('error.account_deleted')]], 422);
                 } else {
 
@@ -129,17 +129,13 @@ class LoginController extends Controller
 
                         if (Auth::attempt(['country_code_id' => $request->country_code, 'mobile' => $request->mobile, 'password' => $request->password, 'status' => 1])) {
 
-                            $custome->fcm = $request->fcm;
-                            $custome->save();
-                            if ($custome->role_id == '3') {
-                                $user = DB::table('customers')->where('id', $custome->user_id)->first();
+                            $customer->fcm = $request->fcm;
+                            $customer->save();
+                            if ($customer->role_id == '3') {
+                                $user = DB::table('customers')->where('id', $customer->user_id)->first();
 
-                            } elseif ($custome->role_id == '4') {
-                                $user = DB::table('drivers')->where('id', $custome->user_id)->first();
-                            } elseif ($custome->role_id == '5') {
-                                $user = DB::table('fuel_stations')->where('id', $custome->user_id)->first();
                             }
-                            $details = $custome;
+                            $details = $customer;
                             $user_details = $details;
 
                             /* Create Token */
@@ -148,7 +144,7 @@ class LoginController extends Controller
 
                               /* User Array */
                             $user_array = [
-                                'details' => $custome,
+                                'details' => $customer,
                                 'other_details' => $user,
 
                             ];
@@ -194,7 +190,7 @@ class LoginController extends Controller
             $res = Response::send(false, [], $message = $errors, 422);
         } else {
             $user = new User;
-            $driver = User::withTrashed()->where('mobile', $request->mobile)->where('country_code_id', $request->country_code)->first();
+            $driver = User::withTrashed()->where('mobile', $request->mobile)->where('country_code_id', $request->country_code)->where('role_id',4 )->first();
             if ($driver) {
                 if ($driver->deleted_at) {
                     $res = Response::send(false, [], $message = ['mobile' => [__('error.account_deleted')]], 422);
@@ -206,14 +202,12 @@ class LoginController extends Controller
 
                             $driver->fcm = $request->fcm;
                             $driver->save();
-                            if ($driver->role_id == '3') {
+
+                            if ($driver->role_id == '4') {
+                           
                                 $user = DB::table('drivers')->where('id', $driver->user_id)->first();
 
-                            } elseif ($driver->role_id == '4') {
-                                $user = DB::table('drivers')->where('id', $driver->user_id)->first();
-                            } elseif ($driver->role_id == '5') {
-                                $user = DB::table('fuel_stations')->where('id', $driver->user_id)->first();
-                            }
+                            } 
                             $details = $driver;
                             $user_details = $details;
 
@@ -244,6 +238,77 @@ class LoginController extends Controller
         return $res;
     }
 
+/*FUELSTATION LOGIN WITH PASSWORD*/
+public function fuelStationLogin(Request $request)
+{
+    $validator = Validator::make($request->all(),
+        [
+            'country_code' => 'required|numeric|exists:country_codes,id',
+            'mobile' => 'required|numeric',
+            'password' => 'required|min:6|max:16',
+        ],
+        [
+            'country_code.required' => __('error.country_code_required'),
+            'country_code.exists' => __('error.country_code_exists'),
+            'mobile.required' => __('error.mobile_required'),
+            'password.required' => __('error.password_required'),
+            'password.min' => __('error.password_min_max'),
+            'password.max' => __('error.password_min_max'),
+        ]
+    );
+    
+    if ($validator->fails()) {
+        $errors = collect($validator->errors());
+
+        $res = Response::send(false, [], $message = $errors, 422);
+    } else {
+        $user = new User;
+        $fuel_station = User::withTrashed()->where('mobile', $request->mobile)->where('country_code_id', $request->country_code)->where('role_id',5 )->first();
+        if ($fuel_station) {
+            if ($fuel_station->deleted_at) {
+                $res = Response::send(false, [], $message = ['mobile' => [__('error.account_deleted')]], 422);
+            } else {
+
+                if (Auth::attempt(['country_code_id' => $request->country_code, 'mobile' => $request->mobile, 'password' => $request->password])) {
+
+                    if (Auth::attempt(['country_code_id' => $request->country_code, 'mobile' => $request->mobile, 'password' => $request->password, 'status' => 1])) {
+
+                        $fuel_station->fcm = $request->fcm;
+                        $fuel_station->save();
+                        if ($fuel_station->role_id == '5') {
+                            $user = DB::table('fuel_stations')->where('id', $fuel_station->user_id)->first();
+
+                        } 
+                        $details = $fuel_station;
+                        $user_details = $details;
+
+                        /* Create Token */
+                        $token = $details->createToken('my-app-token')->plainTextToken;
+                        $user_details->token = $token;
+
+                          /* User Array */
+                        $user_array = [
+                            'details' => $fuel_station,
+                            'other_details' => $user,
+
+                        ];
+
+                        $res = Response::send(true, $user_array, __('auth.login_success'), 200);
+
+                    } else {
+                        $res = Response::send(false, [], __('auth.account_suspended'), 401);
+                    }
+                } else {
+                    $res = Response::send(false, [], $message = ['password' => [__('auth.incorrect_password')]], 422);
+                }
+            }
+        } else {
+            $res = Response::send(false, [], $message = ['mobile' => [__('auth.mobile_not_registered')]], 422);
+        }
+    }
+    return $res;
+}
+
 
 /*LOGOUT*/
     public function logout()
@@ -256,6 +321,7 @@ class LoginController extends Controller
         }
         return $res;
     }
+    //LOGIN WITH OTP
     public function loginWithOtp(Request $request)
     {
 
@@ -277,23 +343,19 @@ class LoginController extends Controller
             $res = Response::send(false, [], $message = $errors, 422);
         } else {
             $user = new User;
-            $custome = User::withTrashed()->where('mobile', $request->mobile)->where('country_code_id', $request->country_code)->first();
-            if ($custome) {
-                if ($custome->deleted_at) {
+            $customer = User::withTrashed()->where('mobile', $request->mobile)->where('country_code_id', $request->country_code)->where('role_id',3 )->first();
+            if ($customer) {
+                if ($customer->deleted_at) {
                     $res = Response::send(false, [], $message = ['mobile' => [__('error.account_deleted')]], 422);
                 } else {
 
-                            $custome->fcm = $request->fcm;
-                            $custome->save();
-                            if ($custome->role_id == '3') {
-                                $user = DB::table('customers')->where('id', $custome->user_id)->first();
+                            $customer->fcm = $request->fcm;
+                            $customer->save();
+                            if ($customer->role_id == '3') {
+                                $user = DB::table('customers')->where('id', $customer->user_id)->first();
 
-                            } elseif ($custome->role_id == '4') {
-                                $user = DB::table('drivers')->where('id', $custome->user_id)->first();
-                            } elseif ($custome->role_id == '5') {
-                                $user = DB::table('fuel_stations')->where('id', $custome->user_id)->first();
-                            }
-                            $details = $custome;
+                            } 
+                            $details = $customer;
                             $user_details = $details;
 
                             /* Create Token */
@@ -302,7 +364,131 @@ class LoginController extends Controller
 
                               /* User Array */
                             $user_array = [
-                                'details' => $custome,
+                                'details' => $customer,
+                                'other_details' => $user,
+
+                            ];
+
+                            $res = Response::send(true, $user_array, __('auth.login_success'), 200);
+
+                      
+                    } 
+                
+            } else {
+                $res = Response::send(false, [], $message = ['mobile' => [__('auth.mobile_not_registered')]], 422);
+            }
+        
+        }
+        return $res;
+    }
+
+        //LOGIN WITH OTP
+
+    public function loginWithOtpDriver(Request $request)
+    {
+
+        $validator = Validator::make($request->all(),
+            [
+                'country_code' => 'required|numeric|exists:country_codes,id',
+                'mobile' => 'required|numeric|digits_between:6,14',
+            ],
+            [
+                'country_code.required' => __('error.country_code_required'),
+                'country_code.exists' => __('error.country_code_exists'),
+                'mobile.required' => __('error.mobile_required'),
+            ]
+        );
+        
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+
+            $res = Response::send(false, [], $message = $errors, 422);
+        } else {
+            $user = new User;
+            $driver = User::withTrashed()->where('mobile', $request->mobile)->where('country_code_id', $request->country_code)->where('role_id',4 )->first();
+            if ($driver) {
+                if ($driver->deleted_at) {
+                    $res = Response::send(false, [], $message = ['mobile' => [__('error.account_deleted')]], 422);
+                } else {
+
+                            $driver->fcm = $request->fcm;
+                            $driver->save();
+                            if ($driver->role_id == '4') {
+                                $user = DB::table('drivers')->where('id', $driver->user_id)->first();
+
+                            } 
+                            $details = $driver;
+                            $user_details = $details;
+
+                            /* Create Token */
+                            $token = $details->createToken('my-app-token')->plainTextToken;
+                            $user_details->token = $token;
+
+                              /* User Array */
+                            $user_array = [
+                                'details' => $driver,
+                                'other_details' => $user,
+
+                            ];
+
+                            $res = Response::send(true, $user_array, __('auth.login_success'), 200);
+
+                      
+                    } 
+                
+            } else {
+                $res = Response::send(false, [], $message = ['mobile' => [__('auth.mobile_not_registered')]], 422);
+            }
+        
+        }
+        return $res;
+    }
+
+    //LOGIN WITH OTP 
+    
+    public function loginWithOtpFuelStation(Request $request)
+    {
+
+        $validator = Validator::make($request->all(),
+            [
+                'country_code' => 'required|numeric|exists:country_codes,id',
+                'mobile' => 'required|numeric|digits_between:6,14',
+            ],
+            [
+                'country_code.required' => __('error.country_code_required'),
+                'country_code.exists' => __('error.country_code_exists'),
+                'mobile.required' => __('error.mobile_required'),
+            ]
+        );
+        
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+
+            $res = Response::send(false, [], $message = $errors, 422);
+        } else {
+            $user = new User;
+            $fuel_station = User::withTrashed()->where('mobile', $request->mobile)->where('country_code_id', $request->country_code)->where('role_id',5 )->first();
+            if ($fuel_station) {
+                if ($fuel_station->deleted_at) {
+                    $res = Response::send(false, [], $message = ['mobile' => [__('error.account_deleted')]], 422);
+                } else {
+
+                            $fuel_station->fcm = $request->fcm;
+                            $fuel_station->save();
+                            if ($fuel_station->role_id == '5') {
+                                $user = DB::table('fuel_stations')->where('id', $fuel_station->user_id)->first();
+
+                            } 
+                            $details = $fuel_station;
+                            $user_details = $details;
+
+                            /* Create Token */
+                            $token = $details->createToken('my-app-token')->plainTextToken;
+                            $user_details->token = $token;
+
+                              /* User Array */
+                            $user_array = [
+                                'details' => $fuel_station,
                                 'other_details' => $user,
 
                             ];
