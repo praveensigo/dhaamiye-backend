@@ -10,16 +10,14 @@ use App\Http\Controllers\fuelstation\ProfileController;
 use App\Http\Controllers\fuelstation\FuelController;
 use App\Http\Controllers\fuelstation\NotificationController;
 use App\Http\Controllers\fuelstation\RatingController;
-<<<<<<< HEAD
-use App\Http\Controllers\fuelstation\FuelOrderController;
-use App\Http\Controllers\fuelstation\DriverController;
-=======
 
 use App\Http\Controllers\fuelstation\FuelOrderController;
 use App\Http\Controllers\fuelstation\DriverController;
 
 
->>>>>>> main
+
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -43,8 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('fuel_station/profile',[ProfileController::class,'profile']);
     Route::post('fuel_station/profile/update_profile', [ProfileController::class, 'updateProfile']);
     Route::post('fuel_station/profile/change_password', [ProfileController::class, 'changePassword']);
-<<<<<<< HEAD
-=======
+
 
     Route::get('fuel_station/fuel_types', [FuelController::class, 'index']);
     Route::post('fuel_station/fuel/add_fuel', [FuelController::class, 'addFuel']);
@@ -72,7 +69,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     
 
->>>>>>> main
+
 
     Route::get('fuel_station/fuel_types', [FuelController::class, 'index']);
     Route::post('fuel_station/fuel/add_fuel', [FuelController::class, 'addFuel']);
