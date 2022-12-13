@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\fuelstation;
 
 use App\Http\Controllers\Controller;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Validator;
@@ -13,9 +13,11 @@ class RatingController extends Controller
 
     // CUSTOMER'S RATINGS
     public function customerRatings(Request $request)
-    {  
-        $fields    = $request->input();
+    {   $user_id = auth('sanctum')->user()->user_id;
+        $fields = $request->input();
+
         $validator = Validator::make($request->all(), [
+
             'limit' => 'required|numeric',
             'keyword' => 'nullable',
             'star_rating'=>'nullable|numeric|in:1,2,3,4,5',
@@ -28,13 +30,14 @@ class RatingController extends Controller
         } else {
 
             $customer_ratings = DB::table('ratings')->select('ratings.id', 'ratings.order_id', 'ratings.role_id', 'ratings.user_id', 'ratings.review', 'ratings.star_rating', 'users.name_en', 'users.name_so', 'users.email', 'users.mobile', 'users.country_code_id', 'country_codes.country_code', 'ratings.created_at')
-                ->leftjoin("users", function ($join) {
-                    $join->on("users.user_id", "=", "ratings.user_id")
-                        ->on("users.role_id", "=", "ratings.role_id");
-                })
-                ->join('country_codes', 'country_codes.id', '=', 'users.country_code_id')
+               
+                ->join('users', 'users.user_id', '=', 'ratings.user_id')
+                ->where('users.role_id', '3')
                 ->where('ratings.role_id', '3')
-                ->orderBy('id', 'desc');
+                ->join('customer_orders', 'customer_orders.id', '=', 'ratings.order_id')
+                ->where('customer_orders.fuel_station_id',$user_id)
+               ->join('country_codes', 'country_codes.id', '=', 'users.country_code_id')
+                ->orderBy('ratings.id', 'desc');
 
             // SEARCH BY KEYWORD
             if ($request->keyword) {
@@ -45,7 +48,6 @@ class RatingController extends Controller
                         ->orWhere('email', 'LIKE', '%' . $request->keyword . '%')
                         ->orWhere('review', 'LIKE', '%' . $request->keyword . '%')
                         ->orWhere('order_id', 'LIKE', '%' . $request->keyword . '%')
-                        ->orWhere('star_rating', 'LIKE', '%' . $request->keyword . '%')
 
                     ;});
             }
@@ -66,8 +68,9 @@ class RatingController extends Controller
     }
     // DRIVER'S RATINGS
     public function driverRatings(Request $request)
-    {
-        $fields    = $request->input();
+    {    $user_id = auth('sanctum')->user()->user_id;
+        $fields = $request->input();
+
         $validator = Validator::make($request->all(), [
             'limit' => 'required|numeric',
             'keyword' => 'nullable',
@@ -80,14 +83,14 @@ class RatingController extends Controller
             $res = Response::send('false', $data = [], $message = $errors, $code = 422);
         } else {
 
-            $driver_ratings = DB::table('ratings')->select('ratings.id', 'ratings.order_id', 'users.role_id as urole_id', 'ratings.role_id', 'ratings.user_id', 'ratings.review', 'ratings.star_rating', 'users.name_en', 'users.name_so', 'users.email', 'users.mobile', 'users.country_code_id', 'country_codes.country_code', 'ratings.created_at')
-                ->leftjoin("users", function ($join) {
-                    $join->on("users.user_id", "=", "ratings.user_id")
-                        ->on("users.role_id", "=", "ratings.role_id");
-                })
-                ->join('country_codes', 'country_codes.id', '=', 'users.country_code_id')
-                ->where('ratings.role_id', '4')
-                ->orderBy('id', 'desc');
+            $driver_ratings = DB::table('ratings')->select('ratings.id', 'ratings.order_id', 'users.role_id as user_role_id', 'ratings.role_id', 'ratings.user_id', 'ratings.review', 'ratings.star_rating', 'users.name_en', 'users.name_so', 'users.email', 'users.mobile', 'users.country_code_id', 'country_codes.country_code', 'ratings.created_at')
+            ->join('users', 'users.user_id', '=', 'ratings.user_id')
+            ->where('ratings.role_id', '4')
+            ->where('users.role_id', '4')
+            ->join('customer_orders', 'customer_orders.id', '=', 'ratings.order_id')
+            ->where('customer_orders.fuel_station_id',$user_id)
+           ->join('country_codes', 'country_codes.id', '=', 'users.country_code_id')
+            ->orderBy('ratings.id', 'desc');
 
             // SEARCH BY KEYWORD
             if ($request->keyword) {
