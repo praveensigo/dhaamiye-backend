@@ -96,7 +96,7 @@ class OrderController extends Controller
             $res = Response::send(false, [], $message = $errors, 422);
 
         } else {
-            $coupon = DB::table('coupons')->select('id', 'coupon_code', 'amount', 'type', 'expiry_date', 'count', 'used_count', 'status')
+            $coupon = DB::table('coupons')->select('id', 'coupon_code', 'amount', 'type', 'expiry_date', 'count', 'used_count', 'min_order_amount', 'status')
                     ->where('status', 1)
                     ->where('coupon_code', $request->coupon_code)
                     ->whereRaw('used_count < count')
@@ -110,6 +110,14 @@ class OrderController extends Controller
                         $message = __('customer-error.coupon_expired_so');
                     }
                     $res = Response::send(false, [], $message = $message, 422);
+
+                } else if($request->order_amount < $coupon->min_order_amount) {
+                    $message = __('customer-error.coupon_min_en',['min' => $coupon->min_order_amount]);
+                    if($request->lang  == 2) {
+                        $message = __('customer-error.coupon_min_so',['min' => $coupon->min_order_amount]);
+                    }
+                    $res = Response::send(false, [], $message = $message, 422);
+
                 } else {
 
                     $order = DB::table('customer_orders')
@@ -142,7 +150,7 @@ class OrderController extends Controller
                             'order_amount' => $request->order_amount,
                             'promotion_discount' => $promotion_discount
                         ];
-                        $res = Response::send(false, $data, '', 422);
+                        $res = Response::send(true, $data, 'Success', 200);
                     }               
                 }
 
