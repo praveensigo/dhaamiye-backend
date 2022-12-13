@@ -13,7 +13,8 @@ class RatingController extends Controller
 
     // CUSTOMER'S RATINGS
     public function customerRatings(Request $request)
-    {
+    {  
+        $fields    = $request->input();
         $validator = Validator::make($request->all(), [
             'limit' => 'required|numeric',
             'keyword' => 'nullable',
@@ -66,6 +67,7 @@ class RatingController extends Controller
     // DRIVER'S RATINGS
     public function driverRatings(Request $request)
     {
+        $fields    = $request->input();
         $validator = Validator::make($request->all(), [
             'limit' => 'required|numeric',
             'keyword' => 'nullable',
