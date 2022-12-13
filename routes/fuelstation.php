@@ -11,6 +11,11 @@ use App\Http\Controllers\fuelstation\FuelController;
 use App\Http\Controllers\fuelstation\NotificationController;
 use App\Http\Controllers\fuelstation\RatingController;
 
+use App\Http\Controllers\fuelstation\FuelOrderController;
+use App\Http\Controllers\fuelstation\DriverController;
+
+
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -50,5 +55,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('fuel_station/customerRatings',[RatingController::class,'customerRatings']);
     Route::get('fuel_station/driverRatings',[RatingController::class,'driverRatings']);
+
+    
+    Route::post('fuel_station/order/add',[FuelOrderController::class,'add']);
+    Route::get('fuel_station/order/cancelOrder',[FuelOrderController::class,'cancelOrder']);
+    Route::post('fuel_station/order/assignDriver',[FuelOrderController::class,'assignDriver']);
+    Route::get('fuel_station/orders',[FuelOrderController::class,'index']);
+    Route::get('fuel_station/order/details',[FuelOrderController::class,'details']);
+    
+    
+
+
 
     });
