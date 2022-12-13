@@ -74,6 +74,9 @@ return [
     'coupon_expired_en' => 'Coupon expired',
     'coupon_expired_so' => 'Coupon expired',
 
+    'coupon_min_en' => 'The order amount must be greater than equal to $:min to apply this coupon code',
+    'coupon_min_so' => 'The order amount must be greater than equal to $:min to apply this coupon code',
+
     'coupon_used_en' => 'Already used',
     'coupon_used_so' => 'Already used',
 
