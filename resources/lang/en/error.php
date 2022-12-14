@@ -58,9 +58,9 @@ return [
  'address_max' => 'Address should contain a maximum of 100 characters',
  'address_contains_alphabets' => 'Address should contain at least one alphabet',
  'address_starts_with_alphanumeric' => 'Address should start with an alphanumeric character',
- 'place_required' => 'Please enter place',
- 'place_min' => 'place should contain a minimum of 3 characters',
- 'place_max' => 'place should contain a maximum of 100 characters',
+ 'location_required' => 'Please enter location',
+ 'location_min' => 'Location should contain a minimum of 3 characters',
+ 'location_max' => 'Location should contain a maximum of 100 characters',
  'latitude_required' => 'Please enter latitude',
  'latitude_min' => 'Latitude should contain a minimum of 3 characters',
  'latitude_max' => 'Latitude should contain a maximum of 100 characters',
@@ -88,5 +88,17 @@ return [
  
  'reason_cancel_required'=>'Please enter the reason for cancellation',
  'update_deposite' => 'Failed to update deposite, please try again',
+
+ 'customer_id_required' => 'Please enter the customer',
+ 'customer_not_found' => 'Failed to find customer',
+ 'fuel_station_id_required' => 'Please enter the fuel station',
+ 'fuel_station_id_not_found' => 'Failed to find fuel station',
+ 'fuel_type_required' => 'Please enter the fuel type',
+ 'quantity_required' => 'Please enter quantity',
+ 'coupon_exists' => 'Invalid coupon code',
+ 'delivery_date_required' => 'Please enter delivery date',
+ 'delivery_date_date' => 'Please enter a valid date',
+ 'delivery_date_format' => 'Please enter a delivery date that match the format Y-m-d.',
+ 'delivery_time_required' => 'Please enter delivery time',
 
 ];
