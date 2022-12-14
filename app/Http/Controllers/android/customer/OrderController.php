@@ -263,7 +263,7 @@ class OrderController extends Controller
                         ->where('customer_favorite_stations.customer_id', '=', $auth_user_id);
                     },
                 ])
-                ->first()->setAppends(['distance']);
+                ->first();
 
             $settings = DB::table('settings')
                         ->select('fuel_delivery_range', 'tax')
@@ -402,7 +402,7 @@ class OrderController extends Controller
                 ->join('users', 'users.user_id', '=', 'fuel_stations.id')
                 ->active()
                 ->where('role_id', 5)                
-                ->first()->setAppends(['distance']);
+                ->first();
 
             $settings = DB::table('settings')
                         ->select('fuel_delivery_range', 'tax')
