@@ -224,7 +224,8 @@ class HomeController extends Controller
                         ->where('customer_favorite_stations.customer_id', '=', $auth_user_id);
                     },
                 ])
-                ->first();
+                ->first()->setAppends(['distance']);
+                
             $data = array(
                 'fuel_station' => $fuel_station,
             );
