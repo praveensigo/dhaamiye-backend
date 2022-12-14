@@ -32,7 +32,7 @@ class ProfileController extends Controller
                 'true', 
                 $data = [
                     'customer' => $customer,
-                    'auth_user' => $auth_user,
+                    //'auth_user' => $auth_user,
                     //'msg' => $msg
 
                 ], 

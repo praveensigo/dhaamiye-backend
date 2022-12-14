@@ -116,7 +116,8 @@ class HomeController extends Controller
                         ->where('customer_favorite_stations.customer_id', '=', $auth_user_id);
                     },
                 ])
-                ->get()->sortBy('distance');
+                ->get()
+                ->sortBy('distance');
 
                 $fuel_stations = CollectionHelper::paginate($results, $request->limit);
         
@@ -172,7 +173,7 @@ class HomeController extends Controller
                 $fuel_stations->where('name_so', 'LIKE', $request->keyword . '%');
             }
 
-            $fuel_stations = $fuel_stations->get();
+            $fuel_stations = $fuel_stations->get()->makeHidden(['distance']) ;
 
             $data = array(
                 'fuel_stations' => $fuel_stations,
@@ -224,6 +225,7 @@ class HomeController extends Controller
                     },
                 ])
                 ->first();
+
             $data = array(
                 'fuel_station' => $fuel_station,
             );
