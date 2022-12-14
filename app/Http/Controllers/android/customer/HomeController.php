@@ -116,7 +116,8 @@ class HomeController extends Controller
                         ->where('customer_favorite_stations.customer_id', '=', $auth_user_id);
                     },
                 ])
-                ->get()->sortBy('distance');
+                ->get()
+                ->each->setAppends(['distance'])->sortBy('distance');
 
                 $fuel_stations = CollectionHelper::paginate($results, $request->limit);
         
