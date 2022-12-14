@@ -149,8 +149,6 @@ class ProfileController extends Controller
                     $image_uploaded_path = $image->store($uploadFolder, 'public');
                     $user->image = $image_uploaded_path;
 
-                } else {
-                    $user->image = '';
                 }
 
                 $user->save();
