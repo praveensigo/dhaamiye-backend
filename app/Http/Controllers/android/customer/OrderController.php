@@ -277,28 +277,39 @@ class OrderController extends Controller
             /************* coupon starts ***************/
             $promotion_discount = 0;
             if($request->coupon_code) {
+                $coupon_code = $request->coupon_code;
                 $coupon = DB::table('coupons')->select('id', 'coupon_code', 'amount', 'type', 'expiry_date', 'count', 'used_count', 'status')
                         ->where('status', 1)
                         ->where('coupon_code', $request->coupon_code)
                         ->whereRaw('used_count < count')
                         ->where('expiry_date', '>=', date('Y-m-d'))
-                        ->whereNotIn('coupon_code', function ($query) use($auth_user_id) {
-                                $query->select('coupon_code')
-                                ->from('customer_orders')
-                                ->where('customer_id', $auth_user_id);
-                            })
+                        // ->whereNotIn('coupon_code', function ($query) use($auth_user_id, $coupon_code) {
+                        //         $query->select('coupon_code')
+                        //         ->from('customer_orders')
+                        //         ->where('customer_id', $auth_user_id)
+                        //         ->where('coupon_code', $coupon_code);
+                        //     })
                         ->first();
                 if($coupon) {
 
-                    if($coupon->type == 1) {
-                        if($coupon->amount > $fuel_quantity_price) {
-                            $promotion_discount = $fuel_quantity_price;
-                        } else {
-                            $promotion_discount = $coupon->amount;
-                        }
+                    $used = DB::table('customer_orders')
+                            ->select('coupon_code')
+                            ->where('customer_id', $auth_user_id)
+                            ->where('coupon_code', $coupon_code)
+                            ->first();
+                    if($used) {
+                    } else {
 
-                    } else if($coupon->type == 2) {
-                        $promotion_discount = $fuel_quantity_price * $coupon->amount/100;
+                        if($coupon->type == 1) {
+                            if($coupon->amount > $fuel_quantity_price) {
+                                $promotion_discount = $fuel_quantity_price;
+                            } else {
+                                $promotion_discount = $coupon->amount;
+                            }
+
+                        } else if($coupon->type == 2) {
+                            $promotion_discount = $fuel_quantity_price * $coupon->amount/100;
+                        }
                     }
                 }
             }
@@ -416,28 +427,43 @@ class OrderController extends Controller
             /************* coupon starts ***************/
             $promotion_discount = 0;
             if($request->coupon_code) {
+
+                $coupon_code = $request->coupon_code;
+
                 $coupon = DB::table('coupons')->select('id', 'coupon_code', 'amount', 'type', 'expiry_date', 'count', 'used_count', 'status')
                         ->where('status', 1)
                         ->where('coupon_code', $request->coupon_code)
                         ->whereRaw('used_count < count')
                         ->where('expiry_date', '>=', date('Y-m-d'))
-                        ->whereNotIn('coupon_code', function ($query) use($auth_user_id) {
-                                $query->select('coupon_code')
-                                ->from('customer_orders')
-                                ->where('customer_id', $auth_user_id);
-                            })
+                        // ->whereNotIn('coupon_code', function ($query) use($auth_user_id, $coupon_code) {
+                        //         $query->select('coupon_code')
+                        //         ->from('customer_orders')
+                        //         ->where('customer_id', $auth_user_id)
+                        //         ->where('coupon_code', $coupon_code);
+                        //     })
                         ->first();
+
                 if($coupon) {
 
-                    if($coupon->type == 1) {
-                        if($coupon->amount > $fuel_quantity_price) {
-                            $promotion_discount = $fuel_quantity_price;
-                        } else {
-                            $promotion_discount = $coupon->amount;
-                        }
+                    $used = DB::table('customer_orders')
+                            ->select('coupon_code')
+                            ->where('customer_id', $auth_user_id)
+                            ->where('coupon_code', $coupon_code)
+                            ->first();
 
-                    } else if($coupon->type == 2) {
-                        $promotion_discount = $fuel_quantity_price * $coupon->amount/100;
+                    if($used) {
+                    } else {
+
+                        if($coupon->type == 1) {
+                            if($coupon->amount > $fuel_quantity_price) {
+                                $promotion_discount = $fuel_quantity_price;
+                            } else {
+                                $promotion_discount = $coupon->amount;
+                            }
+
+                        } else if($coupon->type == 2) {
+                            $promotion_discount = $fuel_quantity_price * $coupon->amount/100;
+                        }
                     }
                 }
             }
@@ -453,12 +479,16 @@ class OrderController extends Controller
             $order->order_type = $request->order_type;
             $order->fuel_quantity_price = $fuel_quantity_price;
             $order->tax = $tax;
-            $order->delivery_charge = $delivery_charge;
+            $order->delivery_charge = $delivery_charge;            
             $order->promotion_discount = $promotion_discount;
             $order->other_charges = $other_charges;
             $order->total = $grand_total;
             $order->created_at = date('Y-m-d H:i:s');
             $order->updated_at = date('Y-m-d H:i:s');
+
+            if($promotion_discount) {
+                $order->coupon_code = $request->coupon_code;
+            }
 
 
             if($order->save()) {
@@ -489,7 +519,6 @@ class OrderController extends Controller
 
                 $data = [
                     'order' => $this->getOrder($order->id),
-                    'coupon' => $coupon
                 ];
 
                 $res = Response::send(true, $data, '', 200);
