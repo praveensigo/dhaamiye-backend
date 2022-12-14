@@ -240,8 +240,8 @@ class ReportsController extends Controller
                                     ->where('customer_orders.id',$order->id)->first()->delivery_charge_commission;
                 $order->total_commission =DB::table('customer_orders')->select('total_commission')
                                     ->where('customer_orders.id',$order->id)->first()->total_commission;
-                 $order->date =DB::table('customer_orders')->select('created_at')
-                                    ->where('customer_orders.id',$order->id)->first()->created_at;
+                 $order->date =DB::table('customer_orders')->select('delivery_date')
+                                    ->where('customer_orders.id',$order->id)->first()->delivery_date;
                         $i++;  
                         }
             $data = array(
@@ -339,8 +339,8 @@ class ReportsController extends Controller
                                     ->where('customer_orders.id',$order->id)->first()->promotion_discount;
                 $order->total =DB::table('customer_orders')->select('total')
                                     ->where('customer_orders.id',$order->id)->first()->total;
-                 $order->date =DB::table('customer_orders')->select('created_at')
-                                    ->where('customer_orders.id',$order->id)->first()->created_at;
+                $order->date =DB::table('customer_orders')->select('delivery_date')
+                                    ->where('customer_orders.id',$order->id)->first()->delivery_date;
                         $i++;  
                         }
             $data = array(
