@@ -10,6 +10,8 @@ use App\Http\Controllers\fuelstation\ProfileController;
 use App\Http\Controllers\fuelstation\FuelController;
 use App\Http\Controllers\fuelstation\NotificationController;
 use App\Http\Controllers\fuelstation\RatingController;
+use App\Http\Controllers\fuelstation\ReportController;
+use App\Http\Controllers\fuelstation\PaymentController;
 
 use App\Http\Controllers\fuelstation\FuelOrderController;
 use App\Http\Controllers\fuelstation\DriverController;
@@ -56,6 +58,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('fuel_station/customerRatings',[RatingController::class,'customerRatings']);
     Route::get('fuel_station/driverRatings',[RatingController::class,'driverRatings']);
 
+
+    Route::get('fuel_station/sales_report',[ReportController::class,'salesReport']);
+    Route::get('fuel_station/earning_report',[ReportController::class,'earningReport']);
+    Route::get('fuel_station/commission_report',[ReportController::class,'commissionReport']);
+    Route::get('fuel_station/sales_report_download',[ReportController::class,'salesReportDownload']);
+    Route::get('fuel_station/earning_report_download',[ReportController::class,'earningReportDownload']);
+    Route::get('fuel_station/commission_report_download',[ReportController::class,'commissionReportDownload']);
+
+    Route::get('fuel_station/payments',[PaymentController::class,'payments']);
+
     
     Route::post('fuel_station/order/add',[FuelOrderController::class,'add']);
     Route::get('fuel_station/order/cancelOrder',[FuelOrderController::class,'cancelOrder']);
@@ -64,6 +76,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('fuel_station/order/details',[FuelOrderController::class,'details']);
     
     
+
 
 
 
