@@ -488,7 +488,8 @@ class OrderController extends Controller
                 ));
 
                 $data = [
-                    'order' => $this->getOrder($order->id)
+                    'order' => $this->getOrder($order->id),
+                    'coupon' => $coupon
                 ];
 
                 $res = Response::send(true, $data, '', 200);

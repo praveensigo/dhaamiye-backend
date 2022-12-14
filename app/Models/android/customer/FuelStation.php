@@ -13,9 +13,9 @@ class FuelStation extends Model
     const ACTIVE = 1;
     const BLOCKED = 2;
 
-    protected $appends = [
-        'distance',
-    ];
+    // protected $appends = [
+    //     'distance',
+    // ];
 
     public function fuels()
     {
