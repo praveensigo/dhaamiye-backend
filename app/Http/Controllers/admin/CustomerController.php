@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\admin\Customer;
 use App\Models\admin\CustomerOrder;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
