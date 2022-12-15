@@ -257,7 +257,7 @@ class HomeController extends Controller
             $distance   = intval($exploded[0]);
             return $distance;
         } else {
-            return '';
+            return null;
         }
     }  
 }

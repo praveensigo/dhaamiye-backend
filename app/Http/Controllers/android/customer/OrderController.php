@@ -597,6 +597,8 @@ class OrderController extends Controller
                         'customer_id' => $order->customer_id,
                         'order_id' => $order->id,
                         'payment_type' => $request->payment_type,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
                 ));
 
                 $title_en = 'Order Placed';
