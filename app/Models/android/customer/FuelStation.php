@@ -92,7 +92,7 @@ class FuelStation extends Model
             $distance   = intval($exploded[0]);
             return $distance;
         } else {
-            return '';
+            return null;
         }
     }  
 }

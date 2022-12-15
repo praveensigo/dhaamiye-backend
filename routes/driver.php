@@ -38,5 +38,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('profile/update', [ProfileController::class, 'update']);
     Route::post('profile/check-mobile', [ProfileController::class, 'isMobileUnique']);
     Route::get('home', [HomeController::class, 'index']);
-    Route::get('orders/details', [HomeController::class, 'details']);
+    Route::get('order/details', [HomeController::class, 'details']);
+    Route::post('order/accept', [HomeController::class, 'acceptOrder']);
+    Route::post('order/start', [HomeController::class, 'startOrder']);
+    Route::post('order/complete', [HomeController::class, 'completeOrder']);
 });
