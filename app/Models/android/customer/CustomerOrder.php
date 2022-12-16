@@ -21,7 +21,8 @@ class CustomerOrder extends Model
     protected $appends = [
         'converted_created_at',
         'converted_status',
-        'converted_payment_type'
+        'converted_payment_type',
+        'converted_order_type',
     ];
 
     /**
@@ -51,6 +52,12 @@ class CustomerOrder extends Model
 
     public function review() {
         return $this->hasMany(Rating::class, 'order_id', 'id');
+    }
+
+    public function driver()
+    {
+        return $this->belongsTo(User::class, 'driver_id', 'user_id')
+                     ->where('role_id', 4);
     }
 
     /**
@@ -133,6 +140,18 @@ class CustomerOrder extends Model
 
         } else if($this->payment_type == 2) {
             return 'Cash Payment';
+
+        } else {
+            return '';
+        }
+    }
+
+    public function getConvertedOrderTypeAttribute() {
+        if($this->order_type == 1) {
+            return 'Normal';
+
+        } else if($this->order_type == 2) {
+            return 'Scheduled';
 
         } else {
             return '';

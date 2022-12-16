@@ -662,7 +662,7 @@ class OrderController extends Controller
 
         } else {
 
-            $orders = CustomerOrder::select('customer_orders.id', 'customer_id', 'fuel_station_id', 'status', 'created_at')
+            $orders = CustomerOrder::select('customer_orders.id', 'customer_id', 'fuel_station_id', 'status', 'created_at', 'order_type', 'delivery_date', 'delivery_time', 'delivered_at')
                 ->descending()
                 ->where('customer_orders.customer_id', $auth_user->user_id)
                 ->where('status', '!=',0)
@@ -739,7 +739,10 @@ class OrderController extends Controller
                         ->select('customers.id', 'name_en', 'name_so', 'email', 'mobile', 'country_code_id', 'country_code', 'customers.created_at', 'customers.status')
                         ->join('country_codes', 'users.country_code_id', '=', 'country_codes.id')
                         ->where('role_id', 3);
-                    },
+                    }, 
+                    'driver' => function ($query) {
+                        $query->select('user_id', 'name_en', 'name_so');
+                    }
                 ])
                 ->first();         
 
