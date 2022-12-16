@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\admin;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use App\Models\admin\Truck;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -17,7 +17,7 @@ class TruckController extends Controller
     {   
         $auth_user            = Auth::user();
         $role_id = $auth_user->role_id;
-        $user_id = $auth_user->user_id;
+        $user_id = $auth_user->id;
 
         $fields    = $request->input();
         $validator = Validator::make($request->all(), [
@@ -121,7 +121,7 @@ class TruckController extends Controller
         public function update(Request $request)
         {    $auth_user            = Auth::user();
             $role_id = $auth_user->role_id;
-            $user_id = $auth_user->user_id;
+            $user_id = $auth_user->id;
             $fields    = $request->input();
             $validator = Validator::make($request->all(), [
                     'id' => 'required|numeric|exists:trucks,id',
@@ -372,7 +372,7 @@ public function approve(Request $request)
 {   
     $auth_user            = Auth::user();
     $role_id = $auth_user->role_id;
-    $user_id = $auth_user->user_id;
+    $user_id = $auth_user->id;
 
     $fields    = $request->input();
     $validator = Validator::make($request->all(),
