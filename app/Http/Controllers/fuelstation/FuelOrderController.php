@@ -219,7 +219,7 @@ class FuelOrderController extends Controller
                     'order_id' => $order->id,
                     'total_amount'=>$order->total,
                     'payment_type' =>$fields['payment_type'],
-                    'delivery_date' => $order->delivery_date,
+                   // 'delivery_date' => $order->delivery_date,
                     'created_at' => $order_fuel->created_at,
                     'updated_at' => $order_fuel->updated_at,
                     ));
@@ -233,7 +233,7 @@ class FuelOrderController extends Controller
                     array(
                         'customer_id' => $fields['customer_id'],
                         'order_id' => $order->id,
-                        'country_code' => $users->customer_country_code_id,
+                        'country_code_id' => $users->customer_country_code_id,
                         'phone' => $fields['mobile'],
                         'location' => $fields['location'],
                         'address' => $fields['address'],
