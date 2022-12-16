@@ -44,7 +44,7 @@ class Truck extends Model
      }
      public function driver()
     {
-        return $this->hasOne(Driver::class, 'id', 'truck_id');
+        return $this->hasOne(Driver::class,'truck_id','id');
     }
     
 }
