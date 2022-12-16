@@ -29,7 +29,7 @@ class EnquiriesController extends Controller
                         ->leftjoin('issue_types', 'issue_types.id', '=', 'comments.issue_type_id')
                         ->leftJoin('users', function($join)
                             {
-                                $join->on('comments.user_id', '=', 'users.user_id');
+                                $join->on('comments.user_id', '=', 'users.id');
                                 $join->on('comments.role_id','=','users.role_id');
                                         
                             })
