@@ -185,7 +185,9 @@
 						<tr>
 							<td class="text-center">{{ $order->sl_no }}</td>
 							<td>{{ $order->order_id }}</td>
-							<td>{{ $order->date }}</td>
+
+							<td>{{ date('d-m-Y',strtotime($order->date)) }}</td>
+
 							<td>{{ $order->price }}</td>
 							<td>{{ $order->delivery_charge }}</td>
 							<td>{{ $order->tax }}</td>

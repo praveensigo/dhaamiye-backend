@@ -4,7 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use App\Models\admin\Driver;
 use App\Models\admin\CustomerOrderFuel;
 use App\Models\admin\CustomerOrder;
@@ -25,7 +25,7 @@ class DriverController extends Controller
     {
         $auth_user            = Auth::user();
         $role_id = $auth_user->role_id;
-        $user_id = $auth_user->user_id;
+        $user_id = $auth_user->id;
 
         $fields    = $request->input();
         $validator = Validator::make($request->all(), [
@@ -161,7 +161,7 @@ class DriverController extends Controller
     {   
         $auth_user            = Auth::user();
         $role_id = $auth_user->role_id;
-        $user_id = $auth_user->user_id;
+        $user_id = $auth_user->id;
 
         $fields    = $request->input();
         $validator = Validator::make($request->all(), [
@@ -519,13 +519,13 @@ public function status(Request $request)
     { 
         $auth_user            = Auth::user();
         $role_id = $auth_user->role_id;
-        $user_id = $auth_user->user_id;
+        $user_id = $auth_user->id;
 
         $fields    = $request->input();
         $validator = Validator::make($request->all(),
             [
                 'id' => 'required|exists:drivers,id',
-
+                'truck_id'=> 'required|exists:trucks,id'
             ],
             [
                 'id.exists' => __('error2.id_exists'),
@@ -549,6 +549,7 @@ public function status(Request $request)
                         $driver   = Driver::where('id',$fields['id'])->first();
                         $driver->approval_by        = $role_id;
                         $driver->approval_user        = $user_id;
+                        $driver->truck_id        = $fields['truck_id'];
                         $result2 = $driver->save();
                         $dmessage = 'Approved';
                     }
@@ -643,7 +644,7 @@ public function pendingIndex(Request $request)
     {   
         $auth_user            = Auth::user();
         $role_id = $auth_user->role_id;
-        $user_id = $auth_user->user_id;
+        $user_id = $auth_user->id;
 
         $validator = Validator::make($request->all(),
         [
@@ -1050,6 +1051,48 @@ public function earnings(Request $request)
             $res = Response::send(true, $data, '', 200);
       }
        return $res;
+}
+public function getFuelStations(Request $request)
+{
+        $fuel_stations = DB::table('users')
+                        ->select('user_id','name_en','name_so')
+                        ->where('status', 1)
+                        ->where('reg_status', 1)
+                        ->where('role_id',5)
+                        ->orderBy('user_id')->get();
+        $data = array(
+            'fuel_stations' => $fuel_stations,
+        );
+        $res = Response::send(true, $data, 'Fuel Stations found', 200);
+    
+
+    return $res;
+}
+public function getTrucks(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'fuel_station_id' => 'required|numeric|exists:fuel_stations,id',
+    ]);
+
+    if ($validator->fails()) {
+        $errors = collect($validator->errors());
+        $res = Response::send(false, [], $message = $errors, 422);
+
+    } else {
+
+        
+        $trucks = DB::table('trucks')
+                        ->select('id','truck_no')
+                        ->where('status', 1)
+                        ->where('fuel_station_id',$request->fuel_station_id)
+                        ->orderBy('trucks.id')->get();
+        $data = array(
+            'trucks' => $trucks,
+        );
+        $res = Response::send(true, $data, 'Trucks found', 200);
+    }
+
+    return $res;
 }
 }
 

@@ -572,8 +572,11 @@ class OrderController extends Controller
             if($order->status == 0) {
                 $order->status = 1;
                 $order->pin = $this->generatePIN();
-                $order->delivery_date = $request->delivery_date;
-                $order->delivery_time = $request->delivery_time;
+                if($request->order_type == 2) {
+                    $order->status = 4;
+                    $order->delivery_date = $request->delivery_date;
+                    $order->delivery_time = $request->delivery_time;
+                }
                 $order->save();
 
                 // DB::table('customer_order_address')->insert(array(
@@ -597,6 +600,8 @@ class OrderController extends Controller
                         'customer_id' => $order->customer_id,
                         'order_id' => $order->id,
                         'payment_type' => $request->payment_type,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
                 ));
 
                 $title_en = 'Order Placed';
@@ -610,7 +615,7 @@ class OrderController extends Controller
                     'description_en' => $description_en,
                     'description_so' => $description_so,
                     'type' => 3,
-                    'user_id' => $auth_user->user_id,
+                    'user_id' => $auth_user->id,
                     'order_id' => $order->id,
                     'date' => date('Y-m-d'),
                     'time' => date('H:i:s'),
