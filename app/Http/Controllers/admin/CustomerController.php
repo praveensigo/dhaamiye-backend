@@ -127,7 +127,7 @@ class CustomerController extends Controller
         } else {
             $customer = new Customer;
             $role_id = auth('sanctum')->user()->role_id;
-            $user_id = auth('sanctum')->user()->user_id;
+            $user_id = auth('sanctum')->user()->id;
             $customer->added_by = $role_id;
             $customer->added_user = $user_id;
             $result = $customer->save();
@@ -205,7 +205,7 @@ class CustomerController extends Controller
         } else {
             $customer = Customer::find($fields['id']);
             $role_id = auth('sanctum')->user()->role_id;
-            $user_id = auth('sanctum')->user()->user_id;
+            $user_id = auth('sanctum')->user()->id;
             $customer->updated_by = $role_id;
             $customer->updated_user = $user_id;
             $result = $customer->save();

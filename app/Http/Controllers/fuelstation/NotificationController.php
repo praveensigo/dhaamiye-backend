@@ -161,7 +161,7 @@ class NotificationController extends Controller
             $notification->type = 4;
             $notification->user_id = $request->user_id;
             $role_id = auth('sanctum')->user()->role_id;
-            $user_id = auth('sanctum')->user()->user_id;
+            $user_id = auth('sanctum')->user()->id;
             $notification->added_by = $role_id;
             $notification->added_user = $user_id;
             $notification->description_en = $request->description_en;
