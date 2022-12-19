@@ -30,7 +30,7 @@ class NotificationController extends Controller
         $notifications = DB::table('notifications')->select('notifications.id', 'notifications.title_en', 'notifications.title_so', 'notifications.user_id', 'users.name_en', 'users.name_so','users.email','users.mobile', 'users.country_code_id', 'country_codes.country_code', 'notifications.order_id', 'users.role_id', 'notifications.type', 'notifications.description_en', 'notifications.description_so', 'notifications.status', 'notifications.date', 'notifications.time', 'notifications.created_at')
 
             ->leftjoin("users", function ($join) {
-                $join->on("users.user_id", "=", "notifications.user_id")
+                $join->on("users.id", "=", "notifications.user_id")
                     ->on("users.role_id", "=", "notifications.type");
             })
             ->leftjoin('country_codes', 'country_codes.id', '=', 'users.country_code_id')
@@ -123,6 +123,10 @@ class NotificationController extends Controller
             $notification->title_so = $request->title_so;
             $notification->type = $request->type;
             $notification->user_id = $request->user_id;
+            $role_id = auth('sanctum')->user()->role_id;
+            $user_id = auth('sanctum')->user()->id;
+            $notification->added_by = $role_id;
+            $notification->added_user = $user_id;
             $notification->description_en = $request->description_en;
             $notification->description_so = $request->description_so;
             $currentTime = Carbon::now();

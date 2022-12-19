@@ -24,6 +24,7 @@ class DriverController extends Controller
         $auth_user = Auth::user();
         $role_id = $auth_user->role_id;
         $user_id = $auth_user->user_id;
+        $id = $auth_user->id;
 
         $fields = $request->input();
         $validator = Validator::make($request->all(), [
@@ -87,9 +88,9 @@ class DriverController extends Controller
             $driver->fuel_station_id = $user_id;
             $driver->truck_id = $fields['truck'];
             $driver->added_by = $role_id;
-            $driver->added_user = $user_id;
+            $driver->added_user = $id;
             $driver->approval_by = $role_id;
-            $driver->approval_user = $user_id;
+            $driver->approval_user = $id;
             $driver->created_at = date('Y-m-d H:i:s');
             $driver->updated_at = date('Y-m-d H:i:s');
 
@@ -155,6 +156,7 @@ class DriverController extends Controller
         $auth_user = Auth::user();
         $role_id = $auth_user->role_id;
         $user_id = $auth_user->user_id;
+        $id = $auth_user->id;
 
         $fields = $request->input();
         $validator = Validator::make($request->all(), [
@@ -214,7 +216,7 @@ class DriverController extends Controller
             $driver->fuel_station_id = $user_id;
             $driver->truck_id = $fields['truck'];
             $driver->updated_by = $role_id;
-            $driver->updated_user = $user_id;
+            $driver->updated_user = $id;
             $driver->updated_at = date('Y-m-d H:i:s');
 
             $passport_uploaded_path = '';
@@ -432,6 +434,7 @@ class DriverController extends Controller
     {
         $auth_user = Auth::user();
         $user_id = $auth_user->user_id;
+        $id = $auth_user->id;
 
         $fields = $request->input();
         $validator = Validator::make($request->all(),
@@ -463,7 +466,7 @@ class DriverController extends Controller
                 if ($result) {
                     $driver = Driver::where('id', $fields['id'])->first();
                     $driver->approval_by = $role_id;
-                    $driver->approval_user = $user_id;
+                    $driver->approval_user = $id;
                     $result2 = $driver->save();
                     $dmessage = 'Approved';
                 }
@@ -559,6 +562,7 @@ class DriverController extends Controller
     {
         $auth_user = Auth::user();
         $user_id = $auth_user->user_id;
+        $id = $auth_user->id;
 
         $validator = Validator::make($request->all(),
             [
@@ -591,7 +595,7 @@ class DriverController extends Controller
             if ($result) {
                 $driver = Driver::where('id', $request->id)->first();
                 $driver->updated_by = $role_id;
-                $driver->updated_user = $user_id;
+                $driver->updated_user = $id;
                 $driver->updated_at = date('Y-m-d H:i:s');
                 $driver->save();
             }

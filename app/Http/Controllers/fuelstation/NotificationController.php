@@ -27,7 +27,7 @@ class NotificationController extends Controller
             $res = Response::send('false', $data = [], $message = $errors, $code = 422);
         } else {
             $user = auth('sanctum')->user();
-            $id = $user->user_id;
+            $id = $user->id;
             $created_date = $user->created_at;
 
             $notification_date = DB::table('notifications')->select('notifications.date')
@@ -71,7 +71,7 @@ class NotificationController extends Controller
 
     public function sendIndex(Request $request)
     {$user = auth('sanctum')->user();
-        $user_id = $user->user_id;
+        $user_id = $user->id;
 
         $validator = Validator::make($request->all(), [
             'limit' => 'required|numeric',
@@ -85,7 +85,7 @@ class NotificationController extends Controller
 
             $notifications = DB::table('notifications')->select('notifications.id', 'notifications.title_en', 'notifications.title_so', 'notifications.user_id', 'users.name_en', 'users.name_so', 'users.email', 'users.mobile', 'users.country_code_id', 'country_codes.country_code', 'notifications.order_id', 'users.role_id', 'notifications.type', 'notifications.description_en', 'notifications.description_so', 'notifications.status', 'notifications.date', 'notifications.time', 'notifications.created_at')
                 ->leftjoin("users", function ($join) {
-                    $join->on("users.user_id", "=", "notifications.user_id")
+                    $join->on("users.id", "=", "notifications.user_id")
                         ->on("users.role_id", "=", "notifications.type");
                 })
                 ->leftjoin('country_codes', 'country_codes.id', '=', 'users.country_code_id')
@@ -195,7 +195,7 @@ class NotificationController extends Controller
                         $fcm = DB::table('users')
                         ->where('users.role_id', 4)
                         ->select('fcm')
-                        ->where('user_id', $notification->user_id)->first();
+                        ->where('id', $notification->user_id)->first();
                                 $this->sendDriverNotification($title, $content, $fcm->fcm);
                             
                             }

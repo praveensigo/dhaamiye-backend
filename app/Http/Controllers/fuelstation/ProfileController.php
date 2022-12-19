@@ -57,7 +57,7 @@ class ProfileController extends Controller
     @params: fuel_station, id
      */
     public function updateProfile(Request $request)
-    {        $user_id = auth('sanctum')->user()->user_id;
+    {        $user_id = auth('sanctum')->user()->id;
 
         $fields = $request->input();
         $validator = Validator::make($request->all(),
@@ -125,7 +125,7 @@ class ProfileController extends Controller
         } else {
             $fuel_station = FuelStation::find($user_id);
             $role_id = auth('sanctum')->user()->role_id;
-            $user_id = auth('sanctum')->user()->user_id;
+            $user_id = auth('sanctum')->user()->id;
             $fuel_station->updated_by = $role_id;
             $fuel_station->updated_user = $user_id;
             $fuel_station->place = $fields['place'];

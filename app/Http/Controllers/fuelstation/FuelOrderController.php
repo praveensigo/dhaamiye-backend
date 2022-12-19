@@ -194,9 +194,9 @@ class FuelOrderController extends Controller
             $order->delivery_time = date('H:i:s', strtotime($fields['delivery_time']));
             $order->status = 1;
             $role_id = auth('sanctum')->user()->role_id;
-            $user_id = auth('sanctum')->user()->user_id;
+            $id = auth('sanctum')->user()->id;
             $order->added_by =$role_id;
-            $order->added_user=$user_id;
+            $order->added_user=$id;
             $order->created_at = date('Y-m-d H:i:s');
             $order->updated_at = date('Y-m-d H:i:s');
             $result = $order->save();
