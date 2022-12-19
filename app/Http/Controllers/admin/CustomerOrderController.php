@@ -387,5 +387,255 @@ function generateCode()
     }
     return $code;
 }
+//CANCEL ORDER
+public function cancelOrder(Request $request)
+{
+    $fields = $request->input();
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required|numeric|exists:customer_orders,id',
+            'reason' => 'required',
+
+        ],
+            [   'reason.required' => __('error.reason_cancel_required'),
+
+            ]);
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+            $res =  Response::send('false', $data = [], $message = $errors, $code = 422);
+        } else {
+             $order = CustomerOrder::find($request->order_id);
+        
+        $order->status = 6;
+        $order->cancelled_at = date('Y-m-d H:i:s');
+        $order->cancel_reason = $request->reason;
+        if($order->save()) {
+
+            $res =  Response::send('true',
+            $data = [],
+            $message = 'Order cancelled successfully.',
+            $code = 200);
+    } else {
+        $res =  Response::send('false',
+            $data = [],
+            $message = 'Failed to cancel order.',
+            $code = 400);
+    }
+}
+return $res;
+}
+
+//ASSIGN DRIVER
+
+public function assignDriver(Request $request)
+{
+    
+    $fields = $request->input();
+    $validator = Validator::make($request->all(),
+        [
+            'order_id' => 'required|numeric|exists:customer_orders,id',
+            'driver_id' => 'required|numeric|exists:drivers,id',
+            
+        ],
+        [
+            'order_id.exists' => __('error.customer_order_not_found'),
+            'driver_id.exists' => __('error.driver_not_found'),
+
+        ]
+
+    );
+    if ($validator->fails()) {
+        $errors = collect($validator->errors());
+        $res = Response::send('false', $data = [], $message = $errors, $code = 422);
+
+    } else {
+       
+        $order = CustomerOrder::find($fields['order_id']);
+        $order->driver_id = $fields['driver_id'];
+        $driver = DB::table('drivers')->select('drivers.*')
+        ->where('id', $fields['driver_id'])
+        ->first();
+        $truck_id=$driver->truck_id;
+        $order->truck_id = $truck_id;
+        $order->status = 2;
+        $order->accepted_at = date('Y-m-d H:i:s');
+        $order->updated_at = date('Y-m-d H:i:s');
+        $result = $order->save();
+        if ($result) {
+            DB::table('customer_order_payments')
+            ->where('order_id', $fields['order_id'])
+            ->update(['driver_id' =>$order->driver_id]);
+            $res = Response::send('true',
+                [],
+                $message = __('success.driver_assign'),
+                $code = 200);
+        } else {
+            $res = Response::send('false',
+                [],
+                $message = __('error_driver_assign_failed'),
+                $code = 400);
+        }
+    }
+
+    return $res;
+}
+
+    /*GET ORDERS */
+public function index(Request $request)
+{
+
+    $fields = $request->input();
+    $validator = Validator::make($request->all(),
+        ['limit' => 'required',
+            'keyword' => 'nullable',
+            'status' => 'nullable|numeric|in:0,1,2,3,4,5,6',
+
+        ]);
+
+    if ($validator->fails()) {$errors = collect($validator->errors());
+        $res = Response::send('false', $data = [], $message = $errors, $code = 422);
+    } else {
+
+         $orders = CustomerOrder::select('customer_orders.id as customer_order_id','customer_orders.customer_id','customer_orders.fuel_station_id','trucks.truck_no' ,'trucks.color as truck_color' ,'customer_orders.driver_id','customer_orders.truck_id','customer_orders.order_type','customer_orders.fuel_quantity_price','customer_orders.tax','customer_orders.delivery_charge','customer_orders.coupon_code','customer_orders.promotion_discount', 'customer_orders.other_charges','customer_orders.total','customer_orders.amount_commission','customer_orders.delivery_charge_commission','customer_orders.total_commission','customer_orders.delivery_date','customer_orders.delivery_time','customer_orders.pin','customer_orders.accepted_at','customer_orders.started_at','customer_orders.delivered_at','customer_orders.cancelled_at','customer_orders.cancel_reason',
+         'p1.name_en as customer_name_en', 'p1.name_so as customer_name_so', 'p2.name_en as driver_name_en', 'p2.name_so as driver_name_so', 'p1.mobile as customer_mobile','p2.mobile as driver_mobile' ,'p1.country_code_id',  'p3.name_en as fuel_station_name_en', 'p3.name_so as fuel_station_name_so', 'p3.mobile as fuel_station_mobile','customer_orders.status', 'customer_orders.total', 'customer_orders.created_at','customer_orders.added_by as customer_order_added_by','customer_orders.added_user as customer_order_added_user')
+         ->leftjoin('trucks', 'customer_orders.truck_id', '=', 'trucks.id')
+
+            ->join('users as p1', function ($join) {
+                $join->on('p1.user_id', '=', 'customer_orders.customer_id')
+                    ->where('p1.role_id', 3);
+            })
+            ->leftjoin('users as p2', function ($join) {
+                $join->on('p2.user_id', '=', 'customer_orders.driver_id')
+                    ->where('p2.role_id', 4);
+            })
+            ->join('users as p3', function ($join) {
+                $join->on('p3.user_id', '=', 'customer_orders.fuel_station_id')
+                    ->where('p3.role_id', 5);
+            })
+
+            ->leftjoin('country_codes', 'country_codes.id', '=', 'p1.country_code_id')
+            ->with([
+                'customers', 'drivers', 'fuel_stations','trucks'
+            ])
+            ->orderBy('customer_orders.id','desc');
+
+        if ($request->keyword) {
+            $orders->where(function ($query) use ($request) {
+                $query->where('customer_orders.order_type', 'LIKE', '%' . $request->keyword . '%')
+                   ->orWhere('p1.name_en', 'LIKE', '%' . $request->keyword . '%')
+                   ->orWhere('p1.name_so', 'LIKE', '%' . $request->keyword . '%')
+                   ->orWhere('p1.mobile', 'LIKE', '%' . $request->keyword . '%')
+                    ->orWhere('p2.name_en', 'LIKE', '%' . $request->keyword . '%')
+                    ->orWhere('p2.name_so', 'LIKE', '%' . $request->keyword . '%')
+                    ->orWhere('p2.mobile', 'LIKE', '%' . $request->keyword . '%')
+                    ->orWhere('p3.mobile', 'LIKE', '%' . $request->keyword . '%')
+                     ->orWhere('p3.name_en', 'LIKE', '%' . $request->keyword . '%')
+                    ->orWhere('p3.name_so', 'LIKE', '%' . $request->keyword . '%')
+                    ->orWhere('trucks.truck_no', 'LIKE', '%' . $request->keyword . '%')
+                    ->orWhere('trucks.color', 'LIKE', '%' . $request->keyword . '%');
+
+            });}
+
+        if ($fields['status'] != '' && $fields['status'] != null) {
+            
+            if ($fields['status'] == 1) {
+
+                $orders->where('customer_orders.status', $fields['status']);
+            }
+            if ($fields['status'] == 2) {
+
+                $orders->where('customer_orders.status', $fields['status']);
+            }
+
+            if ($fields['status'] == 3) {
+
+                $orders->where('customer_orders.status', $fields['status']);
+            }
+            if ($fields['status'] == 4) {
+
+                $orders->where('customer_orders.status', $fields['status']);
+            }if ($fields['status'] == 5) {
+
+                $orders->where('customer_orders.status', $fields['status']);
+            }
+            if ($fields['status'] == 6) {
+
+                $orders->where('customer_orders.status', $fields['status']);
+            }
+                    }
+        $orders = $orders->paginate($fields['limit']);
+
+        $res = Response::send('true',
+            $data = [
+                'Orders' => $orders,
+            ],
+            $message = 'Success',
+            $code = 200);}
+    return $res;
+  }
+/*GET ORDERS */
+public function details(Request $request)
+{
+
+  $fields = $request->input();
+  $validator = Validator::make($request->all(),
+      [
+        'id' => 'required|numeric|exists:customer_orders,id',
+      ]);
+
+  if ($validator->fails()) {$errors = collect($validator->errors());
+      $res = Response::send('false', $data = [], $message = $errors, $code = 422);
+  } else {
+   
+    
+
+       $order =CustomerOrder::select('customer_orders.id as customer_order_id','customer_orders.customer_id','customer_orders.fuel_station_id','trucks.truck_no' ,'trucks.color as truck_color' ,'customer_orders.driver_id','customer_orders.truck_id','customer_orders.order_type','customer_orders.fuel_quantity_price','customer_orders.tax','customer_orders.delivery_charge','customer_orders.coupon_code','customer_orders.promotion_discount', 'customer_orders.other_charges','customer_orders.total','customer_orders.amount_commission','customer_orders.delivery_charge_commission','customer_orders.total_commission as Total_earnings','customer_orders.delivery_date','customer_orders.delivery_time','customer_orders.pin','customer_orders.accepted_at as driver_accepted_at','customer_orders.started_at','customer_orders.delivered_at','customer_orders.cancelled_at','customer_orders.cancel_reason','p1.name_en as customer_name_en', 'p1.name_so as customer_name_so', 'p2.name_en as driver_name_en', 'p2.name_so as driver_name_so', 'p1.mobile as customer_mobile','p2.mobile as driver_mobile' ,'p1.country_code_id',  'p3.name_en as fuel_station_name_en', 'p3.name_so as fuel_station_name_so', 'p3.mobile as fuel_station_mobile','customer_orders.status', 'customer_orders.total', 'customer_orders.created_at as customer_order_created_on','customer_orders.added_by as customer_order_added_by','customer_orders.added_user as customer_order_added_user', 'customer_order_payments.*','customer_order_address.*')
+       ->leftjoin('trucks', 'customer_orders.truck_id', '=', 'trucks.id')
+       ->leftjoin('customer_order_payments', 'customer_order_payments.order_id', '=', 'customer_orders.id')
+       ->leftjoin('customer_order_address', 'customer_order_address.order_id', '=', 'customer_orders.id')
+
+          ->join('users as p1', function ($join) {
+              $join->on('p1.user_id', '=', 'customer_orders.customer_id')
+                  ->where('p1.role_id', 3);
+          })
+          ->leftjoin('users as p2', function ($join) {
+              $join->on('p2.user_id', '=', 'customer_orders.driver_id')
+                  ->where('p2.role_id', 4);
+          })
+          ->join('users as p3', function ($join) {
+              $join->on('p3.user_id', '=', 'customer_orders.fuel_station_id')
+                  ->where('p3.role_id', 5);
+          })
+
+          ->leftjoin('country_codes', 'country_codes.id', '=', 'p1.country_code_id')
+          ->with([
+              'customers', 'drivers', 'fuel_stations','trucks'
+          ])
+          ->where('customer_orders.id', $request->id)
+          ->first();
+          $fuels = DB::table('customer_order_fuels')->select('customer_order_fuels.*','fuel_types.fuel_en','fuel_types.fuel_so')
+          ->join('fuel_types', 'fuel_types.id', '=', 'customer_order_fuels.fuel_type_id')
+          ->where('customer_order_fuels.order_id', $request->id)
+          ->get();
+          
+          $meter_images =DB::table('meter_images')->select('meter_images.*')
+          ->where('meter_images.order_id', $request->id)
+          ->get();
+         
+          $ratings =DB::table('ratings')->select('ratings.*')
+          ->where('ratings.order_id', $request->id)
+          ->get();
+         
+      $res = Response::send('true',
+          $data = [
+            'Order_details' => $order,
+            'fuels' => $fuels,
+            'meter_images' => $meter_images,
+         'ratings' => $ratings,
+
+          ],
+          $message = 'Success',
+          $code = 200);}
+  return $res;
+}
 
 }
