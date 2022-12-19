@@ -6,11 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\admin\CustomerOrder;
-use App\Models\admin\CustomerOrderAddress;
-use App\Models\admin\CustomerFuelSelection;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 
@@ -25,19 +23,19 @@ class CustomerOrderController extends Controller
         $validator = Validator::make($request->all(), [
             'customer_id' => 'required|numeric|exists:customers,id',
             'fuel_station_id' => 'required|numeric|exists:fuel_stations,id',
-            'driver_id' => 'nullable|numeric|exists:drivers,id',
             'order_type' => 'required|in:1,2',
-            //'payment_type' => 'required|in:1,2',
-           // 'fuel_type_id' => 'required|numeric|exists:fuel_types,id',
-            //'quantity' => 'required|numeric',
+            'payment_type' => 'required|in:1,2',
+            'fuel_type_ids' => 'required|array',
+            'fuel_type_ids.*' => 'distinct|exists:fuel_types,id|numeric',
+            'quantities' => 'required|array',
             'address' => 'required|min:3|max:50',
             //'address' => 'required|min:3|max:50|contains_alphabets|starts_with_alphanumeric',
             'location' => 'required|min:3|max:100',
             'latitude' => 'required|min:3|max:100',
             'longitude' => 'required|min:3|max:100',
             'special_instructions' => 'nullable|min:3|max:1000',
-            'mobile' => 'nullable|numeric|starts_with:6,7,8,9',
-            'coupon_code' => [
+            'mobile' => 'required|numeric|starts_with:6,7,8,9',
+             'coupon_code' => [
                 'nullable',
                 Rule::exists('coupons', 'coupon_code')->where(function ($query) use ($customer_id) {
                     $today = Carbon::today();
@@ -52,17 +50,16 @@ class CustomerOrderController extends Controller
                     });
                     return $query;
                 }),
-            ],
-            'delivery_date' => 'nullable|date|date_format:Y-m-d|after_or_equal:today',
-            'delivery_time' => 'nullable',
+            ],  
+            'delivery_date' => 'required|date|date_format:Y-m-d|after_or_equal:today',
+            'delivery_time' => 'required',
 
         ], [
             'customer_id.required' => __('error.customer_id_required'),
             'customer_id.exists' => __('error.customer_not_found'),
             'fuel_station_id.required' => __('error.fuel_station_id_required'),
             'fuel_station_id.exists' => __('error.fuel_station_id_not_found'),
-            'driver_id.exists' => __('error.driver_id_not_found'),
-            'quantity.required' => __('error.quantity_required'),
+            'quantities.required' => __('error.quantity_required'),
             'coupon_code.min' => __('error.coupon_code_min'),
             'coupon_code.max' => __('error.coupon_code_max'),
             'delivery_date.date' => __('error.delivery_date_date'),
@@ -73,13 +70,22 @@ class CustomerOrderController extends Controller
             //'address.contains_alphabets' => __('error.address_contains_alphabets'),
             //'address.starts_with_alphabet' => __('error.address_starts_with_alphabet'),
             'location.required' => __('error.location_required'),
+            'location.min' => __('error.location_min'),
+            'location.max' => __('error.location_max'),
             'latitude.required' => __('error.latitude_required'),
             'latitude.min' => __('error.latitude_min'),
             'latitude.max' => __('error.latitude_max'),
             'longitude.required' => __('error.longitude_required'),
             'logitude.min' => __('error.logitude_min'),
             'logitude.max' => __('error.logitude_max'),
-
+            'mobile.required' => __('error.mobile_required'),
+            'fuel_type_ids.required' => __('error.fuel_type_required'),
+            'coupon_code.exists' => __('error.coupon_exists'),
+            'order_type.required' => 'Please select the order type,Book now or Schedule delivery.',
+            'payment_type.required' => 'Please select the payment type,Mobile or Cash.',
+            'delivery_date.required' => __('error.delivery_date_required'),
+            'delivery_time.required' => __('error.delivery_time_required'),
+            
         ]);
         if ($validator->fails()) {
             $errors = collect($validator->errors());
@@ -87,49 +93,138 @@ class CustomerOrderController extends Controller
         } else {
             $latitude = $fields['latitude'];
             $longitude = $fields['longitude'];
+           
             if ($fields['coupon_code']) {
-
-                $coupons = DB::table('coupons')->select('id', 'coupon_name',  'type', 'coupon_code', 'amount', 'count', 'used_count', 'expiry_date', 'status', 'created_at')
+                  $coupons = DB::table('coupons')->select('id', 'coupon_name',  'type', 'coupon_code', 'amount', 'count', 'used_count', 'expiry_date', 'status', 'created_at')
                     ->where('coupon_code', $fields['coupon_code'])
                     ->first();
+               $d = $coupons->amount;}
+                $fuels = [];
+                $i = 0;
+                $fuel_quantity_price = 0;
+                $quantities =  $fields['quantities'];
+                foreach( $fields['fuel_type_ids']  as $fuel_type) {
+    
+                    $type = DB::table('fuel_station_stocks')
+                            ->select('fuel_station_stocks.fuel_type_id', 'fuel_en', 'fuel_so', 'price', 'stock')
+                           ->where('fuel_station_stocks.fuel_type_id', $fuel_type)
+                           ->where('fuel_station_stocks.fuel_station_id', $fields['fuel_station_id'])
+                           ->join('fuel_types', 'fuel_station_stocks.fuel_type_id', '=', 'fuel_types.id')
+                            ->first();
+                        if($type && $quantities[$i] <= $type->stock) {
+    
+                            $fuels[] = [
+                                'id' => $fuel_type,
+                                'fuel_en' => $type->fuel_en,
+                                'fuel_so' => $type->fuel_so,
+                                'quantity' => $quantities[$i],
+                                'price' => $type->price,
+                                'total' => $type->price * $quantities[$i],
+                                'stock_status' => 1,
+                                'converted_stock_status' => 'In Stock',
+                                'message'=>'Order placed Successfully'
+                            ];
 
-                $d = $coupons->amount;}
+                            $order_fuels[] = (object)array(
+                                'customer_id' => $fields['customer_id'],
+                                'order_id' => 0,
+                                'fuel_type_id' => $type->fuel_type_id,
+                                'quantity' => $quantities[$i],
+                                'price' => $type->price,
+                                'amount' => $type->price * $quantities[$i],
+                                'created_at' => date('Y-m-d H:i:s'),
+                                'updated_at' => date('Y-m-d H:i:s'),
+                            );
+                           
+                            $fuel_quantity_price = $fuel_quantity_price + ($type->price * $quantities[$i]);
+                            
+                        } else {
+                            
+                            $fuels[] = [
+                                'id' => $fuel_type,
+                                'stock_status' => 0,
+                                'converted_stock_status' => 'Out of Stock',
+                               'message'=>'Failed to place the Order'
+                            ];
+
+                            $order_fuels[] = (object)array(
+                                'customer_id' => $fields['customer_id'],
+                                'order_id' => 0,
+                                'fuel_type_id' =>$fuel_type,
+
+                                'quantity' => 0,
+                                'price' => 0,
+                                'amount' => 0,
+                                'created_at' => date('Y-m-d H:i:s'),
+                                'updated_at' => date('Y-m-d H:i:s'),
+                            );
+                           
+                        }
+                        $i++;
+                    }               
+                
+                   
             $order = new CustomerOrder;
             $order->customer_id = $fields['customer_id'];
             $order->fuel_station_id = $fields['fuel_station_id'];
-           // $order->driver_id = $fields['driver_id'];
-           // $order->truck_id = $fields['truck_id'];
             $order->order_type = $fields['order_type'];
-           // $order->payment_type = $fields['payment_type'];
-           // $a = $order->fuel_quantity_price = $fuel_quantity_price;
-            $delivery = $this->delivery_charge($latitude, $longitude);
-            $b = $order->delivery_charge = $delivery['delivery_charge'];
+            $a= $order->fuel_quantity_price = $fuel_quantity_price;
+            $delivery =$this->delivery_charge($latitude, $longitude,$fields['fuel_station_id']);
+            $b=$order->delivery_charge = $delivery['delivery_charge'];
+            $order->delivery_charge_commission = $b/2;
+            $settings = DB::table('settings')->select('tax','commission')->first();
+            $ac=$order->amount_commission =$fuel_quantity_price*$settings->commission/100;$order->delivery_charge_commission = $b/2;
+            $order->total_commission = $ac+$b/2;
+            $oth=$order->other_charges = '0';
+            $tax = $fuel_quantity_price * $settings->tax / 100;
+            $order->tax =$tax;
+            $order->coupon_code = $fields['coupon_code'];
+            $order->pin= $this->generateCode();
             if ($fields['coupon_code']) {
 
                 if (($coupons->type == 1   or $coupons->type == 3)) {
-                    $c = $order->discount = $d;
+                    $c = $order->promotion_discount = $d;
 
                 } else {
-                    $c = $order->discount = $a * $d / 100;
-                }$order->total = $a + $b - $c;
-                $order->coupon_code = $fields['coupon_code'];
-            } else { $order->total = $a + $b;}
-            $order->delivery_date =  date('D, d M Y ',strtotime($fields['delivery_date']));
+                    $c = $order->promotion_discount = $a * $d / 100;
+                }
+                $order->total = $a + $b - $c +$tax +$oth;
+            } 
+            else { $order->total = $a + $b +$tax +$oth;}
+            $order->delivery_date =$fields['delivery_date'];
             $order->delivery_time = date('H:i:s', strtotime($fields['delivery_time']));
-            $order->status = 2;
+            $order->status = 1;
+            $role_id = auth('sanctum')->user()->role_id;
+            $user_id = auth('sanctum')->user()->id;
+            $order->added_by =$role_id;
+            $order->added_user=$user_id;
             $order->created_at = date('Y-m-d H:i:s');
             $order->updated_at = date('Y-m-d H:i:s');
             $result = $order->save();
-            if ($result) {
-                $fueltypes=fuelType::all();
-                         foreach ($fueltypes as $key => $type) {
-                                 $fuelselections = new CustomerFuelSelection();
-                                 $fuelselections ->order_id = $order->id;
-                                 $fuelselections ->fuel_type_id =  $type->id;
-                                 $fuelselections ->quantity =$fields['quantity'];
-                                 $fuelselections->save();
-                                }
-                $users = DB::table('users')->select('users.email as customer_email', 'customers.name as customer_name', 'users.country_code_id as customer_country_code_id')
+
+            if ($result) {if($order_fuels){
+                foreach($order_fuels as $order_fuel) {
+                    DB::table('customer_order_fuels')->insert(array(
+                        'customer_id' => $order_fuel->customer_id,
+                        'order_id' => $order->id,
+                        'fuel_type_id' => $order_fuel->fuel_type_id,
+                        'quantity' => $order_fuel->quantity,
+                        'price' => $order_fuel->price,
+                        'amount' => $order_fuel->amount,
+                        'created_at' => $order_fuel->created_at,
+                        'updated_at' => $order_fuel->updated_at,
+                    ));
+                }                
+                DB::table('customer_order_payments')->insert(array(
+                    'customer_id' => $order->customer_id,
+                    'order_id' => $order->id,
+                    'total_amount'=>$order->total,
+                    'payment_type' =>$fields['payment_type'],
+                    'created_at' => $order_fuel->created_at,
+                    'updated_at' => $order_fuel->updated_at,
+                    ));
+
+    $users = DB::table('users')->select('users.country_code_id as customer_country_code_id')
                     ->join('customers', 'users.user_id', '=', 'customers.id')
                     ->where('customers.id', $fields['customer_id'])
                     ->where('users.role_id', '3')
@@ -138,15 +233,13 @@ class CustomerOrderController extends Controller
                     array(
                         'customer_id' => $fields['customer_id'],
                         'order_id' => $order->id,
-                        'name' => $users->customer_name,
-                        'email' => $users->customer_email,
-                        'country_code' => $users->customer_country_code_id,
+                        'country_code_id' => $users->customer_country_code_id,
                         'phone' => $fields['mobile'],
                         'location' => $fields['location'],
                         'address' => $fields['address'],
                         'latitude' => $fields['latitude'],
                         'longitude' => $fields['longitude'],
-                        'special_insrtruction' => $fields['special_insrtruction'],
+                        'special_instructions' => $fields['special_instructions'],
                         'created_at' => date('Y-m-d H:i:s'),
                         'updated_at' => date('Y-m-d H:i:s'),
                     ));
@@ -155,14 +248,20 @@ class CustomerOrderController extends Controller
                     ->where('users.role_id', '3')
                     ->get();
 
-                $title = 'Order Placed.';
-                $content = 'Your order has been placed succesfully.';
-                if ($this->sendPatientNotification($fcm,
-                    $title, $content)) {
+                $title_en = 'Order placed.';
+                $title_so = '.';
+
+                $content_en = 'Your order has been placed succesfully.';
+                $content_so= '.';
+
+                if ($this->sendCustomerNotification($fcm,
+                    $title_en, $content_en)) {
                     DB::table('notifications')->insert(
                         array(
-                            'title' => $title,
-                            'description' => $content,
+                            'title_en' => $title_en,
+                            'title_so' => $title_so,
+                            'description_en' => $content_en,
+                            'description_so' => $content_so,
                             'type' => '3',
                             'user_id' => $fields['customer_id'],
                             'order_id' => $order->id,
@@ -175,10 +274,13 @@ class CustomerOrderController extends Controller
                 }
 
                 $res =  Response::send('true',
-                    $data = [],
-                    $message = 'Order placed succesfully.',
+                    $data = [
+                           'fuels'=>$fuels
+
+                    ],
+                  //  $message = 'Order placed succesfully.',
                     $code = 200);
-            } else {
+           } } else {
                 $res =  Response::send('false',
                     $data = [],
                     $message = 'Data not found.',
@@ -190,10 +292,12 @@ class CustomerOrderController extends Controller
 
 
 /*GET DELIVERY CHARGE*/
-public function delivery_charge($latitude, $longitude)
+public function delivery_charge($latitude, $longitude, $fuel_station_id)
 {
-    $settings = DB::table('settings')->select('latitude', 'longitude', 'fuel_delivery_range	')->first();
-    $distance1 = $this->GetDrivingDistance($latitude, $settings->latitude, $longitude, $settings->longitude);
+    $settings = DB::table('settings')->select('fuel_delivery_range')->first();
+    $fuel = DB::table('fuel_stations')->select('latitude', 'longitude')->where('id', $fuel_station_id)->first();
+    $distance1 = $this->GetDrivingDistance($latitude, $fuel->latitude, $longitude, $fuel->longitude);
+
     $distance2 = $distance1['distance'];
     $test = explode(' ', $distance2);
     $distance4 = $test[1];
@@ -205,8 +309,7 @@ public function delivery_charge($latitude, $longitude)
     }
     $distance4 = str_replace(',', '.', $distance3);
     $distance = (float) $distance4;
-
-    $delivery_charge = $distance * $settings->fuel_delivery_range	;
+    $delivery_charge = $distance * $settings->fuel_delivery_range;
     return array('delivery_charge' => $delivery_charge);
 
 }
@@ -229,8 +332,60 @@ public function GetDrivingDistance($lat1, $lat2, $long1, $long2)
     return array('distance' => $dist, 'time' => $time);
 }
 
+/* SEND NOTIFICATION */
+public function sendCustomerNotification($fcm, $title, $body)
+{
+    $SERVER_API_KEY = "";
+    $header = [
+        'Authorization: key=' . $SERVER_API_KEY,
+        'Content-Type: Application/json',
+    ];
+    $msg = [
+        'title' => $title,
+        'body' => $body,
+    ];
 
+    $notification = [
+        'title' => $title,
+        'body' => $body,
+        'content_available' => true,
+    ];
 
+    $payload = [
+        'data' => $msg,
+        'notification' => $notification,
+        'to' => $fcm,
+        'priority' => 10,
+    ];
+    $url = 'https://fcm.googleapis.com/fcm/send';
 
+    $curl = curl_init();
+
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => "https://fcm.googleapis.com/fcm/send",
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST => "POST",
+        CURLOPT_POSTFIELDS => json_encode($payload),
+        CURLOPT_HTTPHEADER => $header,
+    ));
+
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+
+    curl_close($curl);
+
+    return true;
+}
+/****** GENERATE CODE *****/
+function generateCode() 
+{
+    $chars = '0123456789';
+    $len = strlen($chars);
+    $code = '';
+    for ($i = 0; $i < 4; $i++) {
+        $code .= $chars[rand(0, $len - 1)];
+    }
+    return $code;
+}
 
 }
