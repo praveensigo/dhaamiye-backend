@@ -81,7 +81,7 @@ class TruckController extends Controller
 
             $mot_uploaded_path = '';
             if ($request->file('mot_certificate')!=null) {
-                $uploadFolder = 'Trucks/mot_certificates';
+                $uploadFolder = 'trucks/mot_certificates';
                 $image = $request->file('mot_certificate');
                 $mot_uploaded_path = $image->store($uploadFolder, 'public');
             }
@@ -90,7 +90,7 @@ class TruckController extends Controller
 
             $insurance_uploaded_path = '';
             if ($request->file('insurance_certificate')!=null) {
-                $uploadFolder = 'Trucks/insurance_certificates';
+                $uploadFolder = 'trucks/insurance_certificates';
                 $image = $request->file('insurance_certificate');
                 $insurance_uploaded_path = $image->store($uploadFolder, 'public');
             }
@@ -100,7 +100,7 @@ class TruckController extends Controller
            
             $certificate_uploaded_path = '';
             if ($request->file('truck_certificate')!=null) {
-                $uploadFolder = 'Trucks/truck_certificates';
+                $uploadFolder = 'trucks/truck_certificates';
                 $image = $request->file('truck_certificate');
                 $certificate_uploaded_path = $image->store($uploadFolder, 'public');
             }
@@ -182,7 +182,7 @@ class TruckController extends Controller
 
                 $mot_uploaded_path = '';
                 if ($request->file('mot_certificate')!=null) {
-                    $uploadFolder = 'Trucks/mot_certificates';
+                    $uploadFolder = 'trucks/mot_certificates';
                     $image = $request->file('mot_certificate');
                     $mot_uploaded_path = $image->store($uploadFolder, 'public');
                     $truck->mot_certificate_url= $mot_uploaded_path;
@@ -191,7 +191,7 @@ class TruckController extends Controller
     
                 $insurance_uploaded_path = '';
                 if ($request->file('insurance_certificate')!=null) {
-                    $uploadFolder = 'Trucks/insurance_certificates';
+                    $uploadFolder = 'trucks/insurance_certificates';
                     $image = $request->file('insurance_certificate');
                     $insurance_uploaded_path = $image->store($uploadFolder, 'public');
                     $truck->insurance_certificate_url= $insurance_uploaded_path;
@@ -200,7 +200,7 @@ class TruckController extends Controller
     
                 $certificate_uploaded_path = '';
                 if ($request->file('truck_certificate')!=null) {
-                    $uploadFolder = 'Trucks/truck_certificates';
+                    $uploadFolder = 'trucks/truck_certificates';
                     $image = $request->file('truck_certificate');
                     $certificate_uploaded_path = $image->store($uploadFolder, 'public');
                     $truck->truck_certificate_url= $certificate_uploaded_path;

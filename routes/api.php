@@ -87,6 +87,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/driver/earnings', [DriverController::class, 'earnings']);
     Route::get('admin/getTrucks', [DriverController::class, 'getTrucks']);
     Route::get('admin/getFuelStations', [DriverController::class, 'getFuelStations']);
+    Route::get('admin/getDrivers', [DriverController::class, 'getDrivers']);
+    Route::get('admin/getCustomers', [DriverController::class, 'getCustomers']);
+    Route::get('admin/getFuels', [DriverController::class, 'getFuels']);
+    Route::get('admin/getRoles', [DriverController::class, 'getRoles']);
+    Route::get('admin/getFuelStationDrivers', [DriverController::class, 'getFuelStationDrivers']);
 
 
     Route::post('admin/truck/add', [TruckController::class, 'add']);
