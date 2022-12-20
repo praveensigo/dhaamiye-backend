@@ -304,7 +304,6 @@ class HomeController extends Controller
 
                 $fuels = CustomerOrder::find($request->order_id)
                     ->fuels()
-                    //->where('id', $request->order_id)
                     ->get();
 
                 $data = [
