@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\admin;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\admin\Comment;
@@ -29,7 +29,7 @@ class EnquiriesController extends Controller
                         ->leftjoin('issue_types', 'issue_types.id', '=', 'comments.issue_type_id')
                         ->leftJoin('users', function($join)
                             {
-                                $join->on('comments.user_id', '=', 'users.user_id');
+                                $join->on('comments.user_id', '=', 'users.id');
                                 $join->on('comments.role_id','=','users.role_id');
                                         
                             })

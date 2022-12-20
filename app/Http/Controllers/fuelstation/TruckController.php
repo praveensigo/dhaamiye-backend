@@ -18,6 +18,7 @@ class TruckController extends Controller
         $auth_user            = Auth::user();
         $role_id = $auth_user->role_id;
         $user_id = $auth_user->user_id;
+        $id = $auth_user->id;
 
         $fields    = $request->input();
         $validator = Validator::make($request->all(), [
@@ -71,7 +72,7 @@ class TruckController extends Controller
             $truck->engine_no           = $fields['engine_no'];
             $truck->fuel_station_id           =$user_id;
             $truck->added_by        = $role_id;
-            $truck->added_user        = $user_id;
+            $truck->added_user        = $id;
             $truck->reg_status           = '0';
             $truck->created_at  = date('Y-m-d H:i:s');
             $truck->updated_at  = date('Y-m-d H:i:s');
@@ -121,6 +122,8 @@ class TruckController extends Controller
         {    $auth_user            = Auth::user();
             $role_id = $auth_user->role_id;
             $user_id = $auth_user->user_id;
+            $id = $auth_user->id;
+
             $fields    = $request->input();
             $validator = Validator::make($request->all(), [
                     'id' => 'required|numeric|exists:trucks,id',
@@ -173,7 +176,7 @@ class TruckController extends Controller
                 $truck->engine_no           = $fields['engine_no'];
                 $truck->fuel_station_id      =$user_id;
                 $truck->updated_by  = $role_id;
-                $truck->updated_user  = $user_id;
+                $truck->updated_user  = $id;
                 $truck->updated_at  = date('Y-m-d H:i:s');
                 $truck->reg_status           = '0';
 

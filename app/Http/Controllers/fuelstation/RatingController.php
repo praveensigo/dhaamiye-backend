@@ -30,8 +30,7 @@ class RatingController extends Controller
         } else {
 
             $customer_ratings = DB::table('ratings')->select('ratings.id', 'ratings.order_id', 'ratings.role_id', 'ratings.user_id', 'ratings.review', 'ratings.star_rating', 'users.name_en', 'users.name_so', 'users.email', 'users.mobile', 'users.country_code_id', 'country_codes.country_code', 'ratings.created_at')
-               
-                ->join('users', 'users.user_id', '=', 'ratings.user_id')
+                ->join('users', 'users.id', '=', 'ratings.user_id')
                 ->where('users.role_id', '3')
                 ->where('ratings.role_id', '3')
                 ->join('customer_orders', 'customer_orders.id', '=', 'ratings.order_id')
@@ -84,7 +83,7 @@ class RatingController extends Controller
         } else {
 
             $driver_ratings = DB::table('ratings')->select('ratings.id', 'ratings.order_id', 'users.role_id as user_role_id', 'ratings.role_id', 'ratings.user_id', 'ratings.review', 'ratings.star_rating', 'users.name_en', 'users.name_so', 'users.email', 'users.mobile', 'users.country_code_id', 'country_codes.country_code', 'ratings.created_at')
-            ->join('users', 'users.user_id', '=', 'ratings.user_id')
+            ->join('users', 'users.id', '=', 'ratings.user_id')
             ->where('ratings.role_id', '4')
             ->where('users.role_id', '4')
             ->join('customer_orders', 'customer_orders.id', '=', 'ratings.order_id')
