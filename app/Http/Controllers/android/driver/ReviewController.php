@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\android\customer;
+namespace App\Http\Controllers\android\driver;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\android\customer\CustomerOrder;
-use App\Models\android\customer\Rating;
+use App\Models\android\driver\CustomerOrder;
+use App\Models\android\driver\Rating;
 use Illuminate\Support\Facades\DB;
 use App\Models\service\ResponseSender as Response;
 use Illuminate\Validation\Rule;
@@ -15,7 +15,7 @@ class ReviewController extends Controller
 {
     /*************
     Add rating and review
-    @params: order_id, driver_id, rating, review
+    @params: order_id, customer_id, rating, review
     **************/
     public function add(Request $request)
     {
@@ -32,7 +32,7 @@ class ReviewController extends Controller
             ];
         }
         $validator = Validator::make($request->all(), [
-            'driver_id' => 'required|exists:drivers,id',
+            'customer_id' => 'required|exists:customers,id',
             'order_id' => 'required|exists:customer_orders,id',
             'rating' => 'required|numeric|in:1,2,3,4,5',
             'review' => 'required',
@@ -47,8 +47,8 @@ class ReviewController extends Controller
 
             $user = DB::table('users')
                     ->select('id', 'user_id')
-                    ->where('user_id', $request->driver_id)
-                    ->where('role_id', 4)
+                    ->where('user_id', $request->customer_id)
+                    ->where('role_id', 3)
                     ->first();
 
             if($order->status == 5) {
