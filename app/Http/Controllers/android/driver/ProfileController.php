@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\android\driver\User;
 use App\Models\android\driver\Driver;
+use Illuminate\Support\Facades\DB;
 use App\Models\service\ResponseSender as Response;
 use Illuminate\Validation\Rule;
 use Validator;
@@ -326,6 +327,40 @@ class ProfileController extends Controller
               
                 $res = Response::send(true, [], '', 200);
             }
+        }
+        return $res;
+    }
+
+    /*************
+    Post current location
+    @params: latitude, longitude
+    **************/
+    public function postLocation(Request $request)
+    {
+        $auth_user = auth('sanctum')->user();
+        
+        $validator = Validator::make($request->all(), [
+            'latitude' => 'required',
+            'longitude' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+            $res = Response::send(false, [], $message = $errors, 422);
+
+        } else {
+
+            DB::table('driver_location')->insert(array(
+                    'driver_id' => $auth_user->user_id,
+                    'latitude' => $request->latitude,
+                    'longitude' => $request->longitude,
+                    'date' => date('Y-m-d'),                        
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+            ));
+
+            $res = Response::send(true, [], 'Success', 200);           
+                
         }
         return $res;
     }
