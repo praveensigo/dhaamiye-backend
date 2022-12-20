@@ -12,4 +12,16 @@ return [
 
     'complete_order_en' => 'Order completed',
     'complete_order_so' => 'Order completed',
+
+    'status_order_en' => 'Please enter a valid status',
+    'status_order_so' => 'Please enter a valid status',
+
+    'start_order_driver_en' => 'You cannot start this order',
+    'start_order_driver_so' => 'You cannot start this order',
+
+    'complete_order_driver_en' => 'You cannot complete this order',
+    'complete_order_driver_so' => 'You cannot complete this order',
+
+    'pin_en' => 'The given pin number is not correct',
+    'pin_so' => 'The given pin number is not correct',
 ];
