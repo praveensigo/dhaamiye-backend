@@ -60,6 +60,11 @@ class CustomerOrder extends Model
                      ->where('role_id', 4);
     }
 
+    public function coupon()
+    {
+        return $this->belongsTo(Coupon::class, 'coupon_code', 'coupon_code');
+    }
+
     /**
     *** Scope
     **/

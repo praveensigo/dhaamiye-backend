@@ -742,7 +742,8 @@ class OrderController extends Controller
                     }, 
                     'driver' => function ($query) {
                         $query->select('user_id', 'name_en', 'name_so');
-                    }
+
+                    }, 'coupon'
                 ])
                 ->first();         
 
