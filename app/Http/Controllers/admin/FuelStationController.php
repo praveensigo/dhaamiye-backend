@@ -164,7 +164,7 @@ class FuelStationController extends Controller
             $fuel_station = new FuelStation;
             $fuel_station->place = $fields['place'];
             $role_id = auth('sanctum')->user()->role_id;
-            $user_id = auth('sanctum')->user()->user_id;
+            $user_id = auth('sanctum')->user()->id;
             $fuel_station->added_by = $role_id;
             $fuel_station->added_user = $user_id;
             $fuel_station->address = $fields['address'];
@@ -313,7 +313,8 @@ class FuelStationController extends Controller
         } else {
             $fuel_station = FuelStation::find($fields['id']);
             $role_id = auth('sanctum')->user()->role_id;
-            $user_id = auth('sanctum')->user()->user_id;
+            $user_id = auth('sanctum')->user();
+            dd($user_id);
             $fuel_station->updated_by = $role_id;
             $fuel_station->updated_user = $user_id;
             $fuel_station->place = $fields['place'];
@@ -814,7 +815,7 @@ class FuelStationController extends Controller
                
                 
                 $role_id = auth('sanctum')->user()->role_id;
-                $user_id = auth('sanctum')->user()->user_id;
+                $user_id = auth('sanctum')->user()->id;
                 $stock->added_by = $role_id;
                 $stock->added_user = $user_id;
                 $result = $stock->save();
@@ -824,7 +825,7 @@ class FuelStationController extends Controller
                 $price->fuel_type_id = $stock->fuel_type_id;
                 $price->price = $stock->price;
                 $role_id = auth('sanctum')->user()->role_id;
-                $user_id = auth('sanctum')->user()->user_id;
+                $user_id = auth('sanctum')->user()->id;
                 $price->added_by = $role_id;
                 $price->added_user = $user_id;
                 $price->save();
@@ -876,7 +877,7 @@ class FuelStationController extends Controller
                 $price->fuel_type_id = $fuel_type_id;
                 $price->price = $fields['price'];
                 $role_id = auth('sanctum')->user()->role_id;
-                $user_id = auth('sanctum')->user()->user_id;
+                $user_id = auth('sanctum')->user()->id;
                 $price->added_by = $role_id;
                 $price->added_user = $user_id;
                 $price->save();
@@ -922,7 +923,7 @@ class FuelStationController extends Controller
                 $stock->fuel_type_id = $fuel_type_id;
                 $stock->stock = $fields['stock'];
                 $role_id = auth('sanctum')->user()->role_id;
-                $user_id = auth('sanctum')->user()->user_id;
+                $user_id = auth('sanctum')->user()->id;
                 $stock->added_by = $role_id;
                 $stock->added_user = $user_id;
                 $stock->save();

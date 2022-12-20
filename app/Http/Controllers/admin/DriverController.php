@@ -4,7 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Service\ResponseSender as Response;
+use App\Models\service\ResponseSender as Response;
 use App\Models\admin\Driver;
 use App\Models\admin\CustomerOrderFuel;
 use App\Models\admin\CustomerOrder;
@@ -25,7 +25,7 @@ class DriverController extends Controller
     {
         $auth_user            = Auth::user();
         $role_id = $auth_user->role_id;
-        $user_id = $auth_user->user_id;
+        $user_id = $auth_user->id;
 
         $fields    = $request->input();
         $validator = Validator::make($request->all(), [
@@ -161,7 +161,7 @@ class DriverController extends Controller
     {   
         $auth_user            = Auth::user();
         $role_id = $auth_user->role_id;
-        $user_id = $auth_user->user_id;
+        $user_id = $auth_user->id;
 
         $fields    = $request->input();
         $validator = Validator::make($request->all(), [
@@ -454,6 +454,7 @@ class DriverController extends Controller
             $errors = collect($validator->errors());
             $res = Response::send(false, [], $message = $errors, 422);
         } else {
+            $date    = date('Y-m-d');
             $drivers = Driver::select('drivers.id as driver_id','drivers.fuel_station_id','drivers.truck_id','drivers.passport_url','drivers.license_url','drivers.license_expiry','drivers.status as driver_status','drivers.added_by','drivers.added_user','drivers.approval_by','drivers.approval_user','drivers.updated_by','drivers.updated_user','drivers.online',
                                        'users.*')
                                     ->join('users', 'users.user_id', '=', 'drivers.id')
@@ -461,13 +462,42 @@ class DriverController extends Controller
                                     ->where('users.role_id','4')
                                     ->where('users.reg_status','1')
                                     ->with([
-                                        'truck','fuel_station','orders' 
+                                        'truck','fuel_station' 
                                             ])
                                     ->where('drivers.id',$request->id)
 
                                     ->first();
+        $orders = CustomerOrder::select('customer_orders.id',)
+                                    ->where('customer_orders.driver_id', $request->id)
+                                    ->get()->count();
+        $total_pending = CustomerOrderPayment::query()
+                                    ->select(
+                                        DB::raw('SUM(total_amount) AS total_pending_amount')
+                                    )
+                                    ->where('customer_order_payments.driver_id', $request->id)
+                                    ->whereNotIn('customer_order_payments.order_id', function ($query) {
+                                        $query->select('order_id')
+                                        ->from('driver_payments');
+                                    })
+                                    ->first()->total_pending_amount;
+        $total_completed = DriverPayments::query()
+                                    ->select(
+                                        DB::raw('SUM(amount) AS total_completed_amount')
+                                    )
+                                    ->where('driver_payments.driver_id', $request->id)
+                                    ->first()->total_completed_amount;
+        $location = DB::table('driver_location')->select('latitude','longitude',DB::raw('MAX(driver_location.created_at)'))
+                                    ->where('driver_location.driver_id', $request->id)
+                                    ->where(DB::raw('CAST(driver_location.date as date)'), '=', $date)
+                                    ->groupBy('latitude','longitude')
+                                    ->first();
+       
                         $data = array(
                             'drivers' => $drivers,
+                            'orders' => $orders,
+                            'total_pending' => $total_pending,
+                            'total_completed' => $total_completed,
+                            'location' => $location,
                                 );
                         $res = Response::send(true, $data, 'Driver found', 200);
                     }
@@ -519,13 +549,13 @@ public function status(Request $request)
     { 
         $auth_user            = Auth::user();
         $role_id = $auth_user->role_id;
-        $user_id = $auth_user->user_id;
+        $user_id = $auth_user->id;
 
         $fields    = $request->input();
         $validator = Validator::make($request->all(),
             [
                 'id' => 'required|exists:drivers,id',
-
+                'truck_id'=> 'required|exists:trucks,id'
             ],
             [
                 'id.exists' => __('error2.id_exists'),
@@ -549,6 +579,7 @@ public function status(Request $request)
                         $driver   = Driver::where('id',$fields['id'])->first();
                         $driver->approval_by        = $role_id;
                         $driver->approval_user        = $user_id;
+                        $driver->truck_id        = $fields['truck_id'];
                         $result2 = $driver->save();
                         $dmessage = 'Approved';
                     }
@@ -643,7 +674,7 @@ public function pendingIndex(Request $request)
     {   
         $auth_user            = Auth::user();
         $role_id = $auth_user->role_id;
-        $user_id = $auth_user->user_id;
+        $user_id = $auth_user->id;
 
         $validator = Validator::make($request->all(),
         [
@@ -1050,6 +1081,135 @@ public function earnings(Request $request)
             $res = Response::send(true, $data, '', 200);
       }
        return $res;
+}
+public function getFuelStations(Request $request)
+{
+        $fuel_stations = DB::table('users')
+                        ->select('user_id','name_en','name_so')
+                        ->where('status', 1)
+                        ->where('reg_status', 1)
+                        ->where('role_id',5)
+                        ->orderBy('user_id')->get();
+        $data = array(
+            'fuel_stations' => $fuel_stations,
+        );
+        $res = Response::send(true, $data, 'Fuel Stations found', 200);
+    
+
+    return $res;
+}
+public function getTrucks(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'fuel_station_id' => 'required|numeric|exists:fuel_stations,id',
+    ]);
+
+    if ($validator->fails()) {
+        $errors = collect($validator->errors());
+        $res = Response::send(false, [], $message = $errors, 422);
+
+    } else {
+
+        
+        $trucks = DB::table('trucks')
+                        ->select('id','truck_no')
+                        ->where('status', 1)
+                        ->where('fuel_station_id',$request->fuel_station_id)
+                        ->orderBy('trucks.id')->get();
+        $data = array(
+            'trucks' => $trucks,
+        );
+        $res = Response::send(true, $data, 'Trucks found', 200);
+    }
+
+    return $res;
+}
+public function getDrivers(Request $request)
+{
+    $drivers = DB::table('users')
+                        ->select('user_id','name_en','name_so','country_code_id','email','mobile')
+                        ->where('status', 1)
+                        ->where('reg_status', 1)
+                        ->where('role_id',4)
+                        ->orderBy('user_id')->get();
+        $data = array(
+            'drivers' => $drivers,
+        );
+        $res = Response::send(true, $data, 'Drivers found', 200);
+    
+
+    return $res;
+}
+public function getCustomers(Request $request)
+{
+    $customers = DB::table('users')
+                        ->select('user_id','name_en','name_so','country_code_id','email','mobile')
+                        ->where('status', 1)
+                        ->where('reg_status', 1)
+                        ->where('role_id',3)
+                        ->orderBy('user_id')->get();
+        $data = array(
+            'customers' => $customers,
+        );
+        $res = Response::send(true, $data, 'customers found', 200);
+    
+
+    return $res;
+}
+public function getFuels(Request $request)
+{
+    $fuels = DB::table('fuel_types')
+                        ->select('id','fuel_en','fuel_so')
+                        ->where('status', 1)
+                        ->orderBy('id')->get();
+        $data = array(
+            'fuels' => $fuels,
+        );
+        $res = Response::send(true, $data, 'fuels found', 200);
+    
+
+    return $res;
+}
+public function getRoles(Request $request)
+{
+    $roles = DB::table('roles')
+                        ->select('id','role',)
+                        ->orderBy('id')->get();
+        $data = array(
+            'roles' => $roles,
+        );
+        $res = Response::send(true, $data, 'roles found', 200);
+    
+
+    return $res;
+}
+public function getFuelstationDrivers(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'fuel_station_id' => 'required|numeric|exists:fuel_stations,id',
+    ]);
+
+    if ($validator->fails()) {
+        $errors = collect($validator->errors());
+        $res = Response::send(false, [], $message = $errors, 422);
+
+    } else {
+
+    $drivers = DB::table('users')
+                        ->select('user_id','name_en','name_so','country_code_id','email','mobile')
+                        ->join('drivers', 'drivers.id', '=', 'users.user_id')
+                        ->where('drivers.status', 1)
+                        ->where('users.reg_status', 1)
+                        ->where('users.role_id',4)
+                        ->where('drivers.fuel_station_id',$request->fuel_station_id)
+                        ->orderBy('drivers.id')->get();
+        $data = array(
+            'drivers' => $drivers,
+        );
+        $res = Response::send(true, $data, 'Drivers found', 200);
+    
+    }
+    return $res;
 }
 }
 

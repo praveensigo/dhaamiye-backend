@@ -85,6 +85,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('admin/driver/change_password', [DriverController::class, 'changePassword']);
     Route::get('admin/driver/orders', [DriverController::class, 'orders']);
     Route::get('admin/driver/earnings', [DriverController::class, 'earnings']);
+    Route::get('admin/getTrucks', [DriverController::class, 'getTrucks']);
+    Route::get('admin/getFuelStations', [DriverController::class, 'getFuelStations']);
+    Route::get('admin/getDrivers', [DriverController::class, 'getDrivers']);
+    Route::get('admin/getCustomers', [DriverController::class, 'getCustomers']);
+    Route::get('admin/getFuels', [DriverController::class, 'getFuels']);
+    Route::get('admin/getRoles', [DriverController::class, 'getRoles']);
+    Route::get('admin/getFuelStationDrivers', [DriverController::class, 'getFuelStationDrivers']);
 
 
     Route::post('admin/truck/add', [TruckController::class, 'add']);
@@ -162,6 +169,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/orders',[CustomerOrderController::class,'index']);
     Route::get('admin/order/details',[CustomerOrderController::class,'details']);
     
+    Route::get('admin/order/startOrder',[CustomerOrderController::class,'startOrder']);
+    Route::get('admin/order/completeOrder',[CustomerOrderController::class,'completeOrder']);
+
     Route::post('admin/fuelStation/updateDeposite', [FuelStationController::class, 'updateDeposite']);
 
     // return $request->user();

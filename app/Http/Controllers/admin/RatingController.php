@@ -29,7 +29,7 @@ class RatingController extends Controller
 
             $customer_ratings = DB::table('ratings')->select('ratings.id', 'ratings.order_id', 'ratings.role_id', 'ratings.user_id', 'ratings.review', 'ratings.star_rating', 'users.name_en', 'users.name_so', 'users.email', 'users.mobile', 'users.country_code_id', 'country_codes.country_code', 'ratings.created_at')
                 ->leftjoin("users", function ($join) {
-                    $join->on("users.user_id", "=", "ratings.user_id")
+                    $join->on("users.id", "=", "ratings.user_id")
                         ->on("users.role_id", "=", "ratings.role_id");
                 })
                 ->join('country_codes', 'country_codes.id', '=', 'users.country_code_id')
@@ -82,7 +82,7 @@ class RatingController extends Controller
 
             $driver_ratings = DB::table('ratings')->select('ratings.id', 'ratings.order_id', 'users.role_id as urole_id', 'ratings.role_id', 'ratings.user_id', 'ratings.review', 'ratings.star_rating', 'users.name_en', 'users.name_so', 'users.email', 'users.mobile', 'users.country_code_id', 'country_codes.country_code', 'ratings.created_at')
                 ->leftjoin("users", function ($join) {
-                    $join->on("users.user_id", "=", "ratings.user_id")
+                    $join->on("users.id", "=", "ratings.user_id")
                         ->on("users.role_id", "=", "ratings.role_id");
                 })
                 ->join('country_codes', 'country_codes.id', '=', 'users.country_code_id')
