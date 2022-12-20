@@ -478,6 +478,113 @@ public function assignDriver(Request $request)
 
     return $res;
 }
+//START ORDER 
+
+public function startOrder(Request $request)
+{
+    $fields = $request->input();
+    $validator = Validator::make($request->all(),   [
+        'order_id' => 'required|numeric|exists:customer_orders,id',
+        
+    ],
+    [
+        'order_id.exists' => __('error.customer_order_not_found'),
+
+    ]
+);
+    if ($validator->fails()) {
+        $errors = collect($validator->errors());
+        $res =Response::send('false', $data = [], $message = $errors, $code = 422);
+    } else {
+        $order = CustomerOrder::find($fields['order_id']);
+        $order->status = 3;
+        $order->started_at = date('Y-m-d H:i:s');
+        $order->updated_at = date('Y-m-d H:i:s');
+        $result = $order->save();
+        if ($result) {
+              $res =Response::send('true',
+                $data = [ ],
+                $message = 'Order started successfully.',
+                $code = 200);
+        } else {
+            $res =Response::send('false',
+                $data = [],
+                $message = 'Failed to start order.',
+                $code = 400);
+        }
+    }
+    return $res;
+}
+
+/* COMPLETE ORDER */
+public function completeOrder(Request $request)
+{
+    $fields = $request->input();
+    $validator = Validator::make($request->all(), [
+        'order_id' => 'required|numeric|exists:customer_orders,id',
+        
+    ],
+    [
+        'order_id.exists' => __('error.customer_order_not_found'),
+
+    ]);
+    if ($validator->fails()) {
+        $errors = collect($validator->errors());
+        $res = Response::send('false', $data = [], $message = $errors, $code = 422);
+    } else {
+        $order = CustomerOrder::find($fields['order_id']);
+        $order->status = 5;
+        $order->delivered_at = date('Y-m-d H:i:s');
+        $order->updated_at = date('Y-m-d H:i:s');
+        $result = $order->save();
+        if ($result) {
+            if($fcm  = DB::table('users')
+                              ->select('fcm')
+                              ->where('user_id',$order->customer_id)
+                              ->where('users.role_id', '3')->first()->fcm)
+                          {
+                              $this->sendNotification($title, $content, $fcm);
+                          } 
+              
+            $title_en = 'Order delivered.';
+            $title_so = '.';
+
+            $content_en = 'Your order has been delivered succesfully.';
+            $content_so= '.';
+
+            if ($this->sendCustomerNotification($fcm,
+                $title_en, $content_en)) {
+                DB::table('notifications')->insert(
+                    array(
+                        'title_en' => $title_en,
+                        'title_so' => $title_so,
+                        'description_en' => $content_en,
+                        'description_so' => $content_so,
+                        'type' => '3',
+                        'user_id' => $order->customer_id,
+                        'order_id' => $order->id,
+                        'status' => 3,
+                        'date' => date('Y-m-d'),
+                        'time' => date('H:i:s'),
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ));
+            }
+               $res = Response::send('true',
+                $data = [],
+                $message = 'Order completed successfully.',
+                $code = 200);
+        } else {
+            $res = Response::send('false',
+                $data = [],
+                $message = 'Failed to complete order.',
+                $code = 400);
+        }
+    }
+    return $res;
+}
+
+
 
     /*GET ORDERS */
 public function index(Request $request)

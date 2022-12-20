@@ -169,6 +169,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/orders',[CustomerOrderController::class,'index']);
     Route::get('admin/order/details',[CustomerOrderController::class,'details']);
     
+    Route::get('admin/order/startOrder',[CustomerOrderController::class,'startOrder']);
+    Route::get('admin/order/completeOrder',[CustomerOrderController::class,'completeOrder']);
+
     Route::post('admin/fuelStation/updateDeposite', [FuelStationController::class, 'updateDeposite']);
 
     // return $request->user();
