@@ -388,6 +388,7 @@ class OrderController extends Controller
                 $type = DB::table('fuel_station_stocks')
                         ->select('fuel_station_stocks.fuel_type_id', 'fuel_en', 'fuel_so', 'price', 'stock')
                         ->join('fuel_types', 'fuel_station_stocks.fuel_type_id', '=', 'fuel_types.id')
+                        ->where('fuel_type_id', $fuel_type)
                         ->first();
 
                 if($type) {                   
@@ -742,7 +743,8 @@ class OrderController extends Controller
                     }, 
                     'driver' => function ($query) {
                         $query->select('user_id', 'name_en', 'name_so');
-                    }
+
+                    }, 'coupon'
                 ])
                 ->first();         
 

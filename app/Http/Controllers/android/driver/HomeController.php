@@ -113,7 +113,7 @@ class HomeController extends Controller
         } else {
 
             $order = CustomerOrder::find($request->order_id);
-            if($order->status == 1) {
+            if($order->status == 1 || $order->status == 4) {
                 $driver = Driver::find($auth_user->user_id);
                 
                 $order->status = 2;
@@ -125,7 +125,7 @@ class HomeController extends Controller
 
                     $message = __('driver-success.accept_order_en');
                     if($request->lang  == 2) {
-                        $message = __('driver-success.accept_order_en');
+                        $message = __('driver-success.accept_order_so');
                     }
 
                     $res = Response::send(true, [], $message, 200);
@@ -133,16 +133,17 @@ class HomeController extends Controller
                 } else {
                     $message = __('driver-error.accept_order_en');
                     if($request->lang  == 2) {
-                        $message = __('driver-error.accept_order_en');
+                        $message = __('driver-error.accept_order_so');
                     }
 
                     $res = Response::send(false, [], $message, 400);
                 }
             } else {
-                $message = __('driver-error.accept_order_en');
+                $message = __('driver-error.status_order_en');
                 if($request->lang  == 2) {
-                    $message = __('driver-error.accept_order_en');
+                    $message = __('driver-error.status_order_so');
                 }
+                $res = Response::send(false, [], $message, 400);
             }
         }
         return $res;
@@ -157,9 +158,7 @@ class HomeController extends Controller
         $auth_user = auth('sanctum')->user();
         
         $validator = Validator::make($request->all(), [
-            'order_id' => 'required|exists:customer_orders,id',
-            'payment_id' => 'nullable',
-            'total_amount' => 'required|numeric',
+            'order_id' => 'required|exists:customer_orders,id',            
         ]);
 
         if ($validator->fails()) {
@@ -175,18 +174,7 @@ class HomeController extends Controller
                     $order->status = 3;                
                     $order->started_at = date('Y-m-d H:i:s');
 
-                    if($order->save()) {
-
-                        DB::table('customer_order_payments')->where('order_id',$request->order_id)->update(
-                             array(
-                                    'payment_id' => $request->payment_id,
-                                    'total_amount' => $request->total_amount,
-                                    'driver_id' => $auth_user->user_id,
-                                    'status' => 2,
-                                    'updated_at' => date('Y-m-d H:i:s'),
-                             )
-                        ); 
-
+                    if($order->save()) {                       
 
                         $message = __('driver-success.start_order_en');
                         if($request->lang  == 2) {
@@ -204,16 +192,16 @@ class HomeController extends Controller
                         $res = Response::send(false, [], $message, 400);
                     }
                 } else {
-                    $message = __('driver-error.accept_order_en');
+                    $message = __('driver-error.start_order_driver_en');
                     if($request->lang  == 2) {
-                        $message = __('driver-error.accept_order_en');
+                        $message = __('driver-error.start_order_driver_so');
                     }
                 }
 
             } else {
-                $message = __('driver-error.accept_order_en');
+                $message = __('driver-error.status_order_en');
                 if($request->lang  == 2) {
-                    $message = __('driver-error.accept_order_en');
+                    $message = __('driver-error.status_order_so');
                 }
             }
         }
@@ -222,7 +210,7 @@ class HomeController extends Controller
 
     /*************
     Complete order
-    @params: order_id, lang
+    @params: order_id, total_amount, payment_id, lang
     **************/
     public function completeOrder(Request $request)
     {
@@ -230,6 +218,8 @@ class HomeController extends Controller
         
         $validator = Validator::make($request->all(), [
             'order_id' => 'required|exists:customer_orders,id',
+            'total_amount' => 'required|numeric',
+            'payment_id' => 'nullable',
         ]);
 
         if ($validator->fails()) {
@@ -247,33 +237,88 @@ class HomeController extends Controller
 
                     if($order->save()) {
 
-                        $message = __('driver-success.accept_order_en');
+                        DB::table('customer_order_payments')->where('order_id',$request->order_id)->update(
+                             array(
+                                    'payment_id' => $request->payment_id,
+                                    'total_amount' => $request->total_amount,
+                                    'driver_id' => $auth_user->user_id,
+                                    'status' => 2,
+                                    'updated_at' => date('Y-m-d H:i:s'),
+                             )
+                        ); 
+
+                        $message = __('driver-success.complete_order_en');
                         if($request->lang  == 2) {
-                            $message = __('driver-success.accept_order_en');
+                            $message = __('driver-success.complete_order_so');
                         }
 
                         $res = Response::send(true, [], $message, 200);
 
                     } else {
-                        $message = __('driver-error.accept_order_en');
+                        $message = __('driver-error.complete_order_en');
                         if($request->lang  == 2) {
-                            $message = __('driver-error.accept_order_en');
+                            $message = __('driver-error.complete_order_so');
                         }
 
                         $res = Response::send(false, [], $message, 400);
                     }
                 } else {
-                    $message = __('driver-error.accept_order_en');
+                    $message = __('driver-error.complete_order_driver_en');
                     if($request->lang  == 2) {
-                        $message = __('driver-error.accept_order_en');
+                        $message = __('driver-error.complete_order_driver_so');
                     }
                 }
 
             } else {
-                $message = __('driver-error.accept_order_en');
+                $message = __('driver-error.status_order_en');
                 if($request->lang  == 2) {
-                    $message = __('driver-error.accept_order_en');
+                    $message = __('driver-error.status_order_so');
                 }
+            }
+        }
+        return $res;
+    }
+
+    /*************
+    Post pin number
+    @params: order_id, pin, lang
+    **************/
+    public function postPin(Request $request)
+    {
+        $auth_user = auth('sanctum')->user();
+        
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required|exists:customer_orders,id',
+            'pin' => 'required|digits:4'
+        ]);
+
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+            $res = Response::send(false, [], $message = $errors, 422);
+
+        } else {
+
+            $order = CustomerOrder::find($request->order_id);           
+
+            if($order->pin == $request->pin) {
+
+                $fuels = CustomerOrder::find($request->order_id)
+                    ->fuels()
+                    ->get();
+
+                $data = [
+                    'fuels' => $fuels,
+                ];
+                
+                $res = Response::send(true, $data, 'Success', 200);
+
+                
+            } else {
+                $message = __('driver-error.pin_en');
+                if($request->lang  == 2) {
+                    $message = __('driver-error.pin_so');
+                }
+                $res = Response::send(false, [], $message, 422);
             }
         }
         return $res;

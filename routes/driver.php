@@ -9,6 +9,7 @@ use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\android\driver\CheckController;
 use App\Http\Controllers\android\driver\ProfileController;
 use App\Http\Controllers\android\driver\HomeController;
+use App\Http\Controllers\android\driver\ReviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,4 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('order/accept', [HomeController::class, 'acceptOrder']);
     Route::post('order/start', [HomeController::class, 'startOrder']);
     Route::post('order/complete', [HomeController::class, 'completeOrder']);
+    Route::post('order/post-pin', [HomeController::class, 'postPin']);
+    Route::post('post-location', [ProfileController::class, 'postLocation']);
+    Route::post('order/add-review', [ReviewController::class, 'add']);
 });
