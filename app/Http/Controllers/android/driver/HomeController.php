@@ -80,7 +80,7 @@ class HomeController extends Controller
                    'fuels', 'meter_readings',
 
                     'customer' => function($query) {
-                        $query->select('user_id', 'name_en', 'name_so');
+                        $query->select('user_id', 'name_en', 'name_so', 'image');
                     },
                 ])
                 ->first();                   
@@ -321,6 +321,113 @@ class HomeController extends Controller
                 $res = Response::send(false, [], $message, 422);
             }
         }
+        return $res;
+    }
+
+    /*************
+    Upload meter reading
+    @params: order_id, meter_images[], lang
+    ************/
+    public function add(Request $request)
+    {
+        $lang = [
+            'meter_images.required' => __('driver-error.meter_images_required_en'),
+        ];
+
+        if($request->lang == 2) {
+            $lang = [
+            'meter_images.required' => __('customer-error.meter_images_required_so'),
+            ];
+        }
+
+        $validator  = Validator::make($request->all(), [
+                'meter_images'   => 'required',
+                'meter_images.*' => 'mimes:png,jpg,jpeg,pdf', 
+                'order_id'  => 'required|exists:customer_orders,id'
+            ], $lang
+        );
+
+        if($validator->fails())
+        {   
+            $errors = collect($validator->errors());
+            $res = Response::send(false, [], $message = $errors, 422);
+        }
+        else
+        {
+            $user    = auth('sanctum')->user();
+            $record  = new Patient_medical_record;
+            $record->patient_id = $user->user_id;
+            $record->notes      = $fields['notes'];
+            $record->created_at = date('Y-m-d H:i:s');
+            $record->updated_at = date('Y-m-d H:i:s');
+            $result  = $record->save();
+            if($result)
+            {
+                foreach($request->file('meter_images') as $file)
+                {
+                    $extension  = $file->getClientOriginalExtension();
+                    $image_uploaded_path2 = $file->store('patient/medical_record','public');  
+                    if($extension=='pdf') {
+                        $type = '2';
+                    } else {
+                        $type = '1';
+                    }
+                    $result_array[] = [
+                                'medical_record_id' => $record->id,
+                                'prescription_type' => $type,
+                                'prescription_url' => $image_uploaded_path2,
+                                'created_at' => date('Y-m-d H:i:s'),
+                                'updated_at' => date('Y-m-d H:i:s'),
+                           ];
+
+                }
+                DB::table('medical_record_prescriptions')->insert($result_array);
+                $res    = sendResponse('true', 
+                                       $data = [], 
+                                       $message =__('message_android.medical_record_add_success'), 
+                                       $code = 200);                                            
+            }            
+            else
+            {
+                $res    = sendResponse('false', 
+                                       $data = [], 
+                                       $message =__('message_android.medical_record_add_error'), 
+                                       $code = 400);
+            }
+        }
+        return $res;
+    } 
+
+    /*************
+    Ongoing order
+    @params: 
+    **************/
+    public function onGoing(Request $request)
+    {        
+        $auth_user = auth('sanctum')->user();
+
+        $order = CustomerOrder::select('customer_orders.*', 'address', 'country_code_id', 'phone', 'latitude', 'longitude', 'location', 'special_instructions', 'payment_type')
+
+                ->leftjoin('customer_order_address', 'customer_orders.id', '=', 'customer_order_address.order_id')
+                ->leftjoin('customer_order_payments', 'customer_orders.id', '=', 'customer_order_payments.order_id')
+
+                ->where('customer_orders.driver_id', $auth_user->user_id)
+                ->where('customer_orders.status', 3)
+                ->with([
+                   'fuels', 'meter_readings',
+
+                    'customer' => function($query) {
+                        $query->select('user_id', 'name_en', 'name_so', 'image');
+                    },
+                ])
+                ->first();                   
+
+        $data = array(
+            'ongoing'=> $order
+        );
+
+        $res = Response::send(true, $data, '', 200);
+        
         return $res;
     }
 }

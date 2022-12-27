@@ -24,4 +24,7 @@ return [
 
     'pin_en' => 'The given pin number is not correct',
     'pin_so' => 'The given pin number is not correct',
+
+    'update_document_en' => 'Failed to update documents',
+    'update_document_so' => 'Failed to update documents',
 ];
