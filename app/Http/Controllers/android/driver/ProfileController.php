@@ -22,11 +22,14 @@ class ProfileController extends Controller
     public function index()
     {
         $auth_user      = auth('sanctum')->user();
-        $driver  = Driver::select('drivers.id', 'name_en', 'name_so', 'country_code', 'users.mobile', 'users.email', 'users.image', 'drivers.created_at', 'drivers.status')
+        $driver  = Driver::select('drivers.id', 'name_en', 'name_so', 'country_code', 'users.mobile', 'users.email', 'users.image', 'drivers.created_at', 'drivers.status', 'fuel_station_id')
                     ->join('users','users.user_id','=','drivers.id')
                     ->join('country_codes','country_codes.id','=','users.country_code_id')                    
                     ->where('drivers.id',$auth_user->user_id)
                     ->where('users.role_id','4')
+                    ->with(['fuel_station' => function ($query) {
+                        $query->select('user_id', 'name_en', 'name_so');
+                    }])
                     ->first();        
 
         if($driver) {
