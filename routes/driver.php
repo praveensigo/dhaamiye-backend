@@ -46,4 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('order/post-pin', [HomeController::class, 'postPin']);
     Route::post('post-location', [ProfileController::class, 'postLocation']);
     Route::post('order/add-review', [ReviewController::class, 'add']);
+    Route::get('profile/documents', [ProfileController::class, 'documents']);
+    Route::post('profile/documents/upload', [ProfileController::class, 'updateDocuments']);
+    Route::get('order/ongoing', [HomeController::class, 'Ongoing']);
 });
