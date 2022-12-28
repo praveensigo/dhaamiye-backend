@@ -328,7 +328,7 @@ class HomeController extends Controller
     Upload meter reading
     @params: order_id, meter_images[], lang
     ************/
-    public function add(Request $request)
+    public function addMeterImages(Request $request)
     {
         $lang = [
             'meter_images.required' => __('driver-error.meter_images_required_en'),
@@ -351,50 +351,32 @@ class HomeController extends Controller
         {   
             $errors = collect($validator->errors());
             $res = Response::send(false, [], $message = $errors, 422);
-        }
-        else
-        {
-            $user    = auth('sanctum')->user();
-            $record  = new Patient_medical_record;
-            $record->patient_id = $user->user_id;
-            $record->notes      = $fields['notes'];
-            $record->created_at = date('Y-m-d H:i:s');
-            $record->updated_at = date('Y-m-d H:i:s');
-            $result  = $record->save();
-            if($result)
-            {
-                foreach($request->file('meter_images') as $file)
-                {
-                    $extension  = $file->getClientOriginalExtension();
-                    $image_uploaded_path2 = $file->store('patient/medical_record','public');  
-                    if($extension=='pdf') {
-                        $type = '2';
-                    } else {
-                        $type = '1';
-                    }
-                    $result_array[] = [
-                                'medical_record_id' => $record->id,
-                                'prescription_type' => $type,
-                                'prescription_url' => $image_uploaded_path2,
-                                'created_at' => date('Y-m-d H:i:s'),
-                                'updated_at' => date('Y-m-d H:i:s'),
-                           ];
 
-                }
-                DB::table('medical_record_prescriptions')->insert($result_array);
-                $res    = sendResponse('true', 
-                                       $data = [], 
-                                       $message =__('message_android.medical_record_add_success'), 
-                                       $code = 200);                                            
-            }            
-            else
-            {
-                $res    = sendResponse('false', 
-                                       $data = [], 
-                                       $message =__('message_android.medical_record_add_error'), 
-                                       $code = 400);
+        } else {
+
+            $auth_user    = auth('sanctum')->user();
+            $order = CustomerOrder::find($request->order_id);  
+
+            foreach($request->file('meter_images') as $file) {
+
+                $image_uploaded_path = $file->store('meter-images','public'); 
+                $array[] = [
+                    'customer_id' => $order->customer_id,
+                    'order_id' => $order->id,
+                    'meter_image_url' => $image_uploaded_path,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ];
             }
+            
+            DB::table('meter_images')->insert($array);
+            $message = __('driver-success.add_meter_image_en');
+            if($request->lang  == 2) {
+                $message = __('driver-success.add_meter_image_en');
+            }
+            $res = Response::send(true, [], $message, 200);             
         }
+
         return $res;
     } 
 
