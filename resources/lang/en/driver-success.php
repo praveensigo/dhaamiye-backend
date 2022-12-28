@@ -13,4 +13,7 @@ return [
 
     'update_document_en' => 'Documents updated successfully',
     'update_document_so' => 'Documents updated successfully',
+
+    'add_meter_image_en' => 'Meter images uploaded successfully',
+    'add_meter_image_so' => 'Meter images uploaded successfully',
 ];

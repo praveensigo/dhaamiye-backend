@@ -10,6 +10,7 @@ use App\Http\Controllers\android\driver\CheckController;
 use App\Http\Controllers\android\driver\ProfileController;
 use App\Http\Controllers\android\driver\HomeController;
 use App\Http\Controllers\android\driver\ReviewController;
+use App\Http\Controllers\android\driver\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,4 +50,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('profile/documents', [ProfileController::class, 'documents']);
     Route::post('profile/documents/upload', [ProfileController::class, 'updateDocuments']);
     Route::get('order/ongoing', [HomeController::class, 'Ongoing']);
+    Route::get('notifications', [NotificationController::class, 'index']);
+    Route::post('order/upload-meter-images', [HomeController::class, 'addMeterImages']);
 });
