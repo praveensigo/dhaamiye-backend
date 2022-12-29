@@ -16,9 +16,12 @@ class CreateDriverPaymentsTable extends Migration
         Schema::create('driver_payments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('driver_id')->references('id')->on('drivers');
-            $table->foreignId('order_id')->references('id')->on('customer_orders');
+            $table->integer('type')->default(1)->comment('1.Credit 2.Debit');
+            $table->foreignId('order_id')->nullable()->references('id')->on('customer_orders');
             $table->decimal('amount');
             $table->integer('payment_type')->comment('1.Mobile 2.Cash');
+            $table->string('payment_id')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\android\driver;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\android\driver\CustomerOrder;
+use App\Models\android\driver\CustomerOrderPayment;
 use App\Models\android\driver\Driver;
 use Illuminate\Support\Facades\DB;
 use App\Models\service\ResponseSender as Response;
@@ -237,16 +238,55 @@ class HomeController extends Controller
 
                     if($order->save()) {
 
-                        DB::table('customer_order_payments')->where('order_id',$request->order_id)->update(
-                             array(
-                                    'payment_id' => $request->payment_id,
-                                    'total_amount' => $request->total_amount,
-                                    'driver_id' => $auth_user->user_id,
-                                    'status' => 2,
-                                    'updated_at' => date('Y-m-d H:i:s'),
-                             )
+                        $payment = CustomerOrderPayment::select('*')
+                        ->where('order_id',$request->order_id)
+                        ->first();
+                        
+                        $payment->payment_id = $request->payment_id;
+                        $payment->total_amount = $request->total_amount;
+                        $payment->driver_id = $auth_user->user_id;
+                        $payment->status = 2;
+                        $payment->updated_at = date('Y-m-d H:i:s');
+
+                        $payment->save();
+
+                        // DB::table('customer_order_payments')->where('order_id',$request->order_id)->update(
+                        //      array(
+                        //             'payment_id' => $request->payment_id,
+                        //             'total_amount' => $request->total_amount,
+                        //             'driver_id' => $auth_user->user_id,
+                        //             'status' => 2,
+                        //             'updated_at' => date('Y-m-d H:i:s'),
+                        //      )
+                        // ); 
+
+                        // $payment = DB::table('customer_order_payments')
+                        //             ->select('id', 'payment_type')
+                        //             ->where('order_id',$request->order_id)
+                        //             ->first();
+
+                        DB::table('driver_payments')->insert(
+                            array(
+                                'driver_id' => $auth_user->user_id,
+                                'type' => 1,
+                                'order_id' => $request->order_id,
+                                'amount' => $request->total_amount,
+                                'payment_type' => $payment->payment_type,
+                                'payment_id' => $request->payment_id,
+                                'created_at' => date('Y-m-d H:i:s'),
+                                'updated_at' => date('Y-m-d H:i:s'),
+                            )
                         ); 
 
+                        $driver = Driver::find($auth_user->user_id);
+                        if($payment->payment_type == 1) {
+                            $driver->total_mobile_earned = $driver->total_mobile_earned + $request->total_amount;
+
+                        } else if($payment->payment_type == 2) {
+                            $driver->total_cash_earned = $driver->total_cash_earned + $request->total_amount;
+                        }
+                        $driver->save();
+                       
                         $message = __('driver-success.complete_order_en');
                         if($request->lang  == 2) {
                             $message = __('driver-success.complete_order_so');
@@ -267,6 +307,7 @@ class HomeController extends Controller
                     if($request->lang  == 2) {
                         $message = __('driver-error.complete_order_driver_so');
                     }
+                    $res = Response::send(false, [], $message, 400);
                 }
 
             } else {
@@ -274,6 +315,7 @@ class HomeController extends Controller
                 if($request->lang  == 2) {
                     $message = __('driver-error.status_order_so');
                 }
+                $res = Response::send(false, [], $message, 400);
             }
         }
         return $res;
