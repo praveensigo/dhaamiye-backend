@@ -11,6 +11,7 @@ use App\Http\Controllers\android\driver\ProfileController;
 use App\Http\Controllers\android\driver\HomeController;
 use App\Http\Controllers\android\driver\ReviewController;
 use App\Http\Controllers\android\driver\NotificationController;
+use App\Http\Controllers\android\driver\EarningsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,4 +53,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('order/ongoing', [HomeController::class, 'Ongoing']);
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::post('order/upload-meter-images', [HomeController::class, 'addMeterImages']);
+    Route::get('earnings', [EarningsController::class, 'index']);
 });
