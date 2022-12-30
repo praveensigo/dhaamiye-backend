@@ -111,7 +111,9 @@ class ProfileController extends Controller
                     Rule::unique('users', 'email')->ignore($auth_user->id, 'id'),
                 ],
                 
-                'profile_image' => 'nullable|mimes:png,jpg,jpeg|max:1024|dimensions:max_width=600,max_height=600',
+                // 'profile_image' => 'nullable|mimes:png,jpg,jpeg|max:1024|dimensions:max_width=600,max_height=600',
+                'profile_image' => 'nullable|mimes:png,jpg,jpeg|max:4096',
+
             ], $lang
             
         );

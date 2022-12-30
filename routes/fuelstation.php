@@ -87,7 +87,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('fuel_station/driver/change_password', [DriverController::class, 'changePassword']);
     Route::get('fuel_station/driver/orders', [DriverController::class, 'orders']);
     Route::get('fuel_station/driver/earnings', [DriverController::class, 'earnings']);
-
+    Route::get('fuel_station/getTrucks', [DriverController::class, 'getTrucks']);
+    Route::get('fuel_station/getFuelStations', [DriverController::class, 'getFuelStations']);
+    Route::get('fuel_station/getDrivers', [DriverController::class, 'getDrivers']);
+    Route::get('fuel_station/getCustomers', [DriverController::class, 'getCustomers']);
+    Route::get('fuel_station/getFuels', [DriverController::class, 'getFuels']);
+    Route::get('fuel_station/getRoles', [DriverController::class, 'getRoles']);
+    Route::get('fuel_station/getFuelStationDrivers', [DriverController::class, 'getFuelStationDrivers']);
+    
     Route::post('fuel_station/truck/add', [TruckController::class, 'add']);
     Route::post('fuel_station/truck/update', [TruckController::class, 'update']);
     Route::get('fuel_station/trucks', [TruckController::class, 'index']);

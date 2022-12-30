@@ -55,7 +55,7 @@ class ContactController extends Controller
         $validator = Validator::make($request->all(), [
             'issue_type_id' => 'required|exists:issue_types,id',            
             'comment' => 'required',
-        ]);
+        ], $lang);
 
         if ($validator->fails()) {
             $errors = collect($validator->errors());

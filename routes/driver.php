@@ -9,6 +9,9 @@ use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\android\driver\CheckController;
 use App\Http\Controllers\android\driver\ProfileController;
 use App\Http\Controllers\android\driver\HomeController;
+use App\Http\Controllers\android\driver\ReviewController;
+use App\Http\Controllers\android\driver\NotificationController;
+use App\Http\Controllers\android\driver\EarningsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,4 +45,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('order/accept', [HomeController::class, 'acceptOrder']);
     Route::post('order/start', [HomeController::class, 'startOrder']);
     Route::post('order/complete', [HomeController::class, 'completeOrder']);
+    Route::post('order/post-pin', [HomeController::class, 'postPin']);
+    Route::post('post-location', [ProfileController::class, 'postLocation']);
+    Route::post('order/add-review', [ReviewController::class, 'add']);
+    Route::get('profile/documents', [ProfileController::class, 'documents']);
+    Route::post('profile/documents/upload', [ProfileController::class, 'updateDocuments']);
+    Route::get('order/ongoing', [HomeController::class, 'Ongoing']);
+    Route::get('notifications', [NotificationController::class, 'index']);
+    Route::post('order/upload-meter-images', [HomeController::class, 'addMeterImages']);
+    Route::get('earnings', [EarningsController::class, 'index']);
 });
