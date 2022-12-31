@@ -913,7 +913,7 @@ public function orders(Request $request)
 //       }
 //        return $res;
 // }
-public function earnings(Request $request)
+public function earnings1(Request $request)
 {
     $fields    = $request->input();
     $validator = Validator::make($request->all(), [
@@ -1075,6 +1075,60 @@ public function earnings(Request $request)
                             
                            }                       
             $data = array(
+                  'payments' => $payments,
+                         );
+
+            $res = Response::send(true, $data, '', 200);
+      }
+       return $res;
+}
+public function earnings(Request $request)
+{
+    $fields    = $request->input();
+    $validator = Validator::make($request->all(), [
+        'id' => 'required|numeric|exists:drivers,id',
+        'limit' => 'required|numeric',
+        'type' => 'nullable|numeric',
+
+    ]);
+    if ($validator->fails()) {
+        $errors = collect($validator->errors());
+        $res = Response::send(false, [], $message = $errors, 422);
+
+    } else {
+        $driver = DB::table('drivers')->select('*')           
+                    ->where('id', $fields['id'])
+                    ->orderBy('created_at','desc')
+                    ->first();
+        $total_earned = round($driver->total_mobile_earned + $driver->total_cash_earned, 2);
+        $total_mobile_earned =  $driver->total_mobile_earned;
+        $total_cash_earned = $driver->total_cash_earned;
+        $cash_in_hand = round($total_earned - $driver->total_paid, 2);
+        $payments = DB::table('driver_payments')->select('*')           
+                    ->where('driver_id', $fields['id'])
+                    ->orderBy('created_at','desc');
+                    
+            if ($fields['type']) 
+                {
+                $payments->where('driver_payments.type', $fields['type'] );
+                }  
+                if ($fields['keyword']) {
+                    $search = $fields['keyword'];
+                    $payments->where(function ($query) use ($search) {
+                        $query->where('notes', 'LIKE', '%' . $search . '%')
+                            ;
+    
+                    });
+                }
+            $payments = $payments->paginate($fields['limit']);
+                     
+            $data = array(
+                'total_earned' => $total_earned,
+                'total_mobile_earned' => $total_mobile_earned,
+                'total_cash_earned' => $total_cash_earned,
+                'cash_in_hand' => $cash_in_hand,
+
+
                   'payments' => $payments,
                          );
 
