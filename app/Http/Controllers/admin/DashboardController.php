@@ -116,7 +116,24 @@ class DashboardController extends Controller
             $missed_total = DB::table('customer_orders')->where('status', '7')->get()->count();
             $missed = $total == 0 ? 0 : $missed_total / $total * 100;
             $missedrounded = round($missed, 2);
-
+            
+            $locations = Driver::select('drivers.id as driver_id',DB::raw('MAX(driver_location.created_at)as driver_location'),)
+            ->join('driver_location', 'driver_location.driver_id', '=', 'drivers.id')
+            ->groupBy('drivers.id')
+            ->orderBy('drivers.id','desc')
+            ->get();
+            $n = Driver::select('drivers.id as driver_id',DB::raw('MAX(driver_location.created_at)as driver_location'),)
+            ->join('driver_location', 'driver_location.driver_id', '=', 'drivers.id')
+            ->groupBy('drivers.id')
+            ->orderBy('drivers.id','desc')
+            ->get()->count();
+    
+        for ($i = 0; $i < $n; $i++) {
+            $loc1=$locations[$i]->driver_location;
+            $location1[] = DB::table('driver_location')->select('driver_location.*')
+            ->where('created_at', $loc1)
+            ->get();
+        }
         
             $confirmed_month = array();
         
@@ -169,6 +186,8 @@ class DashboardController extends Controller
             'missed' => $missedrounded,
             'diesel' => $dieselrounded,
             'gasoline' => $gasolinerounded,
+            'driver_locations' => $location1,
+
 
         );
 

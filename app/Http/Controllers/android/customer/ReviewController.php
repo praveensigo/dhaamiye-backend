@@ -36,7 +36,7 @@ class ReviewController extends Controller
             'order_id' => 'required|exists:customer_orders,id',
             'rating' => 'required|numeric|in:1,2,3,4,5',
             'review' => 'required',
-        ]);
+        ], $lang);
 
         if ($validator->fails()) {
             $errors = collect($validator->errors());

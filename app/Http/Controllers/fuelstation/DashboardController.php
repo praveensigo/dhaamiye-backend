@@ -125,13 +125,28 @@ class DashboardController extends Controller
         $missedrounded = round($missed, 2);
 
         $confirmed_month = array();
-        $location = DB::table('driver_location')->select('driver_location.*')
-        ->join('drivers', 'driver_location.driver_id', '=', 'drivers.id')
+        
+        $locations = Driver::select('drivers.id as driver_id',DB::raw('MAX(driver_location.created_at)as driver_location'),)
+        ->join('driver_location', 'driver_location.driver_id', '=', 'drivers.id')
         ->where('drivers.fuel_station_id', $user_id)
+        ->groupBy('drivers.id')
+        ->orderBy('drivers.id','desc')
+        ->get();
+        $n = Driver::select('drivers.id as driver_id',DB::raw('MAX(driver_location.created_at)as driver_location'),)
+        ->join('driver_location', 'driver_location.driver_id', '=', 'drivers.id')
+       ->where('drivers.fuel_station_id', $user_id)
+        ->groupBy('drivers.id')
+        ->orderBy('drivers.id','desc')
+        ->get()->count();
 
-        ->first();
+    for ($i = 0; $i < $n; $i++) {
+        $loc1=$locations[$i]->driver_location;
+        $location1[] = DB::table('driver_location')->select('driver_location.*')
+        ->where('created_at', $loc1)
+        ->get();
+    }
 
-        for ($iM = 1; $iM <= 12; $iM++) {
+           for ($iM = 1; $iM <= 12; $iM++) {
             $completed_month[] = DB::table('customer_orders')
                 ->where('customer_orders.fuel_station_id', $user_id)
                 ->where('status', '5')->whereYear('created_at', '=', $year)->whereMonth('created_at', '=', $iM)->get()->count();
@@ -156,7 +171,7 @@ class DashboardController extends Controller
             'ongoing' => $ongoingrounded,
             'scheduled' => $scheduledrounded,
             'missed' => $missedrounded,
-            'driver location' => $location,
+            'driver location' => $location1,
 
         );
 
