@@ -37,9 +37,10 @@ class EarningsController extends Controller
            
 
             $data = array(
-                'total_earned' => round($driver->total_mobile_earned + $driver->cash_earned, 2),
+                'total_earned' => round($driver->total_mobile_earned + $driver->total_cash_earned, 2),
                 'total_mobile_earned' => $driver->total_mobile_earned,
-                'total_cash_earned' => $driver->total_mobile_earned,
+                'total_cash_earned' => $driver->total_cash_earned,
+                'cash_in_hand' => round($driver->total_mobile_earned + $driver->total_cash_earned - $driver->total_paid, 2),
 
                 'logs' => $logs,
             );
