@@ -97,7 +97,7 @@ class DriverController extends Controller
 
             $passport_uploaded_path = '';
             if ($request->file('passport') != null) {
-                $uploadFolder = 'driver/passport';
+                $uploadFolder = 'drivers/passports';
                 $image = $request->file('passport');
                 $passport_uploaded_path = $image->store($uploadFolder, 'public');
             }
@@ -105,7 +105,7 @@ class DriverController extends Controller
 
             $license_uploaded_path = '';
             if ($request->file('license') != null) {
-                $uploadFolder = 'driver/license';
+                $uploadFolder = 'drivers/licenses';
                 $image = $request->file('license');
                 $license_uploaded_path = $image->store($uploadFolder, 'public');
             }
@@ -119,7 +119,7 @@ class DriverController extends Controller
 
                 $image_uploaded_path = '';
                 if ($request->file('image') != null) {
-                    $uploadFolder = 'driver/images';
+                    $uploadFolder = 'drivers';
                     $image = $request->file('image');
                     $image_uploaded_path = $image->store($uploadFolder, 'public');
                 }
@@ -222,7 +222,7 @@ class DriverController extends Controller
 
             $passport_uploaded_path = '';
             if ($request->file('passport') != null) {
-                $uploadFolder = 'driver/passport';
+                $uploadFolder = 'drivers/passports';
                 $image = $request->file('passport');
                 $passport_uploaded_path = $image->store($uploadFolder, 'public');
                 $driver->passport_url = $passport_uploaded_path;
@@ -231,7 +231,7 @@ class DriverController extends Controller
 
             $license_uploaded_path = '';
             if ($request->file('license') != null) {
-                $uploadFolder = 'driver/license';
+                $uploadFolder = 'drivers/licenses';
                 $image = $request->file('license');
                 $license_uploaded_path = $image->store($uploadFolder, 'public');
                 $driver->license_url = $license_uploaded_path;
@@ -244,7 +244,7 @@ class DriverController extends Controller
                 $user->name_so = $fields['name_so'];
                 $image_uploaded_path = '';
                 if ($request->file('image') != null) {
-                    $uploadFolder = 'driver/images';
+                    $uploadFolder = 'drivers';
                     $image = $request->file('image');
                     $image_uploaded_path = $image->store($uploadFolder, 'public');
                     $user->image = $image_uploaded_path;
