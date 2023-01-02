@@ -41,12 +41,17 @@ class HomeController extends Controller
                         $query->select('user_id', 'name_en', 'name_so');
                     }
                 ]);
+
+            $driver = Driver::select('online')
+                        ->where('id', $auth_user->user_id)
+                        ->first();
            
 
             $orders = $orders->paginate($request->limit);
 
             $data = array(
                 'orders' => $orders,
+                'online' => $driver->online == 1 ? true:false,
             );
 
             $res = Response::send(true, $data, '', 200);
@@ -82,7 +87,7 @@ class HomeController extends Controller
 
                     'customer' => function($query) {
                         $query->select('user_id', 'name_en', 'name_so', 'image');
-                    }, 'review'
+                    }, 'reviews'
                 ])
                 ->first();                   
 
