@@ -82,7 +82,7 @@ class HomeController extends Controller
 
                     'customer' => function($query) {
                         $query->select('user_id', 'name_en', 'name_so', 'image');
-                    },
+                    }, 'review'
                 ])
                 ->first();                   
 

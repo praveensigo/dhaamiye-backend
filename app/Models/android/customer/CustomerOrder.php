@@ -51,7 +51,8 @@ class CustomerOrder extends Model
     }
 
     public function review() {
-        return $this->hasMany(Rating::class, 'order_id', 'id');
+        return $this->hasMany(Rating::class, 'order_id', 'id')
+                    ->where('role_id', 3);
     }
 
     public function driver()
