@@ -156,7 +156,8 @@ class CustomerOrder extends Model
 
     function GetDrivingDistance($lat1, $lat2, $long1,$long2)
     {
-        $url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=".$lat1.",".$long1."&destinations=".$lat2."%2C".$long2."&mode=driving&language=pl-PL&key=AIzaSyDmehs_u8H6kgD9d9aVV38RuAS-GSZT598";
+        $key = config('constants.google_map_key');
+        $url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=".$lat1.",".$long1."&destinations=".$lat2."%2C".$long2."&mode=driving&language=pl-PL&key=" . $key;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

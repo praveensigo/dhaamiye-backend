@@ -70,7 +70,8 @@ class FuelStation extends Model
 
     function GetDrivingDistance($lat1, $lat2, $long1,$long2)
     {
-        $url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=".$lat1.",".$long1."&destinations=".$lat2."%2C".$long2."&mode=driving&language=pl-PL&key=AIzaSyDmehs_u8H6kgD9d9aVV38RuAS-GSZT598";
+        $key = config('constants.google_map_key');
+        $url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=".$lat1.",".$long1."&destinations=".$lat2."%2C".$long2."&mode=driving&language=pl-PL&key=" . $key;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -83,7 +84,7 @@ class FuelStation extends Model
     
         //return array('distance' => $dist, 'time' => $time);
 
-        if(array_key_exists('distance', $response_a['rows'][0]['elements'][0]) ) {
+        if($response_a['rows'] && array_key_exists('distance', $response_a['rows'][0]['elements'][0]) ) {
             $dist = $response_a['rows'][0]['elements'][0]['distance']['text'];
             $time = $response_a['rows'][0]['elements'][0]['duration']['text'];
         
