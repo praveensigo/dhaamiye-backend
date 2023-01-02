@@ -27,4 +27,10 @@ return [
 
     'update_document_en' => 'Failed to update documents',
     'update_document_so' => 'Failed to update documents',
+
+    'update_online_en' => 'Failed to update your status to online',
+    'update_online_so' => 'Failed to update your status to online',
+
+    'update_offline_en' => 'Failed to update your status to offline',
+    'update_offline_so' => 'Failed to update your status to offline',
 ];

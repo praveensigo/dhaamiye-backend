@@ -55,4 +55,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('order/upload-meter-images', [HomeController::class, 'addMeterImages']);
     Route::get('earnings', [EarningsController::class, 'index']);
     Route::get('earnings/details', [EarningsController::class, 'details']);
+    Route::get('update-status', [ProfileController::class, 'updateOnlineStatus']);
 });
