@@ -5,6 +5,7 @@ namespace App\Http\Controllers\android\driver;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\android\driver\Driver;
+use App\Models\android\driver\DriverPayment;
 use Illuminate\Support\Facades\DB;
 use App\Models\service\ResponseSender as Response;
 use Illuminate\Validation\Rule;
@@ -43,6 +44,42 @@ class EarningsController extends Controller
                 'cash_in_hand' => number_format($driver->total_mobile_earned + $driver->total_cash_earned - $driver->total_paid, 2, '.', ''),
 
                 'logs' => $logs,
+            );
+
+            $res = Response::send(true, $data, '', 200);
+        }
+        return $res;
+    }
+
+    /*************
+    Earnings Details
+    @params: id
+    **************/
+    public function details(Request $request)
+    {
+        $auth_user = auth('sanctum')->user();
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:driver_payments,id',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+            $res = Response::send(false, [], $message = $errors, 422);
+
+        } else {  
+
+            $log = DriverPayment::select('driver_payments.*')
+                ->where('driver_payments.id', $request->id)
+                ->with([
+                   'order',
+                    // 'customer' => function($query) {
+                    //     $query->select('user_id', 'name_en', 'name_so', 'image');
+                    // },
+                ])
+                ->first();                   
+
+            $data = array(
+                'log'=> $log
             );
 
             $res = Response::send(true, $data, '', 200);
