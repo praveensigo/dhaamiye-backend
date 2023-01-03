@@ -12,6 +12,7 @@ use App\Http\Controllers\android\driver\HomeController;
 use App\Http\Controllers\android\driver\ReviewController;
 use App\Http\Controllers\android\driver\NotificationController;
 use App\Http\Controllers\android\driver\EarningsController;
+use App\Http\Controllers\android\driver\ContactController;
 
 /*
 |--------------------------------------------------------------------------
