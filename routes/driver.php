@@ -31,6 +31,7 @@ Route::post('forgot-password', [CheckController::class, 'isMobileRegistered']);
 Route::post('register/check', [CheckController::class, 'isRegistrable']);
 Route::post('reset-password', [CheckController::class, 'resetPassword']);
 Route::get('get-countrycodes', [GeneralController::class, 'getCountryCodes']);
+Route::get('get-fuel-stations', [GeneralController::class, 'getFuelStations']);
 Route::get('about', [GeneralController::class, 'getAbout']);
 Route::get('privacy-policy', [GeneralController::class, 'getPrivacyPolicy']);
 Route::get('terms-and-conditions', [GeneralController::class, 'getTermsandConditions']);
@@ -56,4 +57,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('earnings', [EarningsController::class, 'index']);
     Route::get('earnings/details', [EarningsController::class, 'details']);
     Route::get('update-status', [ProfileController::class, 'updateOnlineStatus']);
+    Route::get('issue-types', [ContactController::class, 'getIssueTypes']);
+    Route::post('add-enquiry', [ContactController::class, 'addEnquiry']);
 });
