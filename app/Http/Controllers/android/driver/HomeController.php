@@ -292,6 +292,11 @@ class HomeController extends Controller
                             $driver->total_cash_earned = $driver->total_cash_earned + $request->total_amount;
                         }
                         $driver->save();
+
+                        DB::table('driver_location')
+                            ->where('driver_id', $auth_user->user_id)
+                            ->where('date', date('Y-m-d'))
+                            ->delete();
                        
                         $message = __('driver-success.complete_order_en');
                         if($request->lang  == 2) {
