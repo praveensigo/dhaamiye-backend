@@ -121,4 +121,10 @@ return [
 
     'add_comment_en' => 'Failed to add your comments',
     'add_comment_so' => 'Failed to add your comments',
+
+    'track_status_en' => 'Driver not yet started',
+    'track_status_so' => 'Driver not yet started',
+
+    'not_accepted_en' => 'Driver has not accepted your order yet',
+    'not_accepted_so' => 'Driver has not accepted your order yet',
 ];
