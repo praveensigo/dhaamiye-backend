@@ -908,6 +908,7 @@ class OrderController extends Controller
         //return array('distance' => $dist, 'time' => $time);
 
         if(array_key_exists('distance', $response_a['rows'][0]['elements'][0]) ) {
+
             //$dist = $response_a['rows'][0]['elements'][0]['distance']['text'];
             $dist = $response_a['rows'][0]['elements'][0]['distance']['value'];
             $time = $response_a['rows'][0]['elements'][0]['duration']['text'];
@@ -916,6 +917,7 @@ class OrderController extends Controller
             //$exploded = explode(' ', $array['distance']);
             //$distance   = intval($exploded[0]);
             $distance = round($dist/1000, 2);
+
             return $distance;
         } else {
             return null;
