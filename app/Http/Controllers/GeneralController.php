@@ -33,7 +33,7 @@ class GeneralController extends Controller
     public function getFuelStations()
     {
         $fuel_stations =  DB::table('users')
-                        ->select('id', 'name_en', 'name_so')
+                        ->select('user_id as id', 'name_en', 'name_so')
                         ->where('role_id', 5)
                         ->where('status', 1)
                         ->get();   
