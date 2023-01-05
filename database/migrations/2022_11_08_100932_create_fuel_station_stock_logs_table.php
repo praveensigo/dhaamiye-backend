@@ -18,6 +18,9 @@ class CreateFuelStationStockLogsTable extends Migration
             $table->foreignId('fuel_station_id')->references('id')->on('fuel_stations');
             $table->foreignId('fuel_type_id')->references('id')->on('fuel_types');
             $table->decimal('stock',12,2);
+            $table->decimal('balance_stock',12,2);
+            $table->integer('type')->comment('1:Incoming, 2:Outgoing');
+            $table->foreignId('truck_id')->nullable()->references('id')->on('trucks');
             $table->integer('added_by')->nullable()->comment('1:Admin, 2:Sub admin 5:Fuel station');
             $table->foreignId('added_user')->references('id')->on('users')->nullable();
             $table->timestamps();
