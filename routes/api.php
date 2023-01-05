@@ -18,6 +18,8 @@ use App\Http\Controllers\admin\SliderController;
 use App\Http\Controllers\admin\RatingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\admin\DashBoardController;
+use App\Http\Controllers\admin\TruckFuelsController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -173,6 +175,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/order/completeOrder',[CustomerOrderController::class,'completeOrder']);
 
     Route::post('admin/fuelStation/updateDeposite', [FuelStationController::class, 'updateDeposite']);
+
+    Route::get('admin/fuel_station/truck/fuels', [TruckFuelsController::class, 'index']);
 
     // return $request->user();
 });

@@ -16,4 +16,10 @@ return [
 
     'add_meter_image_en' => 'Meter images uploaded successfully',
     'add_meter_image_so' => 'Meter images uploaded successfully',
+
+    'update_online_en' => 'You are online now',
+    'update_online_so' => 'You are online now',
+
+    'update_offline_en' => 'You are offline now',
+    'update_offline_so' => 'You are offline now',
 ];

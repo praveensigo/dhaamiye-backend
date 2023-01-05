@@ -18,6 +18,9 @@ class CreateTruckStockLogsTable extends Migration
             $table->foreignId('truck_id')->references('id')->on('trucks');
             $table->foreignId('fuel_type_id')->references('id')->on('fuel_types');
             $table->decimal('stock',12,2);
+            $table->decimal('balance_stock',12,2);
+            $table->integer('type')->comment('1:Incoming, 2:Outgoing');
+            $table->foreignId('order_id')->nullable()->references('id')->on('customer_orders');
             $table->timestamps();
         });
     }

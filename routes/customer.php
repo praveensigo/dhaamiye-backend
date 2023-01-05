@@ -63,4 +63,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('add-enquiry', [ContactController::class, 'addEnquiry']);
 
     Route::get('get-distance', [HomeController::class, 'GetDrivingDistance']);
+    Route::get('order/track-driver', [OrderController::class, 'trackDriver']);
 });

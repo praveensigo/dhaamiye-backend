@@ -43,7 +43,9 @@ class CheckController extends Controller
             $res = Response::send(false, [], $message = $errors, 422);
 
         } else {
-            $user = User::withTrashed()->where('mobile', $request->mobile)->where('country_code_id', $request->country_code)->where('role_id', 3)->first();
+            $user = User::withTrashed()->where('mobile', $request->mobile)->where('country_code_id', $request->country_code)
+                //->where('role_id', 3)
+                ->first();
             if ($user) {
                 if($user->deleted_at) {
                     $message = __('customer-error.account_deleted_en');
@@ -108,7 +110,9 @@ class CheckController extends Controller
             $res = Response::send(false, [], $message = $errors, 422);
 
         } else {
-            $user = User::withTrashed()->where('mobile', $request->mobile)->where('country_code_id', $request->country_code)->where('role_id', 3)->first();
+            $user = User::withTrashed()->where('mobile', $request->mobile)->where('country_code_id', $request->country_code)
+            //->where('role_id', 3)
+            ->first();
 
             if ($user) {
                 if($user->deleted_at) {
@@ -129,7 +133,9 @@ class CheckController extends Controller
             } else {
                 if($request->email) {
 
-                    $user = User::withTrashed()->where('email', $request->email)->where('role_id', 3)->first();
+                    $user = User::withTrashed()->where('email', $request->email)
+                        //->where('role_id', 3)
+                        ->first();
 
                     if ($user) {
                         $message = __('customer-error.email_exists_en');

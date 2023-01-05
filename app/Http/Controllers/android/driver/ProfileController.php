@@ -546,4 +546,67 @@ class ProfileController extends Controller
         }
         return $res;
     }
+
+    /*************
+    Update Online Status
+    @params: status, lang
+    **************/
+    public function updateOnlineStatus(Request $request)
+    {
+        $auth_user = auth('sanctum')->user();
+        
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|numeric|in:1,2',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+            $res = Response::send(false, [], $message = $errors, 422);
+
+        } else {
+
+            $driver = Driver::find($auth_user->user_id);
+            
+                
+            $driver->online = $request->status;
+            $driver->updated_at = date('Y-m-d H:i:s');
+
+            if($driver->save()) {
+
+                if($request->status == 1) {
+
+                    $message = __('driver-success.update_online_en');
+                    if($request->lang  == 2) {
+                        $message = __('driver-success.update_online_so');
+                    }
+                    
+                } else {
+                    $message = __('driver-success.update_offline_en');
+                    if($request->lang  == 2) {
+                        $message = __('driver-success.update_offline_so');
+                    }
+                }
+                $res = Response::send(true, [], $message, 200);
+
+            } else {
+                if($request->status == 1) {
+
+                    $message = __('driver-error.update_online_en');
+                    if($request->lang  == 2) {
+                        $message = __('driver-error.update_online_so');
+                    }
+                    
+                } else {
+                    $message = __('driver-error.update_offline_en');
+                    if($request->lang  == 2) {
+                        $message = __('driver-error.update_offline_so');
+                    }
+                }
+
+                $res = Response::send(false, [], $message, 400);
+            }
+            
+        }
+        return $res;
+    }
 }
