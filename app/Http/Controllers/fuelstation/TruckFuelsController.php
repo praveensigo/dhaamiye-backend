@@ -1,19 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\fuelstation;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use App\Models\admin\TruckFuel;
-use App\Models\admin\TruckStockLog;
-use App\Models\admin\FuelStationStock;
-use App\Models\admin\FuelStationStockLog;
-
-use App\Models\service\ResponseSender as Response;
 use Validator;
-
+use App\Models\service\ResponseSender as Response;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use App\Models\fuelstation\TruckFuel;
+use App\Models\fuelstation\TruckStockLog;
+use App\Models\fuelstation\FuelStationStock;
+use App\Models\fuelstation\FuelStationStockLog;
 class TruckFuelsController extends Controller
 {
     public function Index(Request $request)
@@ -45,7 +43,8 @@ class TruckFuelsController extends Controller
     return $res;
 }
 public function add(Request $request)
-{   
+{     $auth_user = Auth::user();
+    $user_id = $auth_user->user_id;
     $fields = $request->input();
     $validator = Validator::make($request->all(), [
         'truck_id' => 'required|exists:trucks,id',
@@ -97,7 +96,8 @@ public function add(Request $request)
                         $fuel_log->balance_stock = $fuel_stock->stock;
                         $fuel_log->type = 2 ;
                         $fuel_log->truck_id = $fields['truck_id'] ;
-                        $fuel_log->added_by = 1;
+                        $fuel_log->added_by = 5;
+                        $fuel_log->added_user = $user_id;
                         $fuel_log->created_at = date('Y-m-d H:i:s');
                         $fuel_log->updated_at = date('Y-m-d H:i:s');
                         $result3 = $fuel_log->save();
@@ -118,6 +118,8 @@ public function add(Request $request)
 }
 public function updateStock(Request $request)
     {   
+        $auth_user = Auth::user();
+        $user_id = $auth_user->user_id;
         $fields = $request->input();
         $validator = Validator::make($request->all(),
             [
@@ -162,7 +164,8 @@ public function updateStock(Request $request)
                                 $fuel_log->balance_stock = $fuel_stock->stock;
                                 $fuel_log->type = 2 ;
                                 $fuel_log->truck_id = $truck_fuel->truck_id;
-                                $fuel_log->added_by = 1;
+                                $fuel_log->added_by = 5;
+                                $fuel_log->added_user = $user_id;
                                 $fuel_log->created_at = date('Y-m-d H:i:s');
                                 $fuel_log->updated_at = date('Y-m-d H:i:s');
                                 $result3 = $fuel_log->save();
