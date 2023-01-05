@@ -189,7 +189,8 @@ class FuelController extends Controller
 
         } else {
             $fuel_station = FuelStationStock::where('fuel_station_id', '=', $user_id)->where('fuel_type_id', '=', $fields['fuel_type_id'])->first();
-            $fuel_station->stock = $fields['stock'];
+            $stock= $fuel_station->stock;          
+            $fuel_station->stock =$stock+$fields['stock'];
             $result = $fuel_station->save();
 
             if ($result) {
@@ -198,6 +199,8 @@ class FuelController extends Controller
                 $stock->fuel_station_id = $user_id;
                 $stock->fuel_type_id = $fields['fuel_type_id'];
                 $stock->stock = $fields['stock'];
+                $stock->type = 1;
+                $stock->balance_stock =$fuel_station->stock ;
                 $role_id = auth('sanctum')->user()->role_id;
                 $user_id = auth('sanctum')->user()->user_id;
                 $stock->added_by = $role_id;
