@@ -27,6 +27,25 @@ class GeneralController extends Controller
     }
 
     /*
+     * get all fuel stations
+     * @params: null
+     */
+    public function getFuelStations()
+    {
+        $fuel_stations =  DB::table('users')
+                        ->select('user_id as id', 'name_en', 'name_so')
+                        ->where('role_id', 5)
+                        ->where('status', 1)
+                        ->get();   
+
+        $data = array(
+            'fuel_stations' => $fuel_stations,
+        );
+
+        return Response::send(true, $data, 'Fuel stations found', 200);
+    }
+
+    /*
      * get privacy policy
      * @params: null
      */

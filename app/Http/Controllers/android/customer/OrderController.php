@@ -816,4 +816,111 @@ class OrderController extends Controller
         }
         return $pin;
     }
+
+    /*************
+    Track Driver
+    @params: order_id
+    **************/
+    public function trackDriver(Request $request)
+    {
+        $auth_user = auth('sanctum')->user();
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required|exists:customer_orders,id',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+            $res = Response::send(false, [], $message = $errors, 422);
+
+        } else { 
+
+            $order = CustomerOrder::find($request->order_id);
+
+            if($order->status == 3) {
+
+                if($order->driver_id) {
+
+                    $locations = DB::table('driver_location')
+                                ->select('latitude', 'longitude')
+                                ->where('driver_id', $order->driver_id)
+                                ->where('date', date('Y-m-d'))
+                                ->orderBy('created_at')
+                                ->get();
+
+                    $distance = null;
+                    $latitude = '';
+                    $longitude = '';
+
+                    $n = $locations->count();
+                    if($n > 0) {
+                        $order_location = DB::table('customer_order_address')->select('latitude', 'longitude')
+                            ->where('order_id', $order->id)    
+                            ->first();
+                        $latitude = $locations[$n-1]->latitude;
+                        $longitude = $locations[$n-1]->longitude;
+                        $distance = $this->GetDrivingDistance($order_location->latitude, $latitude, $order->longitude, $longitude);
+                    }
+
+                    $data = array(
+                        'locations'=> $locations,
+                        'count' => $n,
+                        'latitude' => $latitude,
+                        'longitude' => $longitude,
+                        'distance' => $distance,
+                        'pin' => $order->pin,
+                    );
+                    $res = Response::send(true, $data, '', 200);
+
+                } else {
+                    $message = __('customer-error.not_accepted_en');
+                    if($request->lang  == 2) {
+                        $message = __('customer-error.not_accepted_so');
+                    }
+
+                    $res = Response::send(false, [], $message, 400);
+                }
+            } else {
+                $message = __('customer-error.track_status_en');
+                if($request->lang  == 2) {
+                    $message = __('customer-error.track_status_so');
+                }
+
+                $res = Response::send(false, [], $message, 400);
+            }                
+        }
+        return $res;
+    }
+
+    function GetDrivingDistance($lat1, $lat2, $long1,$long2)
+    {
+        $key = config('constants.google_map_key');
+        $url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=".$lat1.",".$long1."&destinations=".$lat2."%2C".$long2."&mode=driving&language=pl-PL&key=" . $key;
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_PROXYPORT, 3128);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        $response = curl_exec($ch);
+        curl_close($ch);
+        $response_a = json_decode($response, true);        
+    
+        //return array('distance' => $dist, 'time' => $time);
+
+        if(array_key_exists('distance', $response_a['rows'][0]['elements'][0]) ) {
+
+            //$dist = $response_a['rows'][0]['elements'][0]['distance']['text'];
+            $dist = $response_a['rows'][0]['elements'][0]['distance']['value'];
+            $time = $response_a['rows'][0]['elements'][0]['duration']['text'];
+        
+            //$array = array('distance' => $dist, 'time' => $time);
+            //$exploded = explode(' ', $array['distance']);
+            //$distance   = intval($exploded[0]);
+            $distance = round($dist/1000, 2);
+
+            return $distance;
+        } else {
+            return null;
+        }
+    }  
 }
