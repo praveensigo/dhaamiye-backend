@@ -917,6 +917,7 @@ class OrderController extends Controller
             //$exploded = explode(' ', $array['distance']);
             //$distance   = intval($exploded[0]);
             $distance = round($dist/1000, 2);
+
             return $distance;
             
         } else {
