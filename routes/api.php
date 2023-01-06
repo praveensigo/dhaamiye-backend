@@ -94,6 +94,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/getFuels', [DriverController::class, 'getFuels']);
     Route::get('admin/getRoles', [DriverController::class, 'getRoles']);
     Route::get('admin/getFuelStationDrivers', [DriverController::class, 'getFuelStationDrivers']);
+    Route::get('admin/getFuelTrucks', [DriverController::class, 'getFuelTrucks']);
 
 
     Route::post('admin/truck/add', [TruckController::class, 'add']);
@@ -101,7 +102,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/trucks', [TruckController::class, 'index']);
     Route::get('admin/truck/details', [TruckController::class, 'details']);
     Route::get('admin/truck/status', [TruckController::class, 'status']);
-    Route::post('admin/truck/approve', [TruckController::class, 'approve']);
+    Route::get('admin/truck/approve', [TruckController::class, 'approve']);
     Route::get('admin/truck/pending_trucks', [TruckController::class, 'pendingIndex']);
     Route::get('admin/driver/pending_trucks/details', [TruckController::class, 'pendingDetails']);
 

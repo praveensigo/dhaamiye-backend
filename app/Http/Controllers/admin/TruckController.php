@@ -480,7 +480,7 @@ public function PendingIndex(Request $request)
             $errors = collect($validator->errors());
             $res = Response::send(false, [], $message = $errors, 422);
         } else {    
-            $trucks = Truck::select('trucks.*','users.name_en as fuel_station_name_en','users.name_so as fuel_station_name_so','users.email as fuel_station_email','users.image as fuel_station_image','users.country_code_id as fuel_station_country_code_id ','users.mobile  as fuel_station_mobile','users.role_id   as fuel_station_role_id ','users.user_id  as fuel_station_user_id','users.status  as fuel_station_status','users.reg_status  as fuel_station_reg_status') 
+            $trucks = Truck::select('trucks.*','users.name_en as fuel_station_name_en','users.name_so as fuel_station_name_so','users.email as fuel_station_email','users.image as fuel_station_image','users.country_code_id as fuel_station_country_code_id ','country_codes.country_code','users.mobile  as fuel_station_mobile','users.role_id   as fuel_station_role_id ','users.user_id  as fuel_station_user_id','users.status  as fuel_station_status','users.reg_status  as fuel_station_reg_status') 
                             ->leftjoin('users', 'users.user_id', '=', 'trucks.fuel_station_id')
                             ->leftjoin('country_codes', 'country_codes.id', '=', 'users.country_code_id')
                             ->with([
