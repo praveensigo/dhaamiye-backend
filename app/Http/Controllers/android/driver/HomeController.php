@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\android\driver\CustomerOrder;
 use App\Models\android\driver\CustomerOrderPayment;
+use App\Models\android\driver\CustomerOrderFuel;
+use App\Models\android\driver\TruckFuel;
 use App\Models\android\driver\Driver;
 use Illuminate\Support\Facades\DB;
 use App\Models\service\ResponseSender as Response;
@@ -29,7 +31,7 @@ class HomeController extends Controller
 
         } else {
 
-            $orders = CustomerOrder::select('customer_orders.id', 'customer_orders.customer_id', 'fuel_station_id', 'customer_orders.status','customer_order_address.address as order_address', 'country_code_id', 'phone', 'customer_order_address.latitude as order_latitude', 'customer_order_address.longitude as order_longitude', 'location', 'total', 'customer_orders.created_at', 'fuel_stations.latitude as station_latitude', 'fuel_stations.longitude as station_longitude')
+            $orders = CustomerOrder::select('customer_orders.id', 'customer_orders.customer_id', 'fuel_station_id', 'customer_orders.status','customer_order_address.address as order_address', 'country_code_id', 'phone', 'customer_order_address.latitude as order_latitude', 'customer_order_address.longitude as order_longitude', 'location', 'total', 'customer_orders.created_at', 'fuel_stations.latitude as station_latitude', 'fuel_stations.longitude as station_longitude', 'delivery_date', 'delivery_time', 'delivered_at')
                 ->join('customer_order_address', 'customer_orders.id', '=', 'customer_order_address.order_id')
                 ->join('fuel_stations', 'fuel_station_id', '=', 'fuel_stations.id')
                 ->descending()
@@ -178,17 +180,42 @@ class HomeController extends Controller
             if($order->status == 2) {
 
                 if($order->driver_id == $auth_user->user_id) {
-                    $order->status = 3;                
-                    $order->started_at = date('Y-m-d H:i:s');
+                    $order_fuels = CustomerOrderFuel::select('*')
+                                        ->where('order_id', $order->id)
+                                        ->get();
+                    $no_stock = false;
+                    foreach($order_fuels as $order_fuel) {
+                        $truck_stock = DB::table('truck_fuels')
+                                ->select('*')
+                                ->where('truck_id', $order->truck_id)
+                                ->where('fuel_type_id', $order_fuel->fuel_type_id)
+                                ->first();
+                        if($truck_stock && $truck_stock->stock >= $order_fuel->quantity) {
+                            
+                        }  else {
+                            $no_stock = true;
+                        }
+                    }  
+                    if(!$no_stock) {
+                        $order->status = 3;                
+                        $order->started_at = date('Y-m-d H:i:s');
 
-                    if($order->save()) {                       
+                        if($order->save()) {                       
 
-                        $message = __('driver-success.start_order_en');
+                            $message = __('driver-success.start_order_en');
+                            if($request->lang  == 2) {
+                                $message = __('driver-success.start_order_so');
+                            }
+
+                            $res = Response::send(true, [], $message, 200);
+                    } else {
+                        $message = __('driver-error.insufficient_truck_stock_en');
                         if($request->lang  == 2) {
-                            $message = __('driver-success.start_order_so');
+                            $message = __('driver-error.insufficient_truck_stock_so');
                         }
 
-                        $res = Response::send(true, [], $message, 200);
+                        $res = Response::send(false, [], $message, 400);
+                    }
 
                     } else {
                         $message = __('driver-error.start_order_en');
@@ -292,6 +319,35 @@ class HomeController extends Controller
                             $driver->total_cash_earned = $driver->total_cash_earned + $request->total_amount;
                         }
                         $driver->save();
+
+                        /***** update truck stock starts ******/
+                        $order_fuels = CustomerOrderFuel::select('*')
+                                        ->where('order_id', $order->id)
+                                        ->get();
+                        foreach($order_fuels as $order_fuel) {
+                            
+                            $truck_stock = TruckFuel::select('*')
+                                        ->where('truck_id', $order->truck_id)
+                                        ->where('fuel_type_id', $order_fuel->fuel_type_id)
+                                        ->first();
+                            if($truck_stock) {
+                                $truck_stock->stock = $truck_stock->stock - $order_fuel->quantity;
+                                $truck_stock->save();
+                            }
+
+                            DB::table('truck_stock_logs')->insert(array(
+                                    'truck_id' => $order->truck_id,
+                                    'fuel_type_id' => $order_fuel->fuel_type_id,
+                                    'stock' => $order_fuel->quantity,
+                                    'balance_stock' => $truck_stock->stock,
+                                    'type' => 2,
+                                    'order_id' => $order->id,
+                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'updated_at' => date('Y-m-d H:i:s'),
+                            ));
+                        }
+
+                        /***** delete driver's tracking locations ******/
 
                         DB::table('driver_location')
                             ->where('driver_id', $auth_user->user_id)
