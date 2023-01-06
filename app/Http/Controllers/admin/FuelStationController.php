@@ -908,20 +908,24 @@ class FuelStationController extends Controller
             $res = Response::send(false, [], $message = $errors, 422);
 
         } else {
-            $fuel_station = FuelStationStock::find($fields['id']);
-            $fuel_station->stock = $fields['stock'];
-            $result = $fuel_station->save();
-            $logs = DB::table('fuel_station_stocks')->select('fuel_station_stocks.id', 'fuel_station_stocks.fuel_station_id', 'fuel_station_stocks.fuel_type_id')
+
+            $logs = DB::table('fuel_station_stocks')->select('fuel_station_stocks.id', 'fuel_station_stocks.stock','fuel_station_stocks.fuel_station_id', 'fuel_station_stocks.fuel_type_id')
                 ->where('id', $fields['id'])->first();
             $fuel_station_id = $logs->fuel_station_id;
             $fuel_type_id = $logs->fuel_type_id;
-
+            $stock =$logs->stock;
+            $fuel_station = FuelStationStock::find($fields['id']);
+            $fuel_station->stock =$stock+$fields['stock'];
+            $result = $fuel_station->save();
+            
             if ($result) {
 
                 $stock = new FuelStationStockLog;
                 $stock->fuel_station_id = $fuel_station_id;
                 $stock->fuel_type_id = $fuel_type_id;
                 $stock->stock = $fields['stock'];
+                $stock->type = 1;
+                $stock->balance_stock =$fuel_station->stock ;
                 $role_id = auth('sanctum')->user()->role_id;
                 $user_id = auth('sanctum')->user()->id;
                 $stock->added_by = $role_id;

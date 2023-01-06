@@ -16,6 +16,7 @@ use App\Http\Controllers\fuelstation\PaymentController;
 use App\Http\Controllers\fuelstation\FuelOrderController;
 use App\Http\Controllers\fuelstation\DriverController;
 use App\Http\Controllers\fuelstation\TruckController;
+use App\Http\Controllers\fuelstation\TruckFuelsController;
 
 
 /*
@@ -101,7 +102,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('fuel_station/truck/details', [TruckController::class, 'details']);
     Route::get('fuel_station/truck/status', [TruckController::class, 'status']);
     
-
+    Route::get('fuel_station/truck/fuels', [TruckFuelsController::class, 'index']);
+    Route::post('fuel_station/truck/add_fuel', [TruckFuelsController::class, 'add']);
+    Route::post('fuel_station/truck/update_stock', [TruckFuelsController::class, 'UpdateStock']);
+    Route::get('fuel_station/truck/stock_logs', [TruckFuelsController::class, 'StockLogs']);
 
 
 
