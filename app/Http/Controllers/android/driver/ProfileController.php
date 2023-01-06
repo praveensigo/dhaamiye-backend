@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\android\driver\User;
 use App\Models\android\driver\Driver;
+use App\Models\android\driver\Truck;
+use App\Models\android\driver\TruckFuel;
 use App\Models\android\driver\CustomerOrder;
 use Illuminate\Support\Facades\DB;
 use App\Models\service\ResponseSender as Response;
@@ -608,5 +610,41 @@ class ProfileController extends Controller
             
         }
         return $res;
+    }
+
+    /*************
+    Get Current Stock in truck
+    @params: 
+    **************/
+    public function getTruckStock()
+    {
+        $auth_user      = auth('sanctum')->user();
+        $driver = Driver::find($auth_user->user_id);
+
+        if($driver) {
+
+            $truck = Truck::select('id', 'truck_no', 'fuel_station_id')
+                    ->where('id', $driver->truck_id)
+                    ->first(); 
+
+            $fuels = TruckFuel::select('fuel_type_id', 'capacity', 'stock')
+                        ->where('truck_id', $driver->truck_id)
+                        ->get();
+
+            $data = [
+                    'fuels' => $fuels                  
+            ];   
+            $res = Response::send(true, $data, '', 200); 
+        }
+        else {
+
+            $message = __('customer-error.exists_en');
+            if($request->lang == 2) {
+                $message = __('customer-error.exists_so');
+            }             
+
+            $res = Response::send(false, [], $message, 404);   
+        }      
+        return $res; 
     }
 }

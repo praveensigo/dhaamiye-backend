@@ -22,7 +22,7 @@ class CreateFuelStationStockLogsTable extends Migration
             $table->integer('type')->comment('1:Incoming, 2:Outgoing');
             $table->foreignId('truck_id')->nullable()->references('id')->on('trucks');
             $table->integer('added_by')->nullable()->comment('1:Admin, 2:Sub admin 5:Fuel station');
-            $table->foreignId('added_user')->references('id')->on('users')->nullable();
+            $table->foreignId('added_user')->nullable()->references('id')->on('users');
             $table->timestamps();
         });
     }

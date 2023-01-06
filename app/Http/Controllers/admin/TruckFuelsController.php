@@ -169,12 +169,15 @@ public function updateStock(Request $request)
                         ->first();
             if($fields['stock'] <= $fuel_station_stock->stock)
             {
+
             $truck_stock_details2 = DB::table('truck_fuels')->select('truck_fuels.*')->where('id',$fields['id'])->first();
             $current_stock = $truck_stock_details2->stock;
             $capacity = $truck_stock_details2->capacity;
             $check = $current_stock + $fields['stock'];
             if($check < $capacity)
             {
+
+
             $truck_fuel = TruckFuel::find($fields['id']);
             $truck_fuel->stock = $truck_fuel->stock + $fields['stock'];
             $truck_fuel->updated_at = date('Y-m-d H:i:s');

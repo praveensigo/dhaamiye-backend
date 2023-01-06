@@ -19,7 +19,7 @@ class CreateFuelStationPriceLogsTable extends Migration
             $table->foreignId('fuel_type_id')->references('id')->on('fuel_types');
             $table->decimal('price',12,2);
             $table->integer('added_by')->nullable()->comment('1:Admin, 2:Sub admin 5:Fuel station');
-            $table->integer('added_user')->references('id')->on('users')->nullable();
+            $table->integer('added_user')->nullable()->references('id')->on('users');
             $table->timestamps();
         });
     }
