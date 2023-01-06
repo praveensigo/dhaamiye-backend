@@ -63,6 +63,16 @@ public function add(Request $request)
         $errors = collect($validator->errors());
         $res = Response::send('false', $data = [], $message = $errors, $code = 422);
     } else {
+        if($fields['stock'] <= $fields['capacity'])
+        {
+        $truck_details = DB::table('trucks')->select('trucks.*')->where('id',$fields['truck_id'])->first();
+        $fuel_station_stock = DB::table('fuel_station_stocks')
+                        ->select('fuel_station_stocks.stock')
+                        ->where('fuel_station_id',$truck_details->fuel_station_id)
+                        ->where('fuel_type_id',$fields['fuel_type_id'])
+                        ->first();
+        if($fields['stock'] <= $fuel_station_stock->stock)
+        {
         $truck_fuel = new TruckFuel;
         $truck_fuel->truck_id = $fields['truck_id'];
         $truck_fuel->fuel_type_id = $fields['fuel_type_id'];
@@ -108,11 +118,25 @@ public function add(Request $request)
                     $code = 200);
             }}
         } else {
-            $res = sendResponse('false',
+            $res = Response::send('false',
                 $data = [],
-                $message = 'Stock added successfully',
+                $message = 'Failed to add stock.',
                 $code = 400);
-        }
+        }}
+        else {
+            $res = Response::send('false',
+                $data = [],
+                $message = 'Sorry.There is no enough stock.',
+                $code = 400);
+        }}
+        else {
+            $res = Response::send('false',
+                $data = [],
+                $message = 'Please make sure that the stock is less than or equal to the capacity.',
+                $code = 400);
+
+    }
+        
     }
     return $res;
 }
@@ -135,6 +159,17 @@ public function updateStock(Request $request)
             $res = Response::send(false, [], $message = $errors, 422);
 
         } else {
+            $truck_stock_details = DB::table('truck_fuels')->select('truck_fuels.*')->where('id',$fields['id'])->first();
+
+            $truck_details = DB::table('trucks')->select('trucks.*')->where('id',$truck_stock_details->truck_id)->first();
+
+            $fuel_station_stock = DB::table('fuel_station_stocks')
+                        ->select('fuel_station_stocks.stock')
+                        ->where('fuel_station_id',$truck_details->fuel_station_id)
+                        ->where('fuel_type_id',$truck_stock_details->fuel_type_id)
+                        ->first();
+            if($fields['stock'] <= $fuel_station_stock->stock)
+            {
             $truck_fuel = TruckFuel::find($fields['id']);
             $truck_fuel->stock = $truck_fuel->stock + $fields['stock'];
             $truck_fuel->updated_at = date('Y-m-d H:i:s');
@@ -174,6 +209,13 @@ public function updateStock(Request $request)
                 $res = Response::send(false, [], __('error.update_stock'), 400);
 
             }
+        }
+        else {
+            $res = Response::send('false',
+                $data = [],
+                $message = 'Sorry.There is no enough stock.',
+                $code = 400);
+        }
         }
         return $res;
     }
