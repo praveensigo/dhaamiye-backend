@@ -18,6 +18,8 @@ use App\Http\Controllers\admin\SliderController;
 use App\Http\Controllers\admin\RatingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\admin\DashBoardController;
+use App\Http\Controllers\admin\TruckFuelsController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -92,6 +94,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/getFuels', [DriverController::class, 'getFuels']);
     Route::get('admin/getRoles', [DriverController::class, 'getRoles']);
     Route::get('admin/getFuelStationDrivers', [DriverController::class, 'getFuelStationDrivers']);
+    Route::get('admin/getFuelTrucks', [DriverController::class, 'getFuelTrucks']);
 
 
     Route::post('admin/truck/add', [TruckController::class, 'add']);
@@ -99,7 +102,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/trucks', [TruckController::class, 'index']);
     Route::get('admin/truck/details', [TruckController::class, 'details']);
     Route::get('admin/truck/status', [TruckController::class, 'status']);
-    Route::post('admin/truck/approve', [TruckController::class, 'approve']);
+    Route::get('admin/truck/approve', [TruckController::class, 'approve']);
     Route::get('admin/truck/pending_trucks', [TruckController::class, 'pendingIndex']);
     Route::get('admin/driver/pending_trucks/details', [TruckController::class, 'pendingDetails']);
 
@@ -173,6 +176,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/order/completeOrder',[CustomerOrderController::class,'completeOrder']);
 
     Route::post('admin/fuelStation/updateDeposite', [FuelStationController::class, 'updateDeposite']);
+
+    Route::get('admin/fuel_station/truck/fuels', [TruckFuelsController::class, 'index']);
+    Route::post('admin/fuel_station/truck/add_fuel', [TruckFuelsController::class, 'add']);
+    Route::post('admin/fuel_station/truck/update_stock', [TruckFuelsController::class, 'UpdateStock']);
+    Route::get('admin/fuel_station/truck/stock_logs', [TruckFuelsController::class, 'StockLogs']);
 
     // return $request->user();
 });
