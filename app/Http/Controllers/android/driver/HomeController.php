@@ -332,10 +332,10 @@ class HomeController extends Controller
                                         ->first();
                             if($truck_stock) {
                                 $truck_stock->stock = $truck_stock->stock - $order_fuel->quantity;
-                                $truck_stock->save();
-                            }
 
-                            DB::table('truck_stock_logs')->insert(array(
+                                $truck_stock->save();                           
+                                DB::table('truck_stock_logs')->insert(array(
+
                                     'truck_id' => $order->truck_id,
                                     'fuel_type_id' => $order_fuel->fuel_type_id,
                                     'stock' => $order_fuel->quantity,
@@ -344,7 +344,10 @@ class HomeController extends Controller
                                     'order_id' => $order->id,
                                     'created_at' => date('Y-m-d H:i:s'),
                                     'updated_at' => date('Y-m-d H:i:s'),
-                            ));
+
+                                ));
+                            }
+
                         }
 
                         /***** delete driver's tracking locations ******/
