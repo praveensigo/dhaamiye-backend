@@ -217,6 +217,7 @@ class OrderController extends Controller
                         ->select('fuel_station_stocks.fuel_type_id', 'fuel_en', 'fuel_so', 'price', 'stock')
                         ->join('fuel_types', 'fuel_station_stocks.fuel_type_id', '=', 'fuel_types.id')
                         ->where('fuel_type_id', $fuel_type)
+                        ->where('fuel_station_id', $request->fuel_station_id)
                         ->first();
 
                 if($type) {
@@ -263,6 +264,7 @@ class OrderController extends Controller
                         ->where('customer_favorite_stations.customer_id', '=', $auth_user_id);
                     },
                 ])
+                ->where('fuel_station_id', $request->fuel_station_id)
                 ->first();
 
             $settings = DB::table('settings')
@@ -389,6 +391,7 @@ class OrderController extends Controller
                         ->select('fuel_station_stocks.fuel_type_id', 'fuel_en', 'fuel_so', 'price', 'stock')
                         ->join('fuel_types', 'fuel_station_stocks.fuel_type_id', '=', 'fuel_types.id')
                         ->where('fuel_type_id', $fuel_type)
+                        ->where('fuel_station_id', $request->fuel_station_id)
                         ->first();
 
                 if($type) {                   
@@ -413,7 +416,8 @@ class OrderController extends Controller
             $fuel_station = FuelStation::select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at')
                 ->join('users', 'users.user_id', '=', 'fuel_stations.id')
                 ->active()
-                ->where('role_id', 5)                
+                ->where('role_id', 5)      
+                ->where('fuel_station_id', $request->fuel_station_id)          
                 ->first();
 
             $settings = DB::table('settings')
