@@ -126,7 +126,7 @@ class TruckController extends Controller
             $validator = Validator::make($request->all(), [
                     'id' => 'required|numeric|exists:trucks,id',
                     'truck_no' => ['required','min:3',            
-                                Rule::unique('trucks','truck_no')->ignore($fields['id'], 'id'),
+                                Rule::unique('trucks','truck_no')->ignore($request->id,'id'),
                             ],
                     'manufacturer'          => 'required|min:3|max:100',
                     'manufactured_year'     => 'required|digits:4|integer|max:'.(date('Y')),
