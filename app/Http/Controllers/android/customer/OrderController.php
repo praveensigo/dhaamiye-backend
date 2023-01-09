@@ -264,7 +264,9 @@ class OrderController extends Controller
                         ->where('customer_favorite_stations.customer_id', '=', $auth_user_id);
                     },
                 ])
+
                 ->where('id', $request->fuel_station_id)
+
                 ->first();
 
             $settings = DB::table('settings')
@@ -417,7 +419,9 @@ class OrderController extends Controller
                 ->join('users', 'users.user_id', '=', 'fuel_stations.id')
                 ->active()
                 ->where('role_id', 5)      
+
                 ->where('id', $request->fuel_station_id)          
+
                 ->first();
 
             $settings = DB::table('settings')
