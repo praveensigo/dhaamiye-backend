@@ -252,7 +252,7 @@ class OrderController extends Controller
                     $i++;
                 }               
             }
-
+            //fuel station
             $fuel_station = FuelStation::select('fuel_stations.id', 'name_en', 'name_so', 'place', 'latitude', 'longitude',  'address', 'fuel_stations.status', 'fuel_stations.created_at')
                 ->join('users', 'users.user_id', '=', 'fuel_stations.id')
                 ->active()
