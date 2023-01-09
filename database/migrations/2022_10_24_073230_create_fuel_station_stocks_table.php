@@ -20,7 +20,7 @@ return new class extends Migration
             $table->decimal('stock',12,2)->default(0);
             $table->decimal('price',12,2);
             $table->integer('added_by')->nullable()->comment('1:Admin, 2:Sub admin ,5:Fuel station');
-            $table->foreignId('added_user')->references('id')->on('users')->nullable();
+            $table->foreignId('added_user')->nullable()->references('id')->on('users');
             $table->integer('status')->default(1)->comment('1:Active, 2:Blocked');
             $table->timestamps();
         });

@@ -33,4 +33,7 @@ return [
 
     'update_offline_en' => 'Failed to update your status to offline',
     'update_offline_so' => 'Failed to update your status to offline',
+
+    'insufficient_truck_stock_en' => 'You do not have sufficient fuel stock in your truck for this order',
+    'insufficient_truck_stock_so' => 'You do not have sufficient fuel stock in your truck for this order',
 ];

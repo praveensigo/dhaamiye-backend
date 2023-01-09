@@ -16,8 +16,8 @@
             Schema::create('customer_orders', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('customer_id')->references('id')->on('customers');
-                $table->foreignId('driver_id')->references('id')->on('drivers')->nullable();
-                $table->foreignId('truck_id')->references('id')->on('trucks')->nullable();
+                $table->foreignId('driver_id')->nullable()->references('id')->on('drivers');
+                $table->foreignId('truck_id')->nullable()->references('id')->on('trucks');
                 $table->foreignId('fuel_station_id')->references('id')->on('fuel_stations');
                 $table->integer('order_type')->default(1)->comment('1:Normal, 2:Schedule delivery ');            
                 $table->decimal('fuel_quantity_price',12,2);

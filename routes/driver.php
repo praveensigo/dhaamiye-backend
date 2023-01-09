@@ -60,4 +60,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('update-status', [ProfileController::class, 'updateOnlineStatus']);
     Route::get('issue-types', [ContactController::class, 'getIssueTypes']);
     Route::post('add-enquiry', [ContactController::class, 'addEnquiry']);
+    Route::get('current-stock', [ProfileController::class, 'getTruckStock']);
 });
