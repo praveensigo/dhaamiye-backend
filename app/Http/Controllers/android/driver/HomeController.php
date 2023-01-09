@@ -230,6 +230,7 @@ class HomeController extends Controller
                     if($request->lang  == 2) {
                         $message = __('driver-error.start_order_driver_so');
                     }
+                    $res = Response::send(false, [], $message, 400);
                 }
 
             } else {
@@ -237,6 +238,7 @@ class HomeController extends Controller
                 if($request->lang  == 2) {
                     $message = __('driver-error.status_order_so');
                 }
+                $res = Response::send(false, [], $message, 400);
             }
         }
         return $res;
