@@ -19,6 +19,7 @@ use App\Http\Controllers\admin\RatingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\admin\DashBoardController;
 use App\Http\Controllers\admin\TruckFuelsController;
+use App\Http\Controllers\GeneralController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,6 +45,8 @@ Route::post('register/customer', [RegisterController::class, 'customer']);
 Route::post('register/fuel_station', [RegisterController::class, 'fuelStation']);
 Route::post('register/driver', [RegisterController::class, 'driver']);
 Route::post('register/sub_admin', [RegisterController::class, 'subAdmin']);
+Route::get('get-countrycodes', [GeneralController::class, 'getCountryCodes']);
+
 
 //MIDDLEWARE
 
