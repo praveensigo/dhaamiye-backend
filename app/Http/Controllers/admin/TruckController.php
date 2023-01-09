@@ -23,7 +23,7 @@ class TruckController extends Controller
         $validator = Validator::make($request->all(), [
                 'truck_no'              => 'required|min:3|unique:trucks,truck_no',
                 'manufacturer'          => 'required|min:3|max:100',
-                'manufactured_year'     => 'required|digits:4|integer|max:'.(date('Y')),
+                'manufactured_year'     => 'required|digits:4|integer',
                 'model'                 => 'required|min:3|max:100',
                 'color'                 => 'required|min:3|max:100',
                 'chassis_no'            => 'required|min:3|max:100',
@@ -307,7 +307,7 @@ class TruckController extends Controller
             $res = Response::send(false, [], $message = $errors, 422);
         } else {
 
-            $trucks = Truck::select('trucks.*','users.name_en as fuel_station_name_en','users.name_so as fuel_station_name_so','users.email as fuel_station_email','users.image as fuel_station_image','users.country_code_id as fuel_station_country_code_id ','users.mobile  as fuel_station_mobile','users.role_id   as fuel_station_role_id ','users.user_id  as fuel_station_user_id','users.status  as fuel_station_status','users.reg_status  as fuel_station_reg_status') 
+            $trucks = Truck::select('trucks.*','users.name_en as fuel_station_name_en','users.name_so as fuel_station_name_so','users.email as fuel_station_email','users.image as fuel_station_image','users.country_code_id as fuel_station_country_code_id ','users.mobile  as fuel_station_mobile','users.role_id   as fuel_station_role_id ','users.user_id  as fuel_station_user_id','users.status  as fuel_station_status','users.reg_status  as fuel_station_reg_status','country_codes.country_code') 
                             ->leftjoin('users', 'users.user_id', '=', 'trucks.fuel_station_id')
                             ->leftjoin('country_codes', 'country_codes.id', '=', 'users.country_code_id')
                             ->with([
