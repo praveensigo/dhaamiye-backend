@@ -265,7 +265,9 @@ class OrderController extends Controller
                     },
                 ])
 
-                ->where('id', $request->fuel_station_id)
+
+                ->where('fuel_stations.id', $request->fuel_station_id)
+
 
                 ->first();
 
@@ -420,7 +422,9 @@ class OrderController extends Controller
                 ->active()
                 ->where('role_id', 5)      
 
-                ->where('id', $request->fuel_station_id)          
+
+                ->where('fuel_stations.id', $request->fuel_station_id)          
+
 
                 ->first();
 
