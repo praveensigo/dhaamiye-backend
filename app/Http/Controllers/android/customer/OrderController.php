@@ -911,7 +911,9 @@ class OrderController extends Controller
     
         //return array('distance' => $dist, 'time' => $time);
 
+
         if($response_a && $response_a['rows'] && array_key_exists('distance', $response_a['rows'][0]['elements'][0]) ) {
+
 
             //$dist = $response_a['rows'][0]['elements'][0]['distance']['text'];
             $dist = $response_a['rows'][0]['elements'][0]['distance']['value'];
