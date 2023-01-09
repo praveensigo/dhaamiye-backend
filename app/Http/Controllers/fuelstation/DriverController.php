@@ -1070,4 +1070,57 @@ class DriverController extends Controller
           }
            return $res;
     }
+
+    /*CREATE FUELS*/
+    public function addPayment(Request $request)
+    {$user_id = auth('sanctum')->user()->user_id;
+
+        $fields = $request->input();
+        $validator = Validator::make($request->all(),
+            [
+                'driver_id' => 'required|numeric|exists:drivers,id',
+                'amount' => 'required|numeric',
+                'payment_id' => 'nullable',
+                'notes' => 'nullable|min:3|max:100',
+
+
+            ],
+            [
+                'amount.required' => 'Please enter the amount.',
+                'payment_id.required' => 'Please enter the payment id.',
+                'notes.required' => 'Please enter the notes.',
+
+            ]
+        );
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+            $res = Response::send('false', $data = [], $message = $errors, $code = 422);
+
+        } else {
+                $payment = new DriverPayment;
+                $payment->driver_id = $fields['driver_id'];
+                $payment->amount = $fields['amount'];
+                $payment->payment_id = $fields['payment_id'];
+                $payment->type = 1;
+                $payment->payment_type = 2;
+                $payment->notes = $fields['notes'];
+                $result = $payment->save();
+
+                
+            if($result)   { $res = Response::send('true',
+                    [],
+                    $message = 'Payment added successfully.',
+                    $code = 200);
+            } else {
+                $res = Response::send('false',
+                    [],
+                    $message = 'Failed to add payment.',
+                    $code = 400);
+            }
+        }
+
+        return $res;
+    }
+
+
 }
