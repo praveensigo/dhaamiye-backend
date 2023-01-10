@@ -257,7 +257,7 @@ public function updateStock(Request $request)
             $res = Response::send('false', $data = [], $message = $errors, $code = 422);
         } else {
 
-            $truck_stock = TruckStockLog::select('truck_stock_logs.*', 'fuel_types.fuel_en', 'fuel_types.fuel_so','trucks.*','users.name_en','users.name_so' )
+            $truck_stock = TruckStockLog::select('truck_stock_logs.*', 'fuel_types.fuel_en', 'fuel_types.fuel_so','trucks.id as truck_id','users.name_en','users.name_so' )
                ->join('fuel_types', 'fuel_types.id', '=', 'truck_stock_logs.fuel_type_id')
                ->join('trucks', 'trucks.id', '=', 'truck_stock_logs.truck_id')
                ->join('users', 'users.user_id', '=', 'trucks.fuel_station_id')
