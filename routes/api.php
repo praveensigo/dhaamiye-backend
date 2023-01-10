@@ -186,5 +186,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/fuel_station/truck/stock_logs', [TruckFuelsController::class, 'StockLogs']);
     Route::get('admin/customer/orders', [CustomerController::class, 'order_index']);
 
+    Route::get('admin/fuel_station/fuels', [DriverController::class, 'getFuelstationFuels']);
+
     // return $request->user();
 });
