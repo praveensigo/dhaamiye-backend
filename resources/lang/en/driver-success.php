@@ -22,4 +22,6 @@ return [
 
     'update_offline_en' => 'You are offline now',
     'update_offline_so' => 'You are offline now',
+
+    
 ];

@@ -168,20 +168,32 @@ class LoginController extends Controller
 /*DRIVER LOGIN WITH PASSWORD*/
     public function driverLogin(Request $request)
     {
+        $lang = [
+            'country_code.required' => __('customer-error.country_code_required_en'),
+            'country_code.exists' => __('customer-error.exists_en'),
+            'mobile.required' => __('customer-error.mobile_required_en'),
+            'password.required' => __('customer-error.password_required_en'),
+            'password.min' => __('customer-error.password_min_max_en'),
+            'password.max' => __('customer-error.password_min_max_en'),
+        ];
+
+        if($request->lang == 2) {
+            $lang = [
+            'country_code.required' => __('customer-error.country_code_required_so'),
+            'country_code.exists' => __('customer-error.exists_so'),
+            'mobile.required' => __('customer-error.mobile_required_so'),
+            'password.required' => __('customer-error.password_required_so'),
+            'password.min' => __('customer-error.password_min_max_so'),
+            'password.max' => __('customer-error.password_min_max_so'),
+            ];
+        }
         $validator = Validator::make($request->all(),
             [
                 'country_code' => 'required|numeric|exists:country_codes,id',
                 'mobile' => 'required|numeric',
                 'password' => 'required|min:6|max:16',
-            ],
-            [
-                'country_code.required' => __('error.country_code_required'),
-                'country_code.exists' => __('error.country_code_exists'),
-                'mobile.required' => __('error.mobile_required'),
-                'password.required' => __('error.password_required'),
-                'password.min' => __('error.password_min_max'),
-                'password.max' => __('error.password_min_max'),
-            ]
+                'lang' => 'nullable|numeric|in:1,2',
+            ], $lang
         );
         
         if ($validator->fails()) {
@@ -190,10 +202,20 @@ class LoginController extends Controller
             $res = Response::send(false, [], $message = $errors, 422);
         } else {
             $user = new User;
-            $driver = User::withTrashed()->where('mobile', $request->mobile)->where('country_code_id', $request->country_code)->where('role_id',4 )->first();
+            $driver = User::withTrashed()
+                    ->join('country_codes', 'users.country_code_id', '=', 'country_codes.id')
+                    ->select('users.id as id', 'name_en', 'name_so', 'image', 'email', 'country_code_id', 'mobile', 'user_id', 'country_code', 'deleted_at', 'status')
+                    ->where('mobile', $request->mobile)
+                    ->where('country_code_id', $request->country_code)
+                    ->where('role_id',4 )
+                    ->first();
             if ($driver) {
                 if ($driver->deleted_at) {
-                    $res = Response::send(false, [], $message = ['mobile' => [__('error.account_deleted')]], 422);
+                    $message = __('auth.account_deleted_en');
+                    if($request->lang == 2) {
+                        $message = __('auth.account_deleted_so');
+                    }                     
+                    $res = Response::send(false, [], $message, 401);
                 } else {
 
                     if (Auth::attempt(['country_code_id' => $request->country_code, 'mobile' => $request->mobile, 'password' => $request->password])) {
@@ -203,36 +225,44 @@ class LoginController extends Controller
                             $driver->fcm = $request->fcm;
                             $driver->save();
 
-                            if ($driver->role_id == '4') {
-                           
-                                $user = DB::table('drivers')->where('id', $driver->user_id)->first();
-
-                            } 
-                            $details = $driver;
-                            $user_details = $details;
-
                             /* Create Token */
-                            $token = $details->createToken('my-app-token')->plainTextToken;
-                            $user_details->token = $token;
+                            $token = $driver->createToken('my-app-token')->plainTextToken;
+                            $driver->token = $token;
+
+                            $driver = $driver->makeHidden(['updated_at', 'status', 'converted_status', 'deleted_at']); 
 
                               /* User Array */
                             $user_array = [
                                 'details' => $driver,
-                                'other_details' => $user,
-
                             ];
 
-                            $res = Response::send(true, $user_array, __('auth.login_success'), 200);
+                            $message = __('auth.login_success_en');
+                            if($request->lang == 2) {
+                                $message = __('auth.login_success_so');
+                            }                     
+                            $res = Response::send(true, $user_array, $message, 200);
 
                         } else {
-                            $res = Response::send(false, [], __('auth.account_suspended'), 401);
+                            $message = __('auth.account_suspended_en');
+                            if($request->lang == 2) {
+                                $message = __('auth.account_suspended_so');
+                            }         
+                            $res = Response::send(false, [], $message, 401);
                         }
                     } else {
-                        $res = Response::send(false, [], $message = ['password' => [__('auth.incorrect_password')]], 422);
+                        $message = __('auth.incorrect_password_en');
+                        if($request->lang == 2) {
+                            $message = __('auth.incorrect_password_so');
+                        }   
+                        $res = Response::send(false, [], ['password' => [$message]], 422);
                     }
                 }
             } else {
-                $res = Response::send(false, [], $message = ['mobile' => [__('auth.mobile_not_registered')]], 422);
+                $message = __('auth.mobile_not_registered_en');
+                if($request->lang == 2) {
+                    $message = __('auth.mobile_not_registered_so');
+                }   
+                $res = Response::send(false, [], ['mobile' => [$message]], 422);
             }
         }
         return $res;
@@ -386,17 +416,25 @@ public function fuelStationLogin(Request $request)
 
     public function loginWithOtpDriver(Request $request)
     {
+        $lang = [
+            'country_code.required' => __('customer-error.country_code_required_en'),
+            'country_code.exists' => __('customer-error.exists_en'),
+            'mobile.required' => __('customer-error.mobile_required_en'),
+        ];
 
+        if($request->lang == 2) {
+            $lang = [
+            'country_code.required' => __('customer-error.country_code_required_so'),
+            'country_code.exists' => __('customer-error.exists_so'),
+            'mobile.required' => __('customer-error.mobile_required_so'),
+            ];
+        }
         $validator = Validator::make($request->all(),
             [
                 'country_code' => 'required|numeric|exists:country_codes,id',
                 'mobile' => 'required|numeric|digits_between:6,14',
-            ],
-            [
-                'country_code.required' => __('error.country_code_required'),
-                'country_code.exists' => __('error.country_code_exists'),
-                'mobile.required' => __('error.mobile_required'),
-            ]
+                'lang' => 'nullable|numeric|in:1,2',
+            ], $lang
         );
         
         if ($validator->fails()) {
@@ -404,40 +442,62 @@ public function fuelStationLogin(Request $request)
 
             $res = Response::send(false, [], $message = $errors, 422);
         } else {
-            $user = new User;
-            $driver = User::withTrashed()->where('mobile', $request->mobile)->where('country_code_id', $request->country_code)->where('role_id',4 )->first();
+            $driver = User::withTrashed()
+                    ->join('country_codes', 'users.country_code_id', '=', 'country_codes.id')
+                    ->select('users.id as id', 'name_en', 'name_so', 'image', 'email', 'country_code_id', 'mobile', 'user_id', 'country_code', 'deleted_at', 'status')
+                    ->where('mobile', $request->mobile)
+                    ->where('country_code_id', $request->country_code)
+                    ->where('role_id',4 )
+                    ->first();
+
             if ($driver) {
                 if ($driver->deleted_at) {
-                    $res = Response::send(false, [], $message = ['mobile' => [__('error.account_deleted')]], 422);
+                    $message = __('auth.account_deleted_en');
+                    if($request->lang == 2) {
+                        $message = __('auth.account_deleted_so');
+                    }                     
+                    $res = Response::send(false, [], $message, 422);
+                
                 } else {
+                 
+                    if ($driver->status == 1) {
 
-                            $driver->fcm = $request->fcm;
-                            $driver->save();
-                            if ($driver->role_id == '4') {
-                                $user = DB::table('drivers')->where('id', $driver->user_id)->first();
+                        $driver->fcm = $request->fcm;
+                        $driver->save();
 
-                            } 
-                            $details = $driver;
-                            $user_details = $details;
+                        /* Create Token */
+                        $token = $driver->createToken('my-app-token')->plainTextToken;
+                        $driver->token = $token;
 
-                            /* Create Token */
-                            $token = $details->createToken('my-app-token')->plainTextToken;
-                            $user_details->token = $token;
+                        $driver = $driver->makeHidden(['updated_at', 'status', 'converted_status', 'deleted_at']); 
 
-                              /* User Array */
-                            $user_array = [
-                                'details' => $driver,
-                                'other_details' => $user,
+                        /* User Array */
+                        $user_array = [
+                            'details' => $driver,
+                        ];
 
-                            ];
+                        $message = __('auth.login_success_en');
+                        if($request->lang == 2) {
+                            $message = __('auth.login_success_so');
+                        }                     
+                        $res = Response::send(true, $user_array, $message, 200);
 
-                            $res = Response::send(true, $user_array, __('auth.login_success'), 200);
-
-                      
-                    } 
+                    } else {
+                        $message = __('auth.account_suspended_en');
+                        if($request->lang == 2) {
+                                $message = __('auth.account_suspended_so');
+                        }         
+                        $res = Response::send(false, [], $message, 401);
+                    }
+                }
                 
             } else {
-                $res = Response::send(false, [], $message = ['mobile' => [__('auth.mobile_not_registered')]], 422);
+
+                $message = __('auth.mobile_not_registered_en');
+                if($request->lang == 2) {
+                    $message = __('auth.mobile_not_registered_so');
+                }   
+                $res = Response::send(false, [], ['mobile' => [$message]], 422);
             }
         
         }
