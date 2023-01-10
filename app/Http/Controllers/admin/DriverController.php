@@ -1292,5 +1292,31 @@ public function getFuelTrucks(Request $request)
 
     return $res;
 }
+public function getFuelstationFuels(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'fuel_station_id' => 'required|numeric|exists:fuel_stations,id',
+    ]);
+
+    if ($validator->fails()) {
+        $errors = collect($validator->errors());
+        $res = Response::send(false, [], $message = $errors, 422);
+
+    } else {
+
+    $fuels = DB::table('fuel_types')
+                        ->select('fuel_en','fuel_so','fuel_types.id')
+                        ->join('fuel_station_stocks','fuel_station_stocks.fuel_type_id', '=', 'fuel_types.id')
+                        ->where('fuel_types.status', 1)
+                        ->where('fuel_station_stocks.fuel_station_id',$request->fuel_station_id)
+                        ->orderBy('fuel_types.id')->get();
+        $data = array(
+            'fuels' => $fuels,
+        );
+        $res = Response::send(true, $data, 'Drivers found', 200);
+    
+    }
+    return $res;
+}
 }
 

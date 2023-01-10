@@ -39,7 +39,7 @@ class TruckFuelsController extends Controller
                             ->get();
          $truck_details = DB::table('trucks')
                             ->leftjoin('users', 'users.user_id', '=', 'trucks.fuel_station_id')
-                            ->select('truck_no','users.name_en as fuel_station_name_en','users.name_so as fuel_station_name_so')
+                            ->select('truck_no','users.name_en as fuel_station_name_en','users.name_so as fuel_station_name_so','trucks.fuel_station_id')
                             ->where('users.role_id', '5')
                                ->where('trucks.id',$fields['truck_id'])
                                ->first();
