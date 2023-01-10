@@ -354,6 +354,7 @@ class CustomerController extends Controller
 
             $count = CustomerOrder::select('customer_orders.customer_id','customers.id',)
                 ->where('users.role_id', '3')
+                ->where( 'customer_orders.status','<>','0')
                 ->join('users', 'users.user_id', '=', 'customer_orders.customer_id')
                 ->leftjoin('country_codes', 'country_codes.id', '=', 'users.country_code_id')
                 ->join('customers', 'customers.id', '=', 'customer_orders.customer_id')
