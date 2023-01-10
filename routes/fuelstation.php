@@ -95,7 +95,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('fuel_station/getFuels', [DriverController::class, 'getFuels']);
     Route::get('fuel_station/getRoles', [DriverController::class, 'getRoles']);
     Route::get('fuel_station/getFuelStationDrivers', [DriverController::class, 'getFuelStationDrivers']);
-    
+    Route::post('fuel_station/addPayment', [DriverController::class, 'addPayment']);
+
     Route::post('fuel_station/truck/add', [TruckController::class, 'add']);
     Route::post('fuel_station/truck/update', [TruckController::class, 'update']);
     Route::get('fuel_station/trucks', [TruckController::class, 'index']);
