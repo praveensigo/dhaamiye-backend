@@ -184,6 +184,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('admin/fuel_station/truck/add_fuel', [TruckFuelsController::class, 'add']);
     Route::post('admin/fuel_station/truck/update_stock', [TruckFuelsController::class, 'UpdateStock']);
     Route::get('admin/fuel_station/truck/stock_logs', [TruckFuelsController::class, 'StockLogs']);
+    Route::get('admin/customer/orders', [CustomerController::class, 'order_index']);
 
     // return $request->user();
 });
