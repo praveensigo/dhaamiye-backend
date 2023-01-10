@@ -477,7 +477,7 @@ class CustomerController extends Controller
         } else {
 
            
-            $orders = CustomerOrder::select('customer_orders.id as customer_order_id','customer_orders.customer_id', 'customer_orders.driver_id', 'customer_orders.fuel_station_id', 'p1.name_en as customer_name_en', 'p1.name_so as customer_name_so', 'p2.name_en as driver_name_en', 'p2.name_so as driver_name_so', 'p1.mobile as customer_mobile','p2.mobile as driver_mobile' ,'p1.country_code_id',  'p3.name_en as fuel_station_name_en', 'p3.name_so as fuel_station_name_so', 'p3.mobile as fuel_station_mobile','customer_orders.status', 'customer_orders.total', 'customer_orders.created_at','customer_orders.added_by as customer_order_added_by','customer_orders.added_user as customer_order_added_user')
+            $orders = CustomerOrder::select('customer_orders.id as customer_order_id','customer_orders.customer_id', 'customer_orders.driver_id', 'customer_orders.fuel_station_id', 'p1.name_en as customer_name_en', 'p1.name_so as customer_name_so', 'p2.name_en as driver_name_en', 'p2.name_so as driver_name_so', 'p1.mobile as customer_mobile','p2.mobile as driver_mobile' ,'p1.country_code_id','country_codes.country_code','p1.email as customer_email',  'p3.name_en as fuel_station_name_en', 'p3.name_so as fuel_station_name_so', 'p3.mobile as fuel_station_mobile','customer_orders.status', 'customer_orders.total', 'customer_orders.created_at','customer_orders.added_by as customer_order_added_by','customer_orders.added_user as customer_order_added_user')
                 ->join('users as p1', function ($join) {
                     $join->on('p1.user_id', '=', 'customer_orders.customer_id')
                         ->where('p1.role_id', 3);
