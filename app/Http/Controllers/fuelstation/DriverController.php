@@ -1071,6 +1071,7 @@ class DriverController extends Controller
            return $res;
     }
 
+
     /*CREATE FUELS*/
     public function addPayment(Request $request)
     {$user_id = auth('sanctum')->user()->user_id;
@@ -1121,6 +1122,7 @@ class DriverController extends Controller
 
         return $res;
     }
+
 
 
 }
