@@ -411,7 +411,7 @@ class FuelStationController extends Controller
                 $data = ['fuel_station_detail' => $fuel_station_detail,
                     'bank_details' => $bank_details,
                     'no_of_orders' => $number,
-                    'Earning balance' => $balance,
+                    'earning_balance' => $balance,
                 ],
                 $message = 'Success',
                 $code = 200);
