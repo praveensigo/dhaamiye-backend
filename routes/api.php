@@ -17,7 +17,7 @@ use App\Http\Controllers\admin\NotificationController;
 use App\Http\Controllers\admin\SliderController;
 use App\Http\Controllers\admin\RatingController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\admin\DashBoardController;
+use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\admin\TruckFuelsController;
 use App\Http\Controllers\GeneralController;
 

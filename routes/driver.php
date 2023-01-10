@@ -26,7 +26,7 @@ use App\Http\Controllers\android\driver\ContactController;
 */
 
 Route::post('login', [LoginController::class, 'driverLogin']);
-Route::post('login-with-otp', [LoginController::class, 'loginWithOtp']);
+Route::post('login-with-otp', [LoginController::class, 'loginWithOtpDriver']);
 Route::post('register', [RegisterController::class, 'driver']);
 Route::post('forgot-password', [CheckController::class, 'isMobileRegistered']);
 Route::post('register/check', [CheckController::class, 'isRegistrable']);

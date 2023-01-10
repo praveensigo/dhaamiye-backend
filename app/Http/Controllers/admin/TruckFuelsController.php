@@ -31,11 +31,22 @@ class TruckFuelsController extends Controller
         } else {
         $truck_fuels = DB::table('truck_fuels')
                          ->leftjoin('fuel_types', 'fuel_types.id', '=', 'truck_fuels.fuel_type_id')
-                            ->select('truck_fuels.*','fuel_types.fuel_en','fuel_so')
+                         ->leftjoin('trucks', 'trucks.id', '=', 'truck_fuels.truck_id')
+                         ->leftjoin('users', 'users.user_id', '=', 'trucks.fuel_station_id')
+                         ->select('truck_fuels.*','fuel_types.fuel_en','fuel_so','truck_no','users.name_en as fuel_station_name_en','users.name_so as fuel_station_name_so')
+                         ->where('users.role_id', '5')
                             ->where('truck_id',$fields['truck_id'])
                             ->get();
+         $truck_details = DB::table('trucks')
+                            ->leftjoin('users', 'users.user_id', '=', 'trucks.fuel_station_id')
+                            ->select('truck_no','users.name_en as fuel_station_name_en','users.name_so as fuel_station_name_so')
+                            ->where('users.role_id', '5')
+                               ->where('trucks.id',$fields['truck_id'])
+                               ->first();
             $data = array(
                 'truck_fuels' => $truck_fuels,
+                'truck_details' => $truck_details,
+
             );
             $res = Response::send(true, $data, 'Fuels found', 200);
         
@@ -246,7 +257,7 @@ public function updateStock(Request $request)
             $res = Response::send('false', $data = [], $message = $errors, $code = 422);
         } else {
 
-            $truck_stock = TruckStockLog::select('truck_stock_logs.*', 'fuel_types.fuel_en', 'fuel_types.fuel_so','trucks.*','users.name_en','users.name_so' )
+            $truck_stock = TruckStockLog::select('truck_stock_logs.*', 'fuel_types.fuel_en', 'fuel_types.fuel_so','trucks.id as truck_id','users.name_en','users.name_so' )
                ->join('fuel_types', 'fuel_types.id', '=', 'truck_stock_logs.fuel_type_id')
                ->join('trucks', 'trucks.id', '=', 'truck_stock_logs.truck_id')
                ->join('users', 'users.user_id', '=', 'trucks.fuel_station_id')
