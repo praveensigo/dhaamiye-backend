@@ -31,5 +31,18 @@ return [
     'logout_succuss'  => 'You are logged out successfully.',  
     'logout_error'  => 'Failed to logout.',   
     
+    'login_success_en' => 'You have logged in successfully',
+    'login_success_so' => 'You have logged in successfully',
 
+    'account_suspended_en' => 'Your account has been blocked, please contact administrator',
+    'account_suspended_so' => 'Your account has been blocked, please contact administrator',
+
+    'incorrect_password_en' => 'Incorrect password entered',
+    'incorrect_password_so' => 'Incorrect password entered',
+
+    'mobile_not_registered_en' => 'Mobile number not registered',
+    'mobile_not_registered_so' => 'Mobile number not registered',
+
+    'account_deleted_en' => 'Your account has been deleted, please contact administrator',
+    'account_deleted_so' => 'Your account has been deleted, please contact administrator',
 ];
