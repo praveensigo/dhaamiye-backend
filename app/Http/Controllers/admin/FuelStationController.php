@@ -34,8 +34,8 @@ class FuelStationController extends Controller
             $errors = collect($validator->errors());
             $res = Response::send('false', $data = [], $message = $errors, $code = 422);
         } else {
-            $fuel_stations = FuelStation::select('fuel_stations.id as fuel_station_id', DB::raw("(SELECT COUNT(id) AS truck_count FROM trucks WHERE trucks.fuel_station_id=fuel_stations.id) as truckcount"), DB::raw("(SELECT COUNT(id) AS order_count FROM customer_orders WHERE customer_orders.fuel_station_id=fuel_stations.id) as ordercount"), DB::raw("(select balance from fuel_station_payment_logs WHERE fuel_station_payment_logs.fuel_station_id=fuel_stations.id order by id desc limit 1) as balance"), 'users.name_en', 'users.name_so', 'users.image', 'fuel_stations.added_by', 'place', 'latitude', 'longitude', 'address', 'trucks.truck_no', 'fuel_stations.status', 'country_code_id', 'country_code', 'mobile', 'email', 'role_id', 'fuel_stations.created_at')
-                ->leftjoin('trucks', 'fuel_stations.id', '=', 'trucks.fuel_station_id')
+            $fuel_stations = FuelStation::select('fuel_stations.id as fuel_station_id',DB::raw("(SELECT COUNT(id) AS truck_count FROM trucks WHERE trucks.fuel_station_id=fuel_stations.id) as truckcount"), DB::raw("(SELECT COUNT(id) AS order_count FROM customer_orders WHERE customer_orders.fuel_station_id=fuel_stations.id) as ordercount"), DB::raw("(select balance from fuel_station_payment_logs WHERE fuel_station_payment_logs.fuel_station_id=fuel_stations.id order by id desc limit 1) as balance"), 'users.name_en', 'users.name_so', 'users.image', 'fuel_stations.added_by', 'place', 'latitude', 'longitude', 'address',  'fuel_stations.status', 'country_code_id', 'country_code', 'mobile', 'email', 'role_id', 'fuel_stations.created_at')
+              //  ->leftjoin('trucks', 'fuel_stations.id', '=', 'trucks.fuel_station_id')
                 ->leftjoin('customer_orders', function ($join) {
                     $join->on('customer_orders.fuel_station_id', '=', 'fuel_stations.id')
                         ->where('customer_orders.status', '<>', '0');
@@ -46,14 +46,15 @@ class FuelStationController extends Controller
                 ->leftjoin('country_codes', 'country_codes.id', '=', 'users.country_code_id')
                 ->where('users.role_id', '5')
                 ->where('users.reg_status', '1')
-                ->groupBy('fuel_stations.id', 'users.name_en', 'trucks.truck_no', 'users.name_so', 'users.image', 'added_by', 'place', 'latitude', 'longitude', 'address', 'fuel_stations.status', 'country_code_id', 'country_code', 'mobile', 'email', 'role_id', 'fuel_stations.created_at')
+                ->distinct()
+                ->groupBy('fuel_stations.id', 'users.name_en','users.name_so', 'users.image', 'added_by', 'place', 'latitude', 'longitude', 'address', 'fuel_stations.status', 'country_code_id', 'country_code', 'mobile', 'email', 'role_id', 'fuel_stations.created_at')
                 ->orderBy('fuel_stations.id', 'desc');
             // SEARCH
             if ($request->keyword) {
                 $fuel_stations->where(function ($query) use ($request) {
                     $query->where('users.name_en', 'LIKE', '%' . $request->keyword . '%')
                         ->orWhere('users.name_so', 'LIKE', '%' . $request->keyword . '%')
-                        ->orWhere('trucks.truck_no', 'LIKE', '%' . $request->keyword . '%')
+                        //->orWhere('trucks.truck_no', 'LIKE', '%' . $request->keyword . '%')
                         ->orWhere('place', 'LIKE', '%' . $request->keyword . '%')
                         ->orWhere('mobile', 'LIKE', '%' . $request->keyword . '%')
                         ->orWhere('email', 'LIKE', '%' . $request->keyword . '%');
